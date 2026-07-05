@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Couple memory gift bundle">
+  <rect width="1200" height="900" fill="#fff7ed"/>
+  <rect x="190" y="150" width="390" height="500" rx="34" fill="#ffffff" stroke="#fb923c" stroke-width="18"/>
+  <rect x="235" y="205" width="300" height="300" rx="24" fill="#fed7aa"/>
+  <circle cx="385" cy="355" r="82" fill="#f97316"/>
+  <rect x="650" y="255" width="260" height="260" rx="44" fill="#ffffff" stroke="#ef4444" stroke-width="16"/>
+  <circle cx="780" cy="385" r="76" fill="#fecaca"/>
+  <path d="M760 370c-44-48-108 10-44 68l64 56 64-56c64-58 0-116-44-68l-20 22-20-22Z" fill="#dc2626"/>
+  <text x="600" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#7c2d12">Couple Memory Pack</text>
+</svg>

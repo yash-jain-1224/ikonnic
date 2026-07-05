@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Anniversary special combo">
+  <rect width="1200" height="900" fill="#fdf2f8"/>
+  <rect x="175" y="155" width="360" height="455" rx="34" fill="#ffffff" stroke="#db2777" stroke-width="18"/>
+  <rect x="230" y="220" width="250" height="250" rx="28" fill="#fbcfe8"/>
+  <path d="M340 320c-52-58-126 14-52 82l68 60 68-60c74-68 0-140-52-82l-16 18-16-18Z" fill="#be185d"/>
+  <rect x="655" y="230" width="330" height="330" rx="30" fill="#ffffff" stroke="#be185d" stroke-width="16"/>
+  <path d="M700 285h240M700 355h240M700 425h180" stroke="#f472b6" stroke-width="18" stroke-linecap="round"/>
+  <text x="600" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#831843">Anniversary Special Combo</text>
+</svg>

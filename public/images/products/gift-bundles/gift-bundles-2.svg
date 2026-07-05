@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Family wall decor set">
+  <rect width="1200" height="900" fill="#f8fafc"/>
+  <rect x="155" y="160" width="260" height="360" rx="28" fill="#ffffff" stroke="#0f766e" stroke-width="16"/>
+  <rect x="470" y="120" width="260" height="360" rx="28" fill="#ffffff" stroke="#0f766e" stroke-width="16"/>
+  <circle cx="890" cy="330" r="145" fill="#ffffff" stroke="#0f766e" stroke-width="18"/>
+  <circle cx="890" cy="330" r="100" fill="#ccfbf1"/>
+  <path d="M890 330V250M890 330h70" stroke="#0f766e" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="285" cy="330" r="74" fill="#99f6e4"/>
+  <circle cx="600" cy="290" r="74" fill="#5eead4"/>
+  <text x="600" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#134e4a">Family Wall Decor Set</text>
+</svg>

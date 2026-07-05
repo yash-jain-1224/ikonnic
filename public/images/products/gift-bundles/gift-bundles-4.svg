@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Travel essentials bundle">
+  <rect width="1200" height="900" fill="#eff6ff"/>
+  <rect x="210" y="170" width="310" height="430" rx="44" fill="#ffffff" stroke="#2563eb" stroke-width="18"/>
+  <path d="M310 170c0-70 110-70 110 0" fill="none" stroke="#2563eb" stroke-width="18"/>
+  <circle cx="365" cy="380" r="82" fill="#bfdbfe"/>
+  <rect x="650" y="260" width="300" height="220" rx="52" fill="#ffffff" stroke="#1d4ed8" stroke-width="16"/>
+  <circle cx="800" cy="370" r="60" fill="#93c5fd"/>
+  <path d="M745 505h110" stroke="#1e40af" stroke-width="18" stroke-linecap="round"/>
+  <text x="600" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#1e3a8a">Travel Essentials Bundle</text>
+</svg>

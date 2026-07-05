@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Housewarming gift box">
+  <rect width="1200" height="900" fill="#fefce8"/>
+  <rect x="170" y="230" width="520" height="230" rx="30" fill="#ffffff" stroke="#ca8a04" stroke-width="18"/>
+  <text x="430" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#854d0e">HOME</text>
+  <rect x="760" y="220" width="250" height="250" rx="36" fill="#ffffff" stroke="#eab308" stroke-width="16"/>
+  <rect x="790" y="250" width="190" height="190" rx="24" fill="#fde68a"/>
+  <path d="M830 355h110M885 300v110" stroke="#a16207" stroke-width="16" stroke-linecap="round"/>
+  <text x="600" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#713f12">Housewarming Gift Box</text>
+</svg>

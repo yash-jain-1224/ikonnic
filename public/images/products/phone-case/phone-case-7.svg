@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+    <defs>
+        <!-- Background Gradient -->
+        <linearGradient id="grad_phone-case_6" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="hsl(217, 25%, 96%)" />
+            <stop offset="50%" stop-color="hsl(237, 20%, 93%)" />
+            <stop offset="100%" stop-color="hsl(262, 30%, 88%)" />
+        </linearGradient>
+        <!-- Mockup Surface Gradient -->
+        <linearGradient id="mock_grad_phone-case_6" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="hsl(227, 45%, 85%)" />
+            <stop offset="100%" stop-color="hsl(252, 40%, 65%)" />
+        </linearGradient>
+        <!-- Metallic Studs Gradient -->
+        <linearGradient id="stud_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="40%" stop-color="#d4af37" />
+            <stop offset="100%" stop-color="#aa7c11" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background Card -->
+    <rect width="400" height="300" rx="20" fill="url(#grad_phone-case_6)" />
+    
+    <!-- Outer Elegant Frame -->
+    <rect x="15" y="15" width="370" height="270" rx="12" fill="none" stroke="hsl(217, 20%, 80%)" stroke-width="1" stroke-opacity="0.5" />
+    
+    <!-- Brand Tag -->
+    <text x="200" y="45" font-family="'Georgia', serif" font-size="11" font-weight="900" fill="#7a6b58" text-anchor="middle" letter-spacing="4">G I F T O R A</text>
+    <circle cx="200" cy="55" r="1.5" fill="#cfae81" />
+    
+    <!-- Mockup Visualization -->
+    
+        <!-- Phone Case Outline -->
+        <rect x="162.5" y="65.0" width="75" height="130" rx="15" fill="url(#mock_grad_phone-case_6)" stroke="#1a1a1a" stroke-width="3" filter="drop-shadow(0px 10px 16px rgba(0,0,0,0.2))" />
+        <!-- Camera Bump -->
+        <rect x="170.5" y="73.0" width="22" height="22" rx="4" fill="#111111" />
+        <circle cx="176.5" cy="79.0" r="3" fill="#333" />
+        <circle cx="184.5" cy="79.0" r="2" fill="#333" />
+        <circle cx="176.5" cy="87.0" r="2" fill="#333" />
+        <!-- Inner Pattern (premium lines) -->
+        <path d="M 177.5 125.0 C 200 130 210 150 222.5 175.0" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.4" />
+        <text x="200" y="175" font-family="'Courier New', monospace" font-size="8" fill="#ffffff" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">GIFTORA</text>
+        
+    
+    <!-- Info Footer on Card -->
+    <text x="200" y="240" font-family="'Inter', sans-serif" font-size="13" font-weight="900" fill="#2d251e" text-anchor="middle" letter-spacing="0.5">Phone Case #7</text>
+    <text x="200" y="258" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" fill="#7a6f62" text-anchor="middle" letter-spacing="1">PHONE-CASE-7</text>
+    
+    <!-- Small Decorative Corner Lines -->
+    <path d="M 25 35 L 25 25 L 35 25" fill="none" stroke="#bda688" stroke-width="1.5" />
+    <path d="M 375 35 L 375 25 L 365 25" fill="none" stroke="#bda688" stroke-width="1.5" />
+    <path d="M 25 265 L 25 275 L 35 275" fill="none" stroke="#bda688" stroke-width="1.5" />
+    <path d="M 375 265 L 375 275 L 365 275" fill="none" stroke="#bda688" stroke-width="1.5" />
+</svg>

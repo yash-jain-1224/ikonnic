@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW 2017 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1.99999in" height="1.99999in" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 2000 2000"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil0 {fill:none}
+    .fil2 {fill:#727271}
+    .fil1 {fill:#2B2A29}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g id="_2072355775632">
+   <rect class="fil0" width="2000" height="2000"/>
+   <g>
+    <path class="fil1" d="M270 482l1182 0c39,0 72,32 72,72l0 91c-12,5 -30,17 -53,40l0 -1c0,-17 -14,-30 -30,-30l-1160 0c-17,0 -30,14 -30,30l0 676c0,17 14,30 30,30l1160 0c17,0 30,-14 30,-30l0 -100 53 -23 0 136c0,39 -32,72 -72,72l-819 0c-25,13 -218,113 -226,118 -9,5 -32,16 -46,9 -14,-7 0,-31 0,-31l50 -96 -141 0c-39,0 -72,-32 -72,-72l0 -820c0,-39 32,-72 72,-72zm528 36c30,0 54,24 54,54 0,30 -24,54 -54,54 -30,0 -54,-24 -54,-54 0,-30 24,-54 54,-54zm-194 0c30,0 54,24 54,54 0,30 -24,54 -54,54 -30,0 -54,-24 -54,-54 0,-30 24,-54 54,-54zm-192 0c30,0 54,24 54,54 0,30 -24,54 -54,54 -30,0 -54,-24 -54,-54 0,-30 24,-54 54,-54z"/>
+    <rect class="fil2" x="344" y="796" width="283" height="283" rx="13" ry="13"/>
+    <path class="fil2" d="M1348 809l-604 0c-20,0 -37,17 -37,37l0 0c0,20 17,37 37,37l568 0c11,-27 24,-52 36,-74z"/>
+    <path class="fil2" d="M1279 993l-535 0c-20,0 -37,17 -37,37l0 0c0,20 17,37 37,37l528 0c0,-25 3,-50 7,-74z"/>
+    <path class="fil2" d="M1280 1178l-764 0c-20,0 -37,17 -37,37l0 0c0,20 17,37 37,37l758 0 14 -49 -8 -25z"/>
+    <path class="fil1" d="M1927 599c0,0 -120,216 -125,229l-123 72 98 -17c0,0 -86,179 -156,224 -70,44 -212,97 -212,97l-21 74 -43 0c0,0 15,-58 23,-82 0,0 -42,-60 -12,-212 30,-151 195,-354 570,-384zm-118 71c0,0 -254,122 -379,455l-30 30c0,0 55,-358 409,-485z"/>
+   </g>
+  </g>
+ </g>
+</svg>

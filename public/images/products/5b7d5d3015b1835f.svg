@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW 2017 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1.99999in" height="1.99999in" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 2000 2000"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .str0 {stroke:#2B2A29;stroke-width:39.3701}
+    .str1 {stroke:#2B2A29;stroke-width:15.748}
+    .fil0 {fill:none}
+    .fil1 {fill:#2B2A29}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g id="_2072353945216">
+   <rect class="fil0 str0" x="455" y="206" width="1083" height="1597"/>
+   <g>
+    <path class="fil0 str1" d="M465 1703c0,0 25,-192 109,-221 83,-29 217,-54 246,-54 29,0 61,-51 50,-127"/>
+    <path class="fil0 str1" d="M1107 1294c0,0 14,65 7,94 -7,29 51,62 112,62 62,0 167,11 206,43 40,33 91,181 98,228"/>
+    <path class="fil0 str1" d="M683 1460c0,0 43,94 83,101 40,7 359,25 409,18 51,-7 120,-58 141,-120"/>
+    <path class="fil0 str1" d="M737 1082c0,0 34,132 109,194 74,62 138,80 192,58 54,-22 125,-71 158,-125 33,-54 31,-194 31,-194"/>
+    <path class="fil0 str1" d="M636 1131c0,0 107,-24 143,-112 36,-89 74,-232 83,-275 9,-43 120,-116 176,-38 0,0 40,-63 72,-24 33,40 60,127 67,178 7,51 49,101 94,110 45,9 33,63 33,92 0,29 -31,127 -87,91"/>
+    <path class="fil0 str1" d="M1183 964c0,0 -116,-87 -179,14l-2 125"/>
+    <path class="fil0 str1" d="M945 955c0,0 -36,-40 -138,-9"/>
+    <path class="fil0 str1" d="M1154 1009c0,0 -54,-16 -92,14"/>
+    <path class="fil0 str1" d="M810 1006c0,0 60,-22 94,16"/>
+    <path class="fil0 str1" d="M866 1299c0,0 -67,58 -110,63 -43,5 -125,5 -183,-18 0,0 85,-36 56,-103 -29,-67 -139,-87 -118,-217 22,-130 109,-190 130,-263 22,-72 96,-235 214,-279 118,-43 188,74 188,74 0,0 69,-76 163,-18 94,58 163,293 178,331 14,38 65,179 27,252 -38,72 -63,112 -18,156 45,43 45,43 45,43 0,0 -159,35 -220,19 -61,-16 -90,-56 -90,-56"/>
+    <path class="fil0 str1" d="M915 1185c0,0 54,49 130,5"/>
+    <circle class="fil1" cx="1105" cy="1033" r="25"/>
+    <circle class="fil1" cx="861" cy="1026" r="25"/>
+   </g>
+   <rect class="fil0" width="2000" height="2000"/>
+  </g>
+ </g>
+</svg>

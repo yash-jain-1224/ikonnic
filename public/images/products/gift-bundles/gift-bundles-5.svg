@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Photo memories starter kit">
+  <rect width="1200" height="900" fill="#f5f3ff"/>
+  <rect x="185" y="155" width="250" height="250" rx="34" fill="#ffffff" stroke="#7c3aed" stroke-width="16"/>
+  <rect x="475" y="155" width="250" height="250" rx="34" fill="#ffffff" stroke="#7c3aed" stroke-width="16"/>
+  <rect x="765" y="155" width="250" height="250" rx="34" fill="#ffffff" stroke="#7c3aed" stroke-width="16"/>
+  <rect x="390" y="500" width="420" height="120" rx="28" fill="#ffffff" stroke="#6d28d9" stroke-width="16"/>
+  <circle cx="310" cy="280" r="64" fill="#ddd6fe"/>
+  <circle cx="600" cy="280" r="64" fill="#c4b5fd"/>
+  <circle cx="890" cy="280" r="64" fill="#a78bfa"/>
+  <text x="600" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#4c1d95">Photo Memories Starter Kit</text>
+</svg>

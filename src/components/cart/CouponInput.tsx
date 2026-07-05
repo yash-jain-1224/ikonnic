@@ -1,9 +1,11 @@
 "use client";
 
-import { Tag, X, CheckCircle } from "lucide-react";
+import { Tag, X, CheckCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { couponsAPI } from "@/lib/api";
 
-const VALID_COUPONS: Record<string, { discount: number; type: "percent" | "flat"; label: string; minOrder?: number }> = {
+// Fallback local coupons (used when backend is unavailable)
+const LOCAL_COUPONS: Record<string, { discount: number; type: "percent" | "flat"; label: string; minOrder?: number }> = {
   WELCOME10: { discount: 10, type: "percent", label: "10% off your first order", minOrder: 499 },
   IKONNIC15: { discount: 15, type: "percent", label: "15% off sitewide", minOrder: 999 },
   FLAT200: { discount: 200, type: "flat", label: "₹200 off on orders above ₹1499", minOrder: 1499 },
@@ -32,35 +34,62 @@ export function CouponInput({
 }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [validating, setValidating] = useState(false);
 
-  const handleApply = () => {
+  const handleApply = async () => {
     setError("");
     const upper = code.trim().toUpperCase();
     if (!upper) {
       setError("Please enter a coupon code");
       return;
     }
-    const coupon = VALID_COUPONS[upper];
-    if (!coupon) {
-      setError("Invalid coupon code. Try WELCOME10 or IKONNIC15");
-      return;
-    }
-    if (coupon.minOrder && cartTotal < coupon.minOrder) {
-      setError(`Minimum order of ₹${coupon.minOrder} required for this coupon`);
-      return;
-    }
-    const calculatedDiscount = coupon.type === "percent"
-      ? Math.round(cartTotal * coupon.discount / 100)
-      : coupon.discount;
 
-    onApply({
-      code: upper,
-      discount: coupon.discount,
-      type: coupon.type,
-      label: coupon.label,
-      calculatedDiscount,
-    });
-    setCode("");
+    setValidating(true);
+    try {
+      // Try backend validation first
+      const { data } = await couponsAPI.validate(upper, cartTotal);
+      if (data.valid) {
+        onApply({
+          code: upper,
+          discount: data.discount,
+          type: data.type || "percent",
+          label: data.label || data.message || `${data.discount}${data.type === "flat" ? "₹" : "%"} off`,
+          calculatedDiscount: data.calculatedDiscount ?? (data.type === "flat" ? data.discount : Math.round(cartTotal * data.discount / 100)),
+        });
+        setCode("");
+        return;
+      } else {
+        setError(data.message || "Invalid coupon code");
+        return;
+      }
+    } catch {
+      // Backend unavailable — use local fallback
+      const coupon = LOCAL_COUPONS[upper];
+      if (!coupon) {
+        setError("Invalid coupon code. Try WELCOME10 or IKONNIC15");
+        setValidating(false);
+        return;
+      }
+      if (coupon.minOrder && cartTotal < coupon.minOrder) {
+        setError(`Minimum order of ₹${coupon.minOrder} required for this coupon`);
+        setValidating(false);
+        return;
+      }
+      const calculatedDiscount = coupon.type === "percent"
+        ? Math.round(cartTotal * coupon.discount / 100)
+        : coupon.discount;
+
+      onApply({
+        code: upper,
+        discount: coupon.discount,
+        type: coupon.type,
+        label: coupon.label,
+        calculatedDiscount,
+      });
+      setCode("");
+    } finally {
+      setValidating(false);
+    }
   };
 
   if (appliedCoupon) {
@@ -105,16 +134,19 @@ export function CouponInput({
               setError("");
             }}
             placeholder="Enter coupon code"
-            className="w-full rounded-xl border border-slate-200 py-3 pl-9 pr-4 text-sm font-semibold uppercase tracking-wider outline-none transition focus:border-[#d90000] focus:ring-1 focus:ring-[#d90000]"
-            onKeyDown={(e) => e.key === "Enter" && handleApply()}
+            disabled={validating}
+            className="w-full rounded-xl border border-slate-200 py-3 pl-9 pr-4 text-sm font-semibold uppercase tracking-wider outline-none transition focus:border-[#d90000] focus:ring-1 focus:ring-[#d90000] disabled:opacity-60"
+            onKeyDown={(e) => { if (e.key === "Enter") handleApply(); }}
           />
         </div>
         <button
           type="button"
           onClick={handleApply}
-          className="rounded-xl border border-[#d90000] px-5 py-3 text-sm font-black text-[#d90000] transition hover:bg-red-50 active:scale-[0.98]"
+          disabled={validating}
+          className="inline-flex items-center gap-2 rounded-xl border border-[#d90000] px-5 py-3 text-sm font-black text-[#d90000] transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-60"
         >
-          Apply
+          {validating && <Loader2 size={14} className="animate-spin" />}
+          {validating ? "Checking..." : "Apply"}
         </button>
       </div>
       {error && <p className="mt-2 text-[12px] font-bold text-red-500">{error}</p>}

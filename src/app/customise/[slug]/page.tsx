@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductCustomizerPanel } from "@/components/customizer/ProductCustomizerPanel";
-import { productBySlug, products } from "@/data/products";
+import { products } from "@/data/products";
+import { getProductBySlug } from "@/lib/server-data";
 import { ProductSchema } from "@/components/seo/ProductSchema";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { ReviewsSection } from "@/components/product/ReviewsSection";
+
+// Pre-render known products at build time; API-backed pages revalidate via ISR
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
@@ -12,7 +16,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = productBySlug(slug);
+  const product = await getProductBySlug(slug);
   return {
     title: `Customise ${product?.slug === "acrylic-wall-photo-2" ? "Portrait Acrylic Wall Photo" : product?.title ?? "Product"}`,
   };
@@ -27,16 +31,16 @@ const faqs = [
 
 export default async function CustomisePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = productBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   return (
     <>
       <ProductSchema product={product} />
       <ProductCustomizerPanel product={product} />
-      
+
       <div className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6">
-        <ReviewsSection />
+        <ReviewsSection reviews={product.reviews} productName={product.title} productId={product.id} />
       </div>
 
       <div className="mx-auto max-w-3xl px-4 pb-20 sm:px-6">

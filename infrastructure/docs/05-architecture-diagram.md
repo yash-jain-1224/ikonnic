@@ -1,0 +1,245 @@
+# Azure Architecture Diagram
+
+## System Architecture (Text Diagram)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           IKONNIC E-COMMERCE PLATFORM                        │
+│                        Architecture (~1,000 users, MVP)                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌──────────────────┐
+                              │   USERS/CLIENTS  │
+                              │   (Browsers)     │
+                              └────────┬─────────┘
+                                       │
+                                       │ HTTPS
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          VERCEL EDGE NETWORK (Global CDN)                     │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │
+│  │ Edge Cache  │  │  Middleware   │  │  Static      │  │  Serverless      │ │
+│  │ (Assets)    │  │  (Auth/Rate)  │  │  Pages (ISR) │  │  Functions (API) │ │
+│  └─────────────┘  └──────────────┘  └──────────────┘  └────────┬─────────┘ │
+│                                                                  │           │
+│  Region: Mumbai (bom1)                                           │           │
+└──────────────────────────────────────────────────────────────────┼───────────┘
+                                                                   │
+                    ┌──────────────────────────────────────────────┼──────────┐
+                    │               AZURE (Central India)           │          │
+                    │               Resource Group: Ikonnic-RG      │          │
+                    │                                               │          │
+                    │  ┌────────────────────────────────────────────┼────────┐ │
+                    │  │              IDENTITY & SECURITY            │        │ │
+                    │  │                                             │        │ │
+                    │  │  ┌──────────────────┐  ┌────────────────┐  │        │ │
+                    │  │  │ Microsoft        │  │ Azure Key      │◄─┘        │ │
+                    │  │  │ Entra ID         │  │ Vault          │           │ │
+                    │  │  │                  │  │                │           │ │
+                    │  │  │ • App Reg        │  │ • DB Secrets   │           │ │
+                    │  │  │ • User Groups    │  │ • API Keys     │           │ │
+                    │  │  │ • Roles          │  │ • Conn Strings │           │ │
+                    │  │  │ • Social Login   │  │                │           │ │
+                    │  │  └──────────────────┘  └────────────────┘           │ │
+                    │  └─────────────────────────────────────────────────────┘ │
+                    │                                                           │
+                    │  ┌─────────────────────────────────────────────────────┐ │
+                    │  │              DATA LAYER                              │ │
+                    │  │                                                      │ │
+                    │  │  ┌──────────────────────┐  ┌──────────────────────┐ │ │
+                    │  │  │ PostgreSQL Flexible  │  │ Azure Blob Storage   │ │ │
+                    │  │  │ Server              │  │                      │ │ │
+                    │  │  │                      │  │ Containers:          │ │ │
+                    │  │  │ SKU: B_Standard_B1ms │  │ • products (private) │ │ │
+                    │  │  │ Storage: 32GB        │  │ • user-uploads       │ │ │
+                    │  │  │ Backup: 7 days       │  │ • assets (public)    │ │ │
+                    │  │  │                      │  │                      │ │ │
+                    │  │  │ DB: ikonnic_db       │  │ SKU: Standard_LRS    │ │ │
+                    │  │  │ SSL: Required        │  │ CORS: Enabled        │ │ │
+                    │  │  └──────────────────────┘  └──────────────────────┘ │ │
+                    │  └─────────────────────────────────────────────────────┘ │
+                    │                                                           │
+                    │  ┌─────────────────────────────────────────────────────┐ │
+                    │  │              MONITORING                              │ │
+                    │  │                                                      │ │
+                    │  │  ┌──────────────────────┐  ┌──────────────────────┐ │ │
+                    │  │  │ Application          │  │ Log Analytics        │ │ │
+                    │  │  │ Insights             │  │ Workspace            │ │ │
+                    │  │  │                      │  │                      │ │ │
+                    │  │  │ • Error tracking     │  │ • Query logs         │ │ │
+                    │  │  │ • Performance        │  │ • Audit trail        │ │ │
+                    │  │  │ • Custom events      │  │ • 30 day retention   │ │ │
+                    │  │  │ • User analytics     │  │                      │ │ │
+                    │  │  └──────────────────────┘  └──────────────────────┘ │ │
+                    │  └─────────────────────────────────────────────────────┘ │
+                    └─────────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────────────────────────────────────────────┐
+                    │               EXTERNAL SERVICES                              │
+                    │                                                              │
+                    │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+                    │  │ SendGrid     │  │ Razorpay     │  │ Google OAuth     │  │
+                    │  │              │  │              │  │                  │  │
+                    │  │ • Transact.  │  │ • Payments   │  │ • Social Login   │  │
+                    │  │ • Templates  │  │ • Refunds    │  │ • User Profiles  │  │
+                    │  │ • 100/day    │  │ • Webhooks   │  │                  │  │
+                    │  └──────────────┘  └──────────────┘  └──────────────────┘  │
+                    └─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Data Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        REQUEST FLOW                               │
+└─────────────────────────────────────────────────────────────────┘
+
+ User Browser                Vercel                        Azure
+ ──────────                  ──────                        ─────
+
+ 1. Visit site ─────────────► Edge Cache
+                              │
+                              ├── Static? ──► Return cached HTML/JS
+                              │
+                              └── Dynamic? ──► Serverless Function
+                                                    │
+                              ┌──────────────────────┘
+                              │
+                              ├── Auth check ────────────► Entra ID (JWT verify)
+                              │
+                              ├── DB query ──────────────► PostgreSQL
+                              │                            (SSL/TLS)
+                              ├── File access ───────────► Blob Storage
+                              │                            (SAS Token)
+                              ├── Send email ────────────► SendGrid
+                              │
+                              └── Log event ─────────────► App Insights
+                              
+ ◄────── Response ──────────── Response
+```
+
+---
+
+## Authentication Flow
+
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│                     AUTHENTICATION FLOW (NextAuth.js)                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+ ┌──────┐        ┌─────────┐        ┌──────────┐       ┌──────────────────┐
+ │ User │        │ Next.js │        │ Provider │       │  Database        │
+ └──┬───┘        └────┬────┘        └────┬─────┘       └────────┬─────────┘
+    │                  │                  │                       │
+    │ 1. Click Login   │                  │                       │
+    │─────────────────►│                  │                       │
+    │                  │                  │                       │
+    │                  │ 2. Redirect      │                       │
+    │◄─────────────────│─────────────────►│                       │
+    │                  │                  │                       │
+    │ 3. Login at Provider                │                       │
+    │────────────────────────────────────►│                       │
+    │                  │                  │                       │
+    │                  │ 4. Callback      │                       │
+    │                  │◄─────────────────│                       │
+    │                  │ (code + tokens)  │                       │
+    │                  │                  │                       │
+    │                  │ 5. Upsert User   │                       │
+    │                  │──────────────────┼──────────────────────►│
+    │                  │                  │                       │
+    │                  │ 6. Create Session│                       │
+    │                  │◄─────────────────┼───────────────────────│
+    │                  │                  │                       │
+    │ 7. Set Cookie    │                  │                       │
+    │◄─────────────────│                  │                       │
+    │ (JWT session)    │                  │                       │
+    │                  │                  │                       │
+    │ 8. Authenticated │                  │                       │
+    │  requests        │                  │                       │
+    │─────────────────►│                  │                       │
+    │ (with cookie)    │                  │                       │
+
+ Providers: Microsoft Entra ID, Google OAuth
+ Session: JWT (stateless, stored in httpOnly cookie)
+ Roles: Embedded in JWT claims
+```
+
+---
+
+## File Upload Flow
+
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      FILE UPLOAD FLOW (SAS Token Strategy)                  │
+└───────────────────────────────────────────────────────────────────────────┘
+
+ ┌──────┐        ┌─────────┐        ┌──────────────┐       ┌─────────────┐
+ │ User │        │ API     │        │ Blob Storage │       │ Database    │
+ └──┬───┘        └────┬────┘        └──────┬───────┘       └──────┬──────┘
+    │                  │                    │                       │
+    │ 1. Request       │                    │                       │
+    │    upload URL    │                    │                       │
+    │─────────────────►│                    │                       │
+    │                  │                    │                       │
+    │                  │ 2. Generate SAS    │                       │
+    │                  │    (15min expiry)  │                       │
+    │                  │                    │                       │
+    │ 3. Return SAS URL│                    │                       │
+    │◄─────────────────│                    │                       │
+    │                  │                    │                       │
+    │ 4. Upload file directly               │                       │
+    │──────────────────────────────────────►│                       │
+    │                  │                    │                       │
+    │ 5. Upload OK     │                    │                       │
+    │◄─────────────────────────────────────│                       │
+    │                  │                    │                       │
+    │ 6. Confirm       │                    │                       │
+    │    upload        │                    │                       │
+    │─────────────────►│                    │                       │
+    │                  │ 7. Save blob URL   │                       │
+    │                  │────────────────────┼──────────────────────►│
+    │                  │                    │                       │
+    │ 8. Success       │                    │                       │
+    │◄─────────────────│                    │                       │
+
+ Benefits:
+ • No file data passes through serverless function
+ • Reduces bandwidth costs and function execution time
+ • SAS tokens are short-lived (15 min)
+ • File size validation on client + server
+```
+
+---
+
+## Infrastructure Components Summary
+
+| Component | Service | SKU/Tier | Monthly Cost |
+|-----------|---------|----------|-------------|
+| Frontend & API | Vercel (Hobby→Pro) | Pro | $20 |
+| Database | PostgreSQL Flexible | B_Standard_B1ms | ~$13 |
+| File Storage | Azure Blob Storage | Standard_LRS | ~$2 |
+| Secrets | Azure Key Vault | Standard | ~$0.50 |
+| Identity | Microsoft Entra ID | Free tier | $0 |
+| Monitoring | Application Insights | Pay-per-use | ~$2 |
+| Logs | Log Analytics | 30-day retention | ~$2 |
+| Email | SendGrid | Free (100/day) | $0 |
+| **TOTAL** | | | **~$40/month** |
+
+---
+
+## Network Security
+
+```
+Internet ─── HTTPS ──► Vercel Edge (WAF + DDoS protection)
+                           │
+                           │ Server-side only
+                           ▼
+                    PostgreSQL (SSL required, firewall rules)
+                    Blob Storage (Private containers, SAS tokens)
+                    Key Vault (RBAC, network rules)
+                    
+No public endpoints exposed directly from Azure services.
+All data access is through Vercel serverless functions.
+```

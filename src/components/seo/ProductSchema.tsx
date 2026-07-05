@@ -14,7 +14,7 @@ export function ProductSchema({ product }: { product: Product }) {
     },
     offers: {
       "@type": "Offer",
-      url: `https://ikonnic.in/customise/${product.slug}`,
+      url: `https://ikonnic.com/customise/${product.slug}`,
       priceCurrency: "INR",
       price: product.price,
       itemCondition: "https://schema.org/NewCondition",

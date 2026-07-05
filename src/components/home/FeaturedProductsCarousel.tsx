@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Product } from "@/types";
 import { categories } from "@/data/categories";
 import { products as allProducts } from "@/data/products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -12,11 +13,11 @@ const categoryBySlug = new Map(categories.map((category) => [category.slug, cate
 const featuredProductSlugs = new Set(
   WHITELISTED_CATEGORY_SLUGS.flatMap((slug) => categoryBySlug.get(slug)?.productSlugs ?? [])
 );
-const products = allProducts
+const defaultProducts = allProducts
   .filter((p) => isWhitelistedCategory(p.categorySlug) && featuredProductSlugs.has(p.slug))
   .slice(0, 8);
 
-export function FeaturedProductsCarousel() {
+export function FeaturedProductsCarousel({ products = defaultProducts }: { products?: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {

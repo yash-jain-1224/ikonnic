@@ -1,107 +1,94 @@
 "use client";
 
-import type { ImgHTMLAttributes } from "react";
-import { useEffect, useRef, useState } from "react";
+import NextImage from "next/image";
+import { useState } from "react";
 
-type SmartImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "alt" | "loading"> & {
+type SmartImageProps = {
   src: string;
   alt: string;
   priority?: boolean;
-  loading?: "eager" | "lazy";
   fallbackSrc?: string;
   wrapperClassName?: string;
   imageClassName?: string;
   skeletonClassName?: string;
+  width?: number;
+  height?: number;
+  fill?: boolean;
+  sizes?: string;
 };
-
-const transparentPixel =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 
 export function SmartImage({
   src,
   alt,
   priority = false,
-  loading,
   fallbackSrc = "/images/placeholder.webp",
   wrapperClassName = "",
   imageClassName = "",
   skeletonClassName = "",
-  onLoad,
-  onError,
-  ...props
+  width,
+  height,
+  fill = true,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
 }: SmartImageProps) {
-  const wrapperRef = useRef<HTMLSpanElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(priority);
   const [loaded, setLoaded] = useState(false);
   const [activeSrc, setActiveSrc] = useState(src);
-  const resolvedLoading = loading ?? "eager";
 
-  useEffect(() => {
-    setLoaded(false);
-    setActiveSrc(src);
-    setShouldLoad(priority);
-  }, [priority, src]);
+  // Determine if it's an external URL or local
+  const isExternal = activeSrc.startsWith("http://") || activeSrc.startsWith("https://");
+  const isLocal = activeSrc.startsWith("/") || activeSrc.startsWith("data:");
 
-  useEffect(() => {
-    if (priority || shouldLoad) return;
-
-    const target = wrapperRef.current;
-    if (!target) return;
-
-    if (!("IntersectionObserver" in window)) {
-      setShouldLoad(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldLoad(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "1400px 0px" }
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [priority, shouldLoad]);
-
-  useEffect(() => {
-    const image = imageRef.current;
-    if (shouldLoad && image?.complete && image.naturalWidth > 0) {
-      setLoaded(true);
-    }
-  }, [activeSrc, shouldLoad]);
+  // For local paths and known external hosts, use next/image optimisation.
+  // For unknown external hosts, fall back gracefully.
+  const useNextImage = isLocal || isExternal;
 
   return (
-    <span ref={wrapperRef} className={`relative block overflow-hidden bg-slate-50 ${wrapperClassName}`}>
+    <span className={`relative block overflow-hidden bg-slate-50 ${wrapperClassName}`}>
       <span
         aria-hidden="true"
         className={`absolute inset-0 bg-[linear-gradient(135deg,#f8fafc_0%,#eef2f7_100%)] transition-opacity duration-200 ${loaded ? "opacity-0" : "opacity-100"} ${skeletonClassName}`}
       />
-      <img
-        {...props}
-        ref={imageRef}
-        src={shouldLoad ? activeSrc : transparentPixel}
-        alt={alt}
-        loading={resolvedLoading}
-        decoding="async"
-        fetchPriority={priority ? "high" : "low"}
-        onLoad={(event) => {
-          setLoaded(true);
-          onLoad?.(event);
-        }}
-        onError={(event) => {
-          if (activeSrc !== fallbackSrc) {
-            setActiveSrc(fallbackSrc);
-            return;
-          }
-          onError?.(event);
-        }}
-        className={`transition-opacity duration-150 ${loaded ? "opacity-100" : "opacity-0"} ${imageClassName}`}
-      />
+      {useNextImage ? (
+        fill ? (
+          <NextImage
+            src={activeSrc}
+            alt={alt}
+            fill
+            sizes={sizes}
+            priority={priority}
+            className={`transition-opacity duration-150 ${loaded ? "opacity-100" : "opacity-0"} ${imageClassName}`}
+            onLoad={() => setLoaded(true)}
+            onError={() => {
+              if (activeSrc !== fallbackSrc) setActiveSrc(fallbackSrc);
+            }}
+            unoptimized={isExternal && !activeSrc.includes("blob.core.windows.net") && !activeSrc.includes("cdn.ikonnic.com")}
+          />
+        ) : (
+          <NextImage
+            src={activeSrc}
+            alt={alt}
+            width={width || 400}
+            height={height || 300}
+            priority={priority}
+            className={`transition-opacity duration-150 ${loaded ? "opacity-100" : "opacity-0"} ${imageClassName}`}
+            onLoad={() => setLoaded(true)}
+            onError={() => {
+              if (activeSrc !== fallbackSrc) setActiveSrc(fallbackSrc);
+            }}
+            unoptimized={isExternal && !activeSrc.includes("blob.core.windows.net") && !activeSrc.includes("cdn.ikonnic.com")}
+          />
+        )
+      ) : (
+        <img
+          src={activeSrc}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          className={`transition-opacity duration-150 ${loaded ? "opacity-100" : "opacity-0"} ${imageClassName}`}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            if (activeSrc !== fallbackSrc) setActiveSrc(fallbackSrc);
+          }}
+        />
+      )}
     </span>
   );
 }

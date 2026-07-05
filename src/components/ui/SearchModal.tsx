@@ -1,10 +1,11 @@
 "use client";
 
-import { Search, X, ArrowRight } from "lucide-react";
+import { Search, X, ArrowRight, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { categories } from "@/data/categories";
 import { products } from "@/data/products";
+import { searchAPI } from "@/lib/api";
 import { isWhitelistedCategory, WHITELISTED_CATEGORY_SLUGS } from "@/config/whitelist";
 
 const categoryBySlug = new Map(categories.map((category) => [category.slug, category]));
@@ -17,8 +18,13 @@ const searchableProducts = products.filter(
   (product) => isWhitelistedCategory(product.categorySlug) && searchableProductSlugs.has(product.slug)
 );
 
+type DisplayCategory = { slug: string; name: string; image?: string; description?: string };
+type DisplayProduct = { id: string; slug: string; title: string; image: string; price: number; categoryName: string };
+
 export function SearchModal({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
+  const [remote, setRemote] = useState<{ categories: DisplayCategory[]; products: DisplayProduct[] } | null>(null);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -30,9 +36,57 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
+  // Backend search with debounce; falls back to static filtering on failure
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setRemote(null);
+      setSearching(false);
+      return;
+    }
+    let cancelled = false;
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await searchAPI.query(query.trim());
+        if (cancelled) return;
+        const remoteProducts: DisplayProduct[] = (data.products ?? [])
+          .filter((p: { category?: { slug?: string } }) => !p.category?.slug || isWhitelistedCategory(p.category.slug))
+          .map((p: { id: string; slug: string; title: string; image: string; price: number | string; category?: { slug?: string } }) => ({
+            id: p.id,
+            slug: p.slug,
+            title: p.title,
+            image: p.image,
+            price: Number(p.price),
+            categoryName: (p.category?.slug && categoryBySlug.get(p.category.slug)?.name) || "",
+          }));
+        const remoteCategories: DisplayCategory[] = (data.categories ?? [])
+          .filter((c: { slug: string }) => isWhitelistedCategory(c.slug))
+          .map((c: { slug: string; name: string; image?: string }) => ({
+            slug: c.slug,
+            name: c.name,
+            image: c.image ?? categoryBySlug.get(c.slug)?.image,
+            description: categoryBySlug.get(c.slug)?.description,
+          }));
+        setRemote(
+          remoteProducts.length || remoteCategories.length
+            ? { products: remoteProducts.slice(0, 8), categories: remoteCategories }
+            : null
+        );
+      } catch {
+        if (!cancelled) setRemote(null); // backend unavailable → static fallback
+      } finally {
+        if (!cancelled) setSearching(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [query]);
+
   const normalize = useCallback((text: string) => text.toLowerCase().trim(), []);
 
-  const filteredCategories = query.length >= 2
+  const staticCategories: DisplayCategory[] = query.length >= 2
     ? searchableCategories.filter(
         (c) =>
           normalize(c.name).includes(normalize(query)) ||
@@ -40,7 +94,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
       )
     : [];
 
-  const filteredProducts = query.length >= 2
+  const staticProducts: DisplayProduct[] = query.length >= 2
     ? searchableProducts
         .filter(
           (p) =>
@@ -51,7 +105,9 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         .slice(0, 8)
     : [];
 
-  const hasResults = filteredCategories.length > 0 || filteredProducts.length > 0;
+  const displayCategories = remote?.categories.length ? remote.categories : staticCategories;
+  const displayProducts = remote?.products.length ? remote.products : staticProducts;
+  const hasResults = displayCategories.length > 0 || displayProducts.length > 0;
 
   return (
     <div
@@ -68,7 +124,11 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
           {/* Search Input */}
           <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-            <Search size={20} className="text-slate-400" />
+            {searching ? (
+              <Loader2 size={20} className="animate-spin text-slate-400" />
+            ) : (
+              <Search size={20} className="text-slate-400" />
+            )}
             <input
               ref={inputRef}
               type="text"
@@ -107,7 +167,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
-            {query.length >= 2 && !hasResults && (
+            {query.length >= 2 && !hasResults && !searching && (
               <div className="p-8 text-center">
                 <p className="text-sm font-bold text-slate-500">No results for &quot;{query}&quot;</p>
                 <p className="mt-1 text-[12px] text-slate-400">Try different keywords or browse categories</p>
@@ -115,10 +175,10 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
             )}
 
             {/* Category Results */}
-            {filteredCategories.length > 0 && (
+            {displayCategories.length > 0 && (
               <div className="border-b border-slate-50 p-4">
                 <p className="mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">Categories</p>
-                {filteredCategories.map((cat) => (
+                {displayCategories.map((cat) => (
                   <Link
                     key={cat.slug}
                     href={`/category/${cat.slug}`}
@@ -130,7 +190,9 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                     )}
                     <div className="flex-1">
                       <p className="text-sm font-bold text-slate-900">{cat.name}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">{cat.description}</p>
+                      {cat.description && (
+                        <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">{cat.description}</p>
+                      )}
                     </div>
                     <ArrowRight size={14} className="text-slate-300" />
                   </Link>
@@ -139,10 +201,10 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
             )}
 
             {/* Product Results */}
-            {filteredProducts.length > 0 && (
+            {displayProducts.length > 0 && (
               <div className="p-4">
                 <p className="mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">Products</p>
-                {filteredProducts.map((product) => (
+                {displayProducts.map((product) => (
                   <Link
                     key={product.id}
                     href={`/customise/${product.slug}`}
@@ -156,7 +218,9 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                     />
                     <div className="flex-1">
                       <p className="text-sm font-bold text-slate-900">{product.title}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500">{product.categoryName}</p>
+                      {product.categoryName && (
+                        <p className="mt-0.5 text-[11px] text-slate-500">{product.categoryName}</p>
+                      )}
                     </div>
                     <span className="text-sm font-black text-[#d90000]">₹{product.price}</span>
                   </Link>

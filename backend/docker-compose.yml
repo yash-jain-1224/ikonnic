@@ -1,0 +1,78 @@
+# Ikonnic Backend - Docker Compose for Development
+version: '3.8'
+
+services:
+  # ─── PostgreSQL Database ─────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: ikonnic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ikonnic_db
+      POSTGRES_USER: ikonnic
+      POSTGRES_PASSWORD: ikonnic_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ikonnic -d ikonnic_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis Cache ─────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: ikonnic-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Backend API ─────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ikonnic-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://ikonnic:ikonnic_secret@postgres:5432/ikonnic_db?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: change-this-to-a-secure-random-string-in-production
+      JWT_ACCESS_EXPIRATION: 15m
+      JWT_REFRESH_EXPIRATION: 7d
+      FRONTEND_URL: http://localhost:3000
+      CORS_ORIGINS: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ─── Adminer (DB management UI) ─────────────
+  adminer:
+    image: adminer
+    container_name: ikonnic-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:

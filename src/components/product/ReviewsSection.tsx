@@ -1,7 +1,10 @@
 "use client";
 
-import { Star, ThumbsUp, Play } from "lucide-react";
+import { Star, ThumbsUp, Play, PenLine } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { reviewsAPI } from "@/lib/api";
+import { useAuthStore } from "@/store/auth";
 
 export type Review = {
   id?: string;
@@ -136,16 +139,122 @@ function RatingBar({ star, count, total }: { star: number; count: number; total:
   );
 }
 
+/* ---------- Write Review Form ---------- */
+
+function WriteReviewForm({ productId, onDone }: { productId: string; onDone: () => void }) {
+  const { isAuthenticated } = useAuthStore();
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mt-4 rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm">
+        <p className="text-sm font-bold text-slate-700">Sign in to write a review</p>
+        <Link
+          href="/login"
+          className="mt-3 inline-block rounded-xl bg-[#d90000] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#b50000]"
+        >
+          Log In
+        </Link>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-5 text-center">
+        <p className="text-sm font-bold text-emerald-700">Thanks for your review!</p>
+        <p className="mt-1 text-[12px] text-emerald-600">It will appear here once approved by our team.</p>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rating === 0) {
+      setError("Please select a star rating");
+      return;
+    }
+    if (text.trim().length < 10) {
+      setError("Please write at least 10 characters");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      await reviewsAPI.create({ productId, rating, text: text.trim() });
+      setSubmitted(true);
+      onDone();
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Could not submit review. Please try again.";
+      setError(Array.isArray(message) ? message[0] : message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p className="text-sm font-black text-slate-900">Your Rating</p>
+      <div className="mt-2 flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+          >
+            <Star
+              size={24}
+              className={
+                star <= (hoverRating || rating)
+                  ? "fill-amber-400 text-amber-400"
+                  : "fill-slate-200 text-slate-200"
+              }
+            />
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={4}
+        placeholder="Share your experience with this product..."
+        className="mt-4 w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#d90000]"
+      />
+      {error && <p className="mt-2 text-[12px] font-bold text-[#d90000]">{error}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="mt-4 rounded-xl bg-[#d90000] px-6 py-3 text-sm font-black text-white transition hover:bg-[#b50000] disabled:opacity-60"
+      >
+        {submitting ? "Submitting..." : "Submit Review"}
+      </button>
+    </form>
+  );
+}
+
 /* ---------- Main Reviews Section ---------- */
 
 export function ReviewsSection({
   reviews = [],
   productName,
+  productId,
 }: {
   reviews?: Review[];
   productName?: string;
+  productId?: string;
 }) {
   const [showAll, setShowAll] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   // Calculate aggregates
   const total = reviews.length;
@@ -157,23 +266,42 @@ export function ReviewsSection({
 
   const visibleReviews = showAll ? reviews : reviews.slice(0, 4);
 
+  const writeReviewButton = productId && !showForm && (
+    <button
+      type="button"
+      onClick={() => setShowForm(true)}
+      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-[#d90000] hover:text-[#d90000]"
+    >
+      <PenLine size={14} />
+      Write a Review
+    </button>
+  );
+
   if (total === 0) {
     return (
-      <div className="mt-8 rounded-2xl border border-slate-100 bg-slate-50 p-8 text-center">
-        <Star size={28} className="mx-auto text-slate-300" />
-        <p className="mt-3 text-sm font-bold text-slate-500">No reviews yet</p>
-        <p className="mt-1 text-[13px] text-slate-400">
-          Be the first to review {productName || "this product"}
-        </p>
+      <div className="mt-8">
+        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-8 text-center">
+          <Star size={28} className="mx-auto text-slate-300" />
+          <p className="mt-3 text-sm font-bold text-slate-500">No reviews yet</p>
+          <p className="mt-1 text-[13px] text-slate-400">
+            Be the first to review {productName || "this product"}
+          </p>
+          {writeReviewButton && <div className="mt-4">{writeReviewButton}</div>}
+        </div>
+        {productId && showForm && <WriteReviewForm productId={productId} onDone={() => {}} />}
       </div>
     );
   }
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-black text-[#07142f]">
-        Customer Reviews ({total})
-      </h3>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-xl font-black text-[#07142f]">
+          Customer Reviews ({total})
+        </h3>
+        {writeReviewButton}
+      </div>
+      {productId && showForm && <WriteReviewForm productId={productId} onDone={() => {}} />}
 
       {/* Summary bar */}
       <div className="mt-4 flex flex-col gap-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center">

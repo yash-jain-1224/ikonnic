@@ -3,9 +3,12 @@ import { Apple, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Play, Y
 import { PageContainer } from "@/components/ui/PageContainer";
 
 const quickLinks = [
+  ["About Us", "/about"],
+  ["FAQ", "/faq"],
   ["Terms & Conditions", "/terms-conditions"],
   ["Privacy Policy", "/privacy-policy"],
   ["Refund & Return Policy", "/refund-return-policy"],
+  ["Shipping Policy", "/shipping-policy"],
   ["Track Your Order", "/orders-tracking"],
   ["Contact Us", "/contact-us"],
   ["Blog", "/blog"],
@@ -35,9 +38,9 @@ export function SiteFooter() {
           </p>
 
           <div className="mt-5 space-y-3 text-sm text-slate-300">
-            <a className="flex items-center gap-2 transition hover:text-white" href="mailto:support@ikonnic.in">
+            <a className="flex items-center gap-2 transition hover:text-white" href="mailto:support@ikonnic.com">
               <Mail size={16} />
-              support@ikonnic.in
+              support@ikonnic.com
             </a>
             <a className="flex items-center gap-2 transition hover:text-white" href="tel:+919000012345">
               <Phone size={16} />

@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { CategoryPageClient } from "@/components/product/CategoryPageClient";
-import { categories, categoryMap } from "@/data/categories";
-import { productBySlug, productsByCategory } from "@/data/products";
 import { CategorySchema } from "@/components/seo/CategorySchema";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { isWhitelistedCategory, WHITELISTED_CATEGORY_SLUGS } from "@/config/whitelist";
+import { getCategoryBySlug, getProductsForCategory } from "@/lib/server-data";
+
+// Pre-render whitelisted categories at build time; revalidate via ISR
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return WHITELISTED_CATEGORY_SLUGS.map((slug) => ({ slug }));
@@ -15,7 +17,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const category = categoryMap[slug];
+  const category = await getCategoryBySlug(slug);
   return { title: category?.name ?? "Category" };
 }
 
@@ -31,14 +33,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   // Guard: only whitelisted categories are accessible
   if (!isWhitelistedCategory(slug)) notFound();
 
-  const category = categoryMap[slug];
+  const [category, visibleProducts] = await Promise.all([
+    getCategoryBySlug(slug),
+    getProductsForCategory(slug, 8),
+  ]);
   if (!category) notFound();
-  const linkedProducts = (category.productSlugs ?? []).flatMap((productSlug) => {
-    const product = productBySlug(productSlug);
-    return product ? [product] : [];
-  });
-  const categoryProducts = productsByCategory(slug);
-  const visibleProducts = (linkedProducts.length ? linkedProducts : categoryProducts).slice(0, 8);
 
   return (
     <>
@@ -50,7 +49,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{category.description}</p>
         </div>
         <CategoryPageClient category={category} products={visibleProducts} />
-        
+
         <div className="mt-20 rounded-3xl bg-slate-50 p-6 sm:p-10">
           <h2 className="mb-6 text-2xl font-black text-slate-900">Questions about {category.name}?</h2>
           <FAQAccordion items={categoryFaqs} />

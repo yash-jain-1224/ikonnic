@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -22,8 +23,8 @@ export function WishlistClient() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <article key={item.lineId} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <Link href={`/product/${item.slug}`}>
-            <img src={item.image} alt={item.title} className="aspect-[4/3] w-full object-cover" />
+          <Link href={`/product/${item.slug}`} className="relative block aspect-[4/3] w-full">
+            <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" />
           </Link>
           <div className="p-4">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-ikonnic-red">{item.category}</p>

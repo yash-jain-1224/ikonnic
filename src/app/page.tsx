@@ -4,8 +4,17 @@ import { TrustPromiseCard } from "@/components/home/TrustPromiseCard";
 import { FeaturedProductsCarousel } from "@/components/home/FeaturedProductsCarousel";
 import { WhyIkonnic } from "@/components/home/WhyIkonnic";
 import { PageContainer } from "@/components/ui/PageContainer";
+import { getFeaturedProducts, getHomeCategories } from "@/lib/server-data";
 
-export default function HomePage() {
+// Revalidate home data every 5 minutes (ISR)
+export const revalidate = 300;
+
+export default async function HomePage() {
+  const [categories, featuredProducts] = await Promise.all([
+    getHomeCategories(),
+    getFeaturedProducts(8),
+  ]);
+
   return (
     <>
       <HeroCarousel />
@@ -17,8 +26,8 @@ export default function HomePage() {
             Personalised acrylic photos, wall décor, clocks, frames, albums, keychains, tags, magnets, and gifts—designed to make everyday spaces feel more like yours.
           </p>
         </div>
-        <CategoryGrid />
-        <FeaturedProductsCarousel />
+        <CategoryGrid categories={categories} />
+        <FeaturedProductsCarousel products={featuredProducts} />
         <WhyIkonnic />
         <div className="mt-14"><TrustPromiseCard /></div>
       </PageContainer>

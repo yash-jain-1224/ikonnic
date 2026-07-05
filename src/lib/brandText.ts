@@ -1,11 +1,11 @@
 export function sanitizeBrandText(value: string) {
   return value
-    .replace(/support@omgs\.in/gi, "support@ikonnic.in")
+    .replace(/support@omgs\.in/gi, "support@ikonnic.com")
     .replace(/OMGS\.in/gi, "Ikonnic")
     .replace(/OMGs/g, "Ikonnic")
     .replace(/OMGS/g, "Ikonnic")
     .replace(/\bomgs\b/g, "ikonnic")
-    .replace(/omgs\.in/gi, "ikonnic.in");
+    .replace(/omgs\.in/gi, "ikonnic.com");
 }
 
 export function sanitizeOptionalBrandText(value?: string) {

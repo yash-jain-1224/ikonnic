@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CartSummary } from "@/components/cart/CartSummary";
@@ -29,8 +30,8 @@ export function CartClient() {
       <div className="space-y-3">
         {items.map((item) => (
           <article key={item.lineId} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">
-            <Link href={`/product/${item.slug}`}>
-              <img src={item.previewImage || item.uploadedImagePreview || item.image} alt="" className="h-40 w-full rounded-xl bg-slate-100 object-cover sm:size-32" />
+            <Link href={`/product/${item.slug}`} className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:size-32">
+              <Image src={item.previewImage || item.uploadedImagePreview || item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 128px" />
             </Link>
             <div className="min-w-0 flex-1">
               <Link href={`/product/${item.slug}`} className="font-black text-slate-950 hover:text-ikonnic-red">{item.title}</Link>

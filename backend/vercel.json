@@ -1,12 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "installCommand": "npm ci && npx prisma generate",
+  "installCommand": "npm ci --include=dev && npx prisma generate",
   "regions": ["bom1"],
   "functions": {
     "api/index.ts": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   },
   "rewrites": [

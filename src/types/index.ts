@@ -228,7 +228,7 @@ export type OrderStatus =
   | "Refunded"
   | "Reprint initiated";
 
-export type GiftoraOrder = {
+export type IkonnicOrder = {
   id: string;
   email: string;
   phone: string;

@@ -26,8 +26,8 @@ export function WishlistClient() {
             <img src={item.image} alt={item.title} className="aspect-[4/3] w-full object-cover" />
           </Link>
           <div className="p-4">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-giftora-red">{item.category}</p>
-            <Link href={`/product/${item.slug}`} className="mt-1 block font-black text-slate-950 hover:text-giftora-red">{item.title}</Link>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-ikonnic-red">{item.category}</p>
+            <Link href={`/product/${item.slug}`} className="mt-1 block font-black text-slate-950 hover:text-ikonnic-red">{item.title}</Link>
             <p className="mt-2 text-sm font-black">Rs {item.price.toLocaleString("en-IN")}</p>
             <div className="mt-4 flex gap-2">
               <button
@@ -47,11 +47,11 @@ export function WishlistClient() {
                   });
                   removeItem(item.lineId);
                 }}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-giftora-red px-4 py-2.5 text-xs font-black text-white hover:bg-red-700"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-ikonnic-red px-4 py-2.5 text-xs font-black text-white hover:bg-red-700"
               >
                 <ShoppingCart size={15} /> Move to cart
               </button>
-              <button type="button" onClick={() => removeItem(item.lineId)} className="grid size-10 place-items-center rounded-full border border-red-200 bg-red-50 text-giftora-red">
+              <button type="button" onClick={() => removeItem(item.lineId)} className="grid size-10 place-items-center rounded-full border border-red-200 bg-red-50 text-ikonnic-red">
                 <Trash2 size={15} />
               </button>
             </div>

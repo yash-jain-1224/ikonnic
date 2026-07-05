@@ -42,7 +42,7 @@ export const useWishlistStore = create<WishlistState>()(
       clearWishlist: () => set({ items: [] }),
     }),
     {
-      name: "giftora-wishlist",
+      name: "ikonnic-wishlist",
       storage: createJSONStorage(() => localStorage),
     },
   ),

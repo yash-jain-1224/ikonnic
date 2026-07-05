@@ -17,7 +17,7 @@ export function AccountClient() {
       <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <h2 className="font-black text-slate-950">Demo profile</h2>
         <div className="mt-4 space-y-3 text-sm text-slate-600">
-          <p><strong className="text-slate-950">Name:</strong> Giftora Guest</p>
+          <p><strong className="text-slate-950">Name:</strong> Ikonnic Guest</p>
           <p><strong className="text-slate-950">Address:</strong> Add saved addresses after auth is connected.</p>
           <p><strong className="text-slate-950">Data rights:</strong> Export/delete request placeholder.</p>
         </div>
@@ -33,12 +33,12 @@ export function AccountClient() {
               <article key={order.id} className="rounded-xl border border-slate-100 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.12em] text-giftora-red">{order.id}</p>
+                    <p className="text-xs font-black uppercase tracking-[0.12em] text-ikonnic-red">{order.id}</p>
                     <h3 className="mt-1 font-black text-slate-950">{order.status}</h3>
                     <p className="mt-1 text-xs text-slate-500">{order.items.length} item(s) · Rs {order.total.toLocaleString("en-IN")}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Link href="/orders-tracking" className="rounded-full bg-red-50 px-3 py-2 text-xs font-black text-giftora-red">Track</Link>
+                    <Link href="/orders-tracking" className="rounded-full bg-red-50 px-3 py-2 text-xs font-black text-ikonnic-red">Track</Link>
                     <button type="button" className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600"><RotateCcw size={13} />Reorder</button>
                     <button type="button" className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600"><Download size={13} />Invoice</button>
                     <button type="button" className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-600"><Star size={13} />Review</button>

@@ -7,8 +7,8 @@ import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: {
-    default: "Giftora | Personalised Decor & Gifts",
-    template: "%s | Giftora",
+    default: "Ikonnic | Personalised Decor & Gifts",
+    template: "%s | Ikonnic",
   },
   description: "A complete personalised gifting storefront demo built with Next.js, Tailwind CSS, and Zustand.",
 };

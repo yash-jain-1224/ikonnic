@@ -23,7 +23,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     <PageContainer className="py-8 sm:py-12">
       <Breadcrumb current={post.title} parent={{ label: "Blog", href: "/blog" }} />
       <article className="mx-auto mt-6 max-w-4xl">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-giftora-red">{post.date}</p>
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-ikonnic-red">{post.date}</p>
         <h1 className="mt-3 text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">{post.title}</h1>
         <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-500">{post.excerpt}</p>
         <img src={post.image} alt="" className="mt-8 aspect-[16/8] w-full rounded-3xl border border-slate-200 object-cover shadow-card" />

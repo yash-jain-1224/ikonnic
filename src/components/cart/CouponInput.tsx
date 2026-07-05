@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const VALID_COUPONS: Record<string, { discount: number; type: "percent" | "flat"; label: string; minOrder?: number }> = {
   WELCOME10: { discount: 10, type: "percent", label: "10% off your first order", minOrder: 499 },
-  GIFTORA15: { discount: 15, type: "percent", label: "15% off sitewide", minOrder: 999 },
+  IKONNIC15: { discount: 15, type: "percent", label: "15% off sitewide", minOrder: 999 },
   FLAT200: { discount: 200, type: "flat", label: "₹200 off on orders above ₹1499", minOrder: 1499 },
   FIRST100: { discount: 100, type: "flat", label: "₹100 off your first purchase" },
   SUMMER20: { discount: 20, type: "percent", label: "20% Summer Sale discount", minOrder: 799 },
@@ -42,7 +42,7 @@ export function CouponInput({
     }
     const coupon = VALID_COUPONS[upper];
     if (!coupon) {
-      setError("Invalid coupon code. Try WELCOME10 or GIFTORA15");
+      setError("Invalid coupon code. Try WELCOME10 or IKONNIC15");
       return;
     }
     if (coupon.minOrder && cartTotal < coupon.minOrder) {

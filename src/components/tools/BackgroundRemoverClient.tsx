@@ -24,11 +24,11 @@ export function BackgroundRemoverClient() {
         <h2 className="text-lg font-black text-slate-950">Upload image</h2>
         <label className="mt-5 grid min-h-64 cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:border-red-300">
           <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => readFile(event.target.files?.[0])} />
-          <span className="grid size-14 place-items-center rounded-full bg-red-50 text-giftora-red"><ImagePlus size={24} /></span>
+          <span className="grid size-14 place-items-center rounded-full bg-red-50 text-ikonnic-red"><ImagePlus size={24} /></span>
           <span className="mt-4 block font-black">Choose JPG, PNG, or WEBP</span>
           <span className="mt-1 block text-sm text-slate-500">File validation and guest rate limits belong in the future API route.</span>
         </label>
-        <button type="button" disabled={!preview} onClick={() => setProcessed(true)} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-giftora-red px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300">
+        <button type="button" disabled={!preview} onClick={() => setProcessed(true)} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300">
           <WandSparkles size={16} /> Remove background
         </button>
       </section>

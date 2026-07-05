@@ -18,8 +18,8 @@ export function FilterPills({
           onClick={() => onChange(filter)}
           className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
             selected === filter
-              ? "border-giftora-red bg-giftora-red text-white shadow-sm"
-              : "border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:text-giftora-red"
+              ? "border-ikonnic-red bg-ikonnic-red text-white shadow-sm"
+              : "border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:text-ikonnic-red"
           }`}
         >
           {filter}

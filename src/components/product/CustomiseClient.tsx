@@ -206,7 +206,7 @@ export function CustomiseClient({ product }: { product: Product }) {
               <h2 className="text-lg font-black text-slate-950">Preview canvas</h2>
               <p className="mt-1 text-xs text-slate-500">Reference-only local preview. Print-file generation is wired as a future API hook.</p>
             </div>
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-giftora-red px-4 py-2 text-xs font-black text-white">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-ikonnic-red px-4 py-2 text-xs font-black text-white">
               <ImageDown size={15} />
               Upload
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => readFile(event.target.files?.[0])} />
@@ -252,7 +252,7 @@ export function CustomiseClient({ product }: { product: Product }) {
           {preview ? (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3">
               <p className="text-xs font-bold text-slate-600">{dimensions.width} x {dimensions.height} inch print area</p>
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:border-giftora-red hover:text-giftora-red">
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:border-ikonnic-red hover:text-ikonnic-red">
                 Replace Photo
               </button>
             </div>
@@ -262,7 +262,7 @@ export function CustomiseClient({ product }: { product: Product }) {
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
           <h2 className="text-lg font-black text-slate-950">Text and finishing</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_120px]">
-            <label className="text-xs font-bold text-slate-600">Text overlay<input value={text} onChange={(event) => setText(event.target.value)} placeholder="Name, date, or short message" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
+            <label className="text-xs font-bold text-slate-600">Text overlay<input value={text} onChange={(event) => setText(event.target.value)} placeholder="Name, date, or short message" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
             <label className="text-xs font-bold text-slate-600">Text colour<input type="color" value={textColor} onChange={(event) => setTextColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white p-1" /></label>
           </div>
           <button type="button" className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600">
@@ -274,7 +274,7 @@ export function CustomiseClient({ product }: { product: Product }) {
 
       <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-card lg:sticky lg:top-20 sm:p-7">
         <h2 className="text-lg font-black text-slate-950">{product.title}</h2>
-        <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-giftora-red">{product.categoryName}</p>
+        <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-ikonnic-red">{product.categoryName}</p>
         <div className="mt-5 space-y-4">
           <OptionGroup label="Size" values={sizes} value={size} onChange={setSize} />
           <OptionGroup label="Thickness" values={thicknesses} value={thickness} onChange={setThickness} />
@@ -292,10 +292,10 @@ export function CustomiseClient({ product }: { product: Product }) {
           <div className="flex justify-between"><dt className="text-slate-500">Discount</dt><dd className="font-bold">Rs {discount.toLocaleString("en-IN")}</dd></div>
           <div className="flex justify-between text-base"><dt className="font-black">Total</dt><dd className="font-black">Rs {finalPrice.toLocaleString("en-IN")}</dd></div>
         </dl>
-        <button type="button" onClick={addToCart} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-giftora-red px-6 py-4 text-sm font-black text-white transition hover:bg-red-700">
+        <button type="button" onClick={addToCart} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-6 py-4 text-sm font-black text-white transition hover:bg-red-700">
           <ShoppingCart size={17} /> Add to Cart
         </button>
-        <Link href="/checkout" onClick={addToCart} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-giftora-red px-6 py-4 text-sm font-black text-giftora-red transition hover:bg-red-50">
+        <Link href="/checkout" onClick={addToCart} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-ikonnic-red px-6 py-4 text-sm font-black text-ikonnic-red transition hover:bg-red-50">
           Buy Now <ArrowRight size={17} />
         </Link>
         {added ? (
@@ -315,7 +315,7 @@ function OptionGroup({ label, values, value, onChange }: { label: string; values
       <legend className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</legend>
       <div className="mt-2 flex flex-wrap gap-2">
         {values.map((item) => (
-          <button key={item} type="button" onClick={() => onChange(item)} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${value === item ? "border-giftora-red bg-red-50 text-giftora-red" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}>
+          <button key={item} type="button" onClick={() => onChange(item)} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${value === item ? "border-ikonnic-red bg-red-50 text-ikonnic-red" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}>
             {item}
           </button>
         ))}

@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        giftora: {
+        ikonnic: {
           red: "#d90404",
           soft: "#fff1f1",
           ink: "#111827",

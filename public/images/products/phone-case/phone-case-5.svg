@@ -40,7 +40,7 @@
         <circle cx="176.5" cy="87.0" r="2" fill="#333" />
         <!-- Inner Pattern (premium lines) -->
         <path d="M 177.5 125.0 C 200 130 210 150 222.5 175.0" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.4" />
-        <text x="200" y="175" font-family="'Courier New', monospace" font-size="8" fill="#ffffff" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">GIFTORA</text>
+        <text x="200" y="175" font-family="'Courier New', monospace" font-size="8" fill="#ffffff" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">IKONNIC</text>
         
     
     <!-- Info Footer on Card -->

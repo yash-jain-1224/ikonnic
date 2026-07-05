@@ -39,7 +39,7 @@ function CategoryPageClientInner({ category, products }: { category: Category; p
       <div className="flex items-center justify-between gap-4">
         <p className="text-xs font-semibold text-slate-500">{cappedProducts.length} designs</p>
         {selected !== "All" ? (
-          <button type="button" onClick={() => setSelected("All")} className="text-xs font-bold text-giftora-red hover:underline">
+          <button type="button" onClick={() => setSelected("All")} className="text-xs font-bold text-ikonnic-red hover:underline">
             Clear filter
           </button>
         ) : null}

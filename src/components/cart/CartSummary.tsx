@@ -15,7 +15,7 @@ export function CartSummary({ subtotal, checkoutHref, buttonLabel = "Checkout" }
         </div>
         <div className="flex justify-between border-t border-dashed border-slate-200 pt-4 text-base font-black text-slate-950"><span>Total</span><span>₹{total.toLocaleString("en-IN")}</span></div>
       </div>
-      {checkoutHref ? <Link href={checkoutHref} className="mt-5 flex w-full justify-center rounded-full bg-giftora-red px-5 py-3 text-sm font-black text-white hover:bg-red-700">{buttonLabel}</Link> : null}
+      {checkoutHref ? <Link href={checkoutHref} className="mt-5 flex w-full justify-center rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white hover:bg-red-700">{buttonLabel}</Link> : null}
       <p className="mt-3 text-center text-[11px] leading-4 text-slate-400">Taxes and final delivery estimates are shown before payment.</p>
     </aside>
   );

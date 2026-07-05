@@ -47,7 +47,7 @@ export function HeroCarousel() {
               <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-red-400">{slide.eyebrow}</p>
               <h1 className="mt-3 text-3xl font-black sm:text-4xl">{slide.title}</h1>
               <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-slate-300">{slide.description}</p>
-              <Link href={`/category/${slide.categorySlug}`} className="mt-7 inline-flex rounded-full border border-white bg-white px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-giftora-red hover:text-white">
+              <Link href={`/category/${slide.categorySlug}`} className="mt-7 inline-flex rounded-full border border-white bg-white px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-ikonnic-red hover:text-white">
                 Shop now
               </Link>
               <div className="mt-8 flex justify-center gap-1.5">

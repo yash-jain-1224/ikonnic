@@ -65,7 +65,7 @@ export function CheckoutClient() {
         </p>
         <p className="mt-4 font-black text-slate-950">{placedOrderId}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/orders-tracking" className="rounded-full bg-giftora-red px-5 py-3 text-sm font-black text-white">Track order</Link>
+          <Link href="/orders-tracking" className="rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white">Track order</Link>
           <Link href="/account" className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700">My account</Link>
         </div>
       </div>
@@ -78,25 +78,25 @@ export function CheckoutClient() {
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-lg font-black">Customer details</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <label className="text-xs font-bold text-slate-600">Full name<input required name="name" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
-            <label className="text-xs font-bold text-slate-600">Email<input required type="email" name="email" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
-            <label className="text-xs font-bold text-slate-600">Phone<input required type="tel" name="phone" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
-            <label className="text-xs font-bold text-slate-600">Coupon<input name="coupon" defaultValue={coupon ?? ""} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm uppercase outline-none focus:border-giftora-red" /></label>
+            <label className="text-xs font-bold text-slate-600">Full name<input required name="name" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+            <label className="text-xs font-bold text-slate-600">Email<input required type="email" name="email" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+            <label className="text-xs font-bold text-slate-600">Phone<input required type="tel" name="phone" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+            <label className="text-xs font-bold text-slate-600">Coupon<input name="coupon" defaultValue={coupon ?? ""} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm uppercase outline-none focus:border-ikonnic-red" /></label>
           </div>
         </section>
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-lg font-black">Billing and shipping</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <label className="text-xs font-bold text-slate-600 sm:col-span-2">Street address<input required name="address" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
+            <label className="text-xs font-bold text-slate-600 sm:col-span-2">Street address<input required name="address" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
             <label className="text-xs font-bold text-slate-600">PIN code
               <div className="relative">
-                <input required name="pin" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" />
-                {loadingPin && <div className="absolute right-3 top-5 size-4 animate-spin rounded-full border-2 border-giftora-red border-t-transparent" />}
+                <input required name="pin" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" />
+                {loadingPin && <div className="absolute right-3 top-5 size-4 animate-spin rounded-full border-2 border-ikonnic-red border-t-transparent" />}
               </div>
             </label>
-            <label className="text-xs font-bold text-slate-600">City<input required name="city" value={city} onChange={(e) => setCity(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
-            <label className="text-xs font-bold text-slate-600">State<input required name="state" value={stateName} onChange={(e) => setStateName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-giftora-red" /></label>
-            <label className="text-xs font-bold text-slate-600 sm:col-span-2">Country<select name="country" className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-giftora-red"><option>India</option></select></label>
+            <label className="text-xs font-bold text-slate-600">City<input required name="city" value={city} onChange={(e) => setCity(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+            <label className="text-xs font-bold text-slate-600">State<input required name="state" value={stateName} onChange={(e) => setStateName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+            <label className="text-xs font-bold text-slate-600 sm:col-span-2">Country<select name="country" className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"><option>India</option></select></label>
           </div>
         </section>
       </div>
@@ -117,7 +117,7 @@ export function CheckoutClient() {
           </div>
         </section>
         <CartSummary subtotal={subtotal} />
-        <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-full bg-giftora-red px-6 py-4 text-sm font-black text-white hover:bg-red-700"><CreditCard size={17} />Place demo order</button>
+        <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-6 py-4 text-sm font-black text-white hover:bg-red-700"><CreditCard size={17} />Place demo order</button>
         <p className="text-center text-xs font-semibold text-slate-500">Payment gateway, email, SMS, and WhatsApp hooks are placeholders.</p>
       </div>
     </form>

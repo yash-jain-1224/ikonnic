@@ -17,17 +17,17 @@ export function VolumePricingPanel({ baseLabel, tiers }: { baseLabel: string; ti
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-card sm:p-7">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
         <div className="flex-1">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-giftora-red">Buy More, Save more</p>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-ikonnic-red">Buy More, Save more</p>
           <h2 className="mt-2 text-2xl font-black text-slate-950">{baseLabel}</h2>
           <p className="mt-2 text-sm text-slate-500">Move the slider to compare pack savings. Your current tier updates instantly.</p>
 
-          <div className="mt-6 rounded-2xl border-2 border-giftora-red bg-red-50 p-4">
+          <div className="mt-6 rounded-2xl border-2 border-ikonnic-red bg-red-50 p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="grid size-11 place-items-center rounded-xl bg-white text-giftora-red"><PackageOpen size={22} /></div>
+                <div className="grid size-11 place-items-center rounded-xl bg-white text-ikonnic-red"><PackageOpen size={22} /></div>
                 <div><p className="text-xs text-slate-500">Selected pack</p><p className="font-black text-slate-950">{quantity} pieces</p></div>
               </div>
-              <div className="text-right"><p className="text-xs text-slate-500">Price per piece</p><p className="text-2xl font-black text-giftora-red">₹{activeTier.pricePerPiece}</p></div>
+              <div className="text-right"><p className="text-xs text-slate-500">Price per piece</p><p className="text-2xl font-black text-ikonnic-red">₹{activeTier.pricePerPiece}</p></div>
             </div>
           </div>
 
@@ -40,7 +40,7 @@ export function VolumePricingPanel({ baseLabel, tiers }: { baseLabel: string; ti
             step={4}
             value={quantity}
             onChange={(event) => setQuantity(Number(event.target.value))}
-            className="mt-3 h-2 w-full cursor-pointer accent-giftora-red"
+            className="mt-3 h-2 w-full cursor-pointer accent-ikonnic-red"
           />
           <div className="mt-1 flex justify-between text-[10px] font-semibold text-slate-400"><span>{tiers[0].quantity}</span><span>24</span></div>
         </div>
@@ -61,7 +61,7 @@ export function VolumePricingPanel({ baseLabel, tiers }: { baseLabel: string; ti
           <div className="mt-5 flex items-end justify-between border-t border-slate-800 pt-4">
             <span className="text-xs text-slate-400">Estimated pack total</span><strong className="text-xl">₹{total.toLocaleString("en-IN")}</strong>
           </div>
-          <button type="button" onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-giftora-red px-5 py-3 text-sm font-black text-white transition hover:bg-red-700">
+          <button type="button" onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white transition hover:bg-red-700">
             Next: choose shapes <ArrowRight size={16} />
           </button>
         </div>

@@ -4,7 +4,7 @@ export function CategorySchema({ category, products }: { category: Category; pro
   const schema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "url": `https://giftora.in/category/${category.slug}`,
+    "url": `https://ikonnic.in/category/${category.slug}`,
     "name": category.name,
     "description": category.description,
     "itemListElement": products.map((product, index) => ({
@@ -12,7 +12,7 @@ export function CategorySchema({ category, products }: { category: Category; pro
       "position": index + 1,
       "item": {
         "@type": "Product",
-        "url": `https://giftora.in/customise/${product.slug}`,
+        "url": `https://ikonnic.in/customise/${product.slug}`,
         "name": product.title,
         "image": product.image,
         "offers": {

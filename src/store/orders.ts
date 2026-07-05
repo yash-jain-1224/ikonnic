@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { CartItem, GiftoraOrder, OrderStatus } from "@/types";
+import type { CartItem, IkonnicOrder, OrderStatus } from "@/types";
 
 const defaultStatuses: OrderStatus[] = [
   "Order placed",
@@ -21,8 +21,8 @@ const defaultStatuses: OrderStatus[] = [
 ];
 
 type OrderState = {
-  orders: GiftoraOrder[];
-  createOrder: (input: { email: string; phone: string; items: CartItem[]; total: number }) => GiftoraOrder;
+  orders: IkonnicOrder[];
+  createOrder: (input: { email: string; phone: string; items: CartItem[]; total: number }) => IkonnicOrder;
 };
 
 export const trackingStatuses = defaultStatuses;
@@ -33,7 +33,7 @@ export const useOrderStore = create<OrderState>()(
       orders: [],
       createOrder: (input) => {
         const now = new Date();
-        const order: GiftoraOrder = {
+        const order: IkonnicOrder = {
           id: `GFT-${now.getFullYear()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
           email: input.email,
           phone: input.phone,
@@ -42,7 +42,7 @@ export const useOrderStore = create<OrderState>()(
           items: input.items,
           createdAt: now.toISOString(),
           trackingEvents: [
-            { status: "Order placed", timestamp: now.toISOString(), note: "Demo order created in local Giftora storage." },
+            { status: "Order placed", timestamp: now.toISOString(), note: "Demo order created in local Ikonnic storage." },
             { status: "Image processing", timestamp: now.toISOString(), note: "Uploaded artwork is queued for review." },
           ],
         };
@@ -51,7 +51,7 @@ export const useOrderStore = create<OrderState>()(
       },
     }),
     {
-      name: "giftora-orders",
+      name: "ikonnic-orders",
       storage: createJSONStorage(() => localStorage),
     },
   ),

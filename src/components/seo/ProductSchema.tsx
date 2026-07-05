@@ -10,11 +10,11 @@ export function ProductSchema({ product }: { product: Product }) {
     sku: product.slug,
     brand: {
       "@type": "Brand",
-      name: "Giftora"
+      name: "Ikonnic"
     },
     offers: {
       "@type": "Offer",
-      url: `https://giftora.in/customise/${product.slug}`,
+      url: `https://ikonnic.in/customise/${product.slug}`,
       priceCurrency: "INR",
       price: product.price,
       itemCondition: "https://schema.org/NewCondition",

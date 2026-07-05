@@ -37,7 +37,7 @@ export function SiteHeader() {
 
           <Link href="/" className="mx-auto inline-flex h-8 items-center gap-1 rounded-[2px] bg-black px-2.5 text-[19px] font-black tracking-[-0.03em] text-white">
             {brand.logoText}
-            <span className="grid size-6 place-items-center rounded-[2px] bg-giftora-red text-white">
+            <span className="grid size-6 place-items-center rounded-[2px] bg-ikonnic-red text-white">
               <Tag size={15} fill="currentColor" />
             </span>
           </Link>
@@ -58,7 +58,7 @@ export function SiteHeader() {
             <Link href="/cart" aria-label={`Cart with ${cartCount} items`} className="relative grid size-11 place-items-center rounded-full text-[#07142f] transition hover:bg-slate-100">
               <ShoppingCart size={28} strokeWidth={2.25} />
               {cartCount > 0 ? (
-                <span className="absolute right-0 top-0 grid size-5 place-items-center rounded-full bg-giftora-red text-[10px] font-black text-white">
+                <span className="absolute right-0 top-0 grid size-5 place-items-center rounded-full bg-ikonnic-red text-[10px] font-black text-white">
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
               ) : null}

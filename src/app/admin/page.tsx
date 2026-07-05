@@ -20,16 +20,16 @@ export default function AdminPage() {
   return (
     <PageContainer className="py-10 sm:py-14">
       <div className="mb-7">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-giftora-red">Inferred admin architecture</p>
-        <h1 className="mt-2 text-3xl font-black text-slate-950">Giftora Admin Console</h1>
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-ikonnic-red">Inferred admin architecture</p>
+        <h1 className="mt-2 text-3xl font-black text-slate-950">Ikonnic Admin Console</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-          Admin panels are private and not publicly exposed. This route documents the operational modules Giftora needs and can later be protected by real admin auth.
+          Admin panels are private and not publicly exposed. This route documents the operational modules Ikonnic needs and can later be protected by real admin auth.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {modules.map(([title, Icon, body]) => (
           <article key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="grid size-10 place-items-center rounded-xl bg-red-50 text-giftora-red"><Icon size={20} /></div>
+            <div className="grid size-10 place-items-center rounded-xl bg-red-50 text-ikonnic-red"><Icon size={20} /></div>
             <h2 className="mt-4 font-black text-slate-950">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">{body}</p>
           </article>

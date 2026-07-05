@@ -62,7 +62,7 @@ export const useCartStore = create<CartState>()(
       cartCount: () => get().items.reduce((total, item) => total + item.quantity, 0),
     }),
     {
-      name: "giftora-cart",
+      name: "ikonnic-cart",
       storage: createJSONStorage(() => localStorage),
     },
   ),

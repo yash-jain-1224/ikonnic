@@ -2,8 +2,8 @@ import { BadgeCheck, Headphones, ShieldCheck, Sparkles } from "lucide-react";
 
 export function TrustPromiseCard() {
   return (
-    <section className="overflow-hidden rounded-3xl border border-slate-200 border-t-4 border-t-giftora-red bg-white px-6 py-12 text-center shadow-card sm:px-12">
-      <span className="inline-flex rounded-full bg-red-50 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-giftora-red">Trusted promise</span>
+    <section className="overflow-hidden rounded-3xl border border-slate-200 border-t-4 border-t-ikonnic-red bg-white px-6 py-12 text-center shadow-card sm:px-12">
+      <span className="inline-flex rounded-full bg-red-50 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-ikonnic-red">Trusted promise</span>
       <div className="mx-auto mt-5 grid size-20 place-items-center rounded-full bg-slate-950 text-white shadow-xl"><BadgeCheck size={34} /></div>
       <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Our promise</p>
       <h2 className="mx-auto mt-5 max-w-2xl text-2xl font-black leading-tight text-slate-900">If something does not feel right, we will help make it right.</h2>

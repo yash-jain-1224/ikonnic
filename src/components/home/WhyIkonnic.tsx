@@ -1,6 +1,6 @@
 import { Heart, Package, ShieldCheck, Truck } from "lucide-react";
 
-export function WhyGiftora() {
+export function WhyIkonnic() {
   const reasons = [
     {
       icon: Heart,
@@ -35,7 +35,7 @@ export function WhyGiftora() {
   return (
     <div className="mt-20 rounded-3xl bg-white px-6 py-12 shadow-[0_4px_20px_rgba(15,23,42,0.03)] sm:px-12 sm:py-16">
       <div className="text-center">
-        <h2 className="text-3xl font-black text-slate-900 sm:text-4xl">Why Choose Giftora?</h2>
+        <h2 className="text-3xl font-black text-slate-900 sm:text-4xl">Why Choose Ikonnic?</h2>
         <p className="mt-3 text-sm text-slate-500">
           We bring your memories to life with unmatched quality and care.
         </p>

@@ -8,7 +8,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
 
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card">
-      {product.sale ? <span className="absolute left-2 top-2 z-10 rounded-md bg-giftora-red px-2 py-1 text-[10px] font-black text-white">SALE</span> : null}
+      {product.sale ? <span className="absolute left-2 top-2 z-10 rounded-md bg-ikonnic-red px-2 py-1 text-[10px] font-black text-white">SALE</span> : null}
       <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-slate-50">
         <SmartImage
           src={imageSrc}
@@ -19,7 +19,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         />
       </Link>
       <div className="p-3">
-        <Link href={`/product/${product.slug}`} className="line-clamp-2 min-h-9 text-xs font-bold leading-4 text-slate-800 hover:text-giftora-red">
+        <Link href={`/product/${product.slug}`} className="line-clamp-2 min-h-9 text-xs font-bold leading-4 text-slate-800 hover:text-ikonnic-red">
           {product.title}
         </Link>
         <div className="mt-2 flex flex-wrap items-baseline gap-1.5 text-xs">
@@ -27,7 +27,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <strong className="text-sm text-slate-950">₹{product.price.toLocaleString("en-IN")}</strong>
           {product.oldPrice ? <del className="text-[11px] text-slate-400">₹{product.oldPrice.toLocaleString("en-IN")}</del> : null}
         </div>
-        <Link href={`/customise/${product.slug}`} className="mt-3 inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1.5 text-[10px] font-black tracking-wide text-giftora-red transition hover:bg-giftora-red hover:text-white">
+        <Link href={`/customise/${product.slug}`} className="mt-3 inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1.5 text-[10px] font-black tracking-wide text-ikonnic-red transition hover:bg-ikonnic-red hover:text-white">
           <Pencil size={11} /> CUSTOMISE
         </Link>
       </div>

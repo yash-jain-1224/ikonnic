@@ -9,7 +9,7 @@ export function BlogList({ posts }: { posts: BlogPost[] }) {
   return (
     <>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{posts.slice(0, visible).map((post) => <BlogCard key={post.slug} post={post} />)}</div>
-      {visible < posts.length ? <div className="mt-8 text-center"><button type="button" onClick={() => setVisible(posts.length)} className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-black text-slate-800 hover:border-giftora-red hover:text-giftora-red">Load More</button></div> : null}
+      {visible < posts.length ? <div className="mt-8 text-center"><button type="button" onClick={() => setVisible(posts.length)} className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-black text-slate-800 hover:border-ikonnic-red hover:text-ikonnic-red">Load More</button></div> : null}
     </>
   );
 }

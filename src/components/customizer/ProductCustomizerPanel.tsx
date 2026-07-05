@@ -328,7 +328,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
   const [textToolOpen, setTextToolOpen] = useState(false);
   const [textLayer, setTextLayer] = useState("");
   const [editorMode, setEditorMode] = useState<"edit" | "threeD">("edit");
-  const [showWhyGiftora, setShowWhyGiftora] = useState(false);
+  const [showWhyIkonnic, setShowWhyIkonnic] = useState(false);
   const [showConfirmOverlay, setShowConfirmOverlay] = useState(false);
   const [showCrossSellPopup, setShowCrossSellPopup] = useState(false);
   const [addToCartError, setAddToCartError] = useState("");
@@ -364,7 +364,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     ...previewShapeStyle(previewShape),
   }), [previewShape, product.categorySlug, selectedDimensions]);
 
-  const mountingText = selectedThickness === "3mm" ? "Giftora Adhesive Hooks" : "Premium Steel Studs";
+  const mountingText = selectedThickness === "3mm" ? "Ikonnic Adhesive Hooks" : "Premium Steel Studs";
 
   useEffect(() => {
     if (!uploadedImage) return;
@@ -502,7 +502,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
   };
 
   const confirmAddToCart = () => {
-    const id = `giftora-custom-${Date.now()}`;
+    const id = `ikonnic-custom-${Date.now()}`;
     addItem({
       id,
       productId: product.id,
@@ -571,12 +571,12 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     <div className="relative min-h-[calc(100vh-68px)] bg-[#f4f5f7] text-[#07142f]">
       <button
         type="button"
-        onClick={() => setShowWhyGiftora(true)}
+        onClick={() => setShowWhyIkonnic(true)}
         className="fixed left-2 top-[38vh] z-40 hidden rounded-full border border-[#ffb4b4] bg-white px-2.5 py-3 text-[12px] font-extrabold text-[#d90000] shadow-[0_8px_22px_rgba(15,23,42,0.14)] transition hover:bg-red-50 xl:flex"
         style={{ writingMode: "vertical-rl" }}
       >
         <CircleHelp className="mb-1" size={14} />
-        Why Giftora?
+        Why Ikonnic?
       </button>
 
       <div className="mx-auto grid max-w-[1240px] gap-10 px-4 pb-10 pt-4 sm:px-6 lg:grid-cols-[600px_1fr]">
@@ -766,7 +766,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
               ) : null}
               {!uploadedImage && previewImageSrc ? (
                 <span className="absolute bottom-[14%] left-1/2 z-30 -translate-x-1/2 rounded-[2px] bg-white px-1.5 py-0.5 text-[6px] font-black uppercase tracking-tight text-[#d90000] shadow-sm">
-                  GIFTORA
+                  IKONNIC
                 </span>
               ) : null}
               {textLayer ? (
@@ -777,7 +777,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                   {textLayer}
                 </div>
               ) : null}
-              <span className="absolute bottom-1.5 right-2 z-30 text-[7px] font-black uppercase tracking-tight text-[#d90000] opacity-55">GIFTORA</span>
+              <span className="absolute bottom-1.5 right-2 z-30 text-[7px] font-black uppercase tracking-tight text-[#d90000] opacity-55">IKONNIC</span>
             </div>
           </div>
           ) : null}
@@ -945,8 +945,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
         categorySlug={product.categorySlug}
       />
 
-      {showWhyGiftora ? (
-        <Modal title="Why Giftora?" onClose={() => setShowWhyGiftora(false)}>
+      {showWhyIkonnic ? (
+        <Modal title="Why Ikonnic?" onClose={() => setShowWhyIkonnic(false)}>
           <div className="grid gap-3">
             {["Premium acrylic finish", "Easy mounting included", "Secure checkout", "Custom made with care"].map((item) => (
               <div key={item} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 text-sm font-bold text-[#07142f]">

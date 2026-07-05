@@ -13,7 +13,7 @@ const slides = [
   ["A bright desk companion", "Acrylic Photo Stands", "A favourite photograph, beautifully ready for any shelf or desk.", "acrylic-photo-stand"],
   ["Keep every chapter", "Photo Albums", "Designed books for birthdays, trips, weddings, and family stories.", "photo-albums"],
   ["Gifts that feel considered", "Celebration Keepsakes", "Personal details make even small gifts feel wonderfully specific.", "personalised-keychains"],
-  ["Made for your people", "Giftora Originals", "Personalised decor and keepsakes, edited by you and made with care.", "acrylic-wall-photo"],
+  ["Made for your people", "Ikonnic Originals", "Personalised decor and keepsakes, edited by you and made with care.", "acrylic-wall-photo"],
 ] as const;
 
 export const heroSlides: HeroSlide[] = slides.map(([eyebrow, title, description, categorySlug], index) => ({

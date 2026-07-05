@@ -23,8 +23,8 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-slate-900 bg-[#05070d] text-white">
       <PageContainer className="grid gap-10 py-12 lg:grid-cols-[1fr_1.12fr_.78fr]">
         <div>
-          <Link href="/" aria-label="Giftora home" className="inline-flex h-9 items-center gap-1 rounded-[2px] bg-white px-2.5 text-[20px] font-black tracking-[-0.04em] text-black">
-            GIFTORA
+          <Link href="/" aria-label="Ikonnic home" className="inline-flex h-9 items-center gap-1 rounded-[2px] bg-white px-2.5 text-[20px] font-black tracking-[-0.04em] text-black">
+            IKONNIC
             <span className="grid size-6 place-items-center rounded-[2px] bg-[#d90000] text-[13px] text-white">◆</span>
           </Link>
           <p className="mt-5 max-w-sm text-sm leading-6 text-slate-300">
@@ -35,9 +35,9 @@ export function SiteFooter() {
           </p>
 
           <div className="mt-5 space-y-3 text-sm text-slate-300">
-            <a className="flex items-center gap-2 transition hover:text-white" href="mailto:support@giftora.in">
+            <a className="flex items-center gap-2 transition hover:text-white" href="mailto:support@ikonnic.in">
               <Mail size={16} />
-              support@giftora.in
+              support@ikonnic.in
             </a>
             <a className="flex items-center gap-2 transition hover:text-white" href="tel:+919000012345">
               <Phone size={16} />
@@ -130,7 +130,7 @@ export function SiteFooter() {
       </PageContainer>
       <div className="border-t border-slate-900">
         <PageContainer className="flex flex-col gap-2 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>Copyright 2016-2026 © Giftora. All rights reserved.</span>
+          <span>Copyright 2016-2026 © Ikonnic. All rights reserved.</span>
           <span>
             Made with <span className="text-[#d90000]">♥</span> in India
           </span>

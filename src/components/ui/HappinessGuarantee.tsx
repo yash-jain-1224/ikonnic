@@ -7,7 +7,7 @@ export function HappinessGuarantee() {
         <HeartHandshake size={24} className="text-pink-600" />
       </div>
       <div>
-        <h3 className="text-sm font-black uppercase tracking-widest text-pink-700">The Giftora Promise</h3>
+        <h3 className="text-sm font-black uppercase tracking-widest text-pink-700">The Ikonnic Promise</h3>
         <p className="mt-1 text-sm font-medium leading-relaxed">
           100% Happiness Guaranteed. If your personalized product isn't absolutely perfect, we'll replace it or refund it—no questions asked.
         </p>

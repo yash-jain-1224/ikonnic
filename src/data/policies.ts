@@ -1,7 +1,7 @@
 export const policies = {
   "privacy-policy": {
     title: "Privacy Policy",
-    intro: "This sample policy explains how a future Giftora service may handle information. It should be reviewed by qualified counsel before production use.",
+    intro: "This sample policy explains how a future Ikonnic service may handle information. It should be reviewed by qualified counsel before production use.",
     sections: [
       ["Information we collect", "We may collect account details, delivery information, order preferences, uploaded artwork, and basic usage information needed to operate the service."],
       ["How information is used", "Information may be used to prepare orders, provide support, improve the storefront, prevent misuse, and communicate service updates."],
@@ -14,7 +14,7 @@ export const policies = {
     intro: "Because personalised goods are made to order, returns require a clear and fair review process. This placeholder policy is not legal advice.",
     sections: [
       ["Damaged or incorrect items", "Contact support promptly with the order number and clear photos. Valid manufacturing or fulfilment issues may be reprinted or refunded."],
-      ["Customer-provided artwork", "Giftora cannot be responsible for spelling, crop, or image-quality issues that were visible and approved during customisation."],
+      ["Customer-provided artwork", "Ikonnic cannot be responsible for spelling, crop, or image-quality issues that were visible and approved during customisation."],
       ["Cancellations", "Orders may be cancelled before production begins. Once a personalised item enters production, cancellation may no longer be possible."],
       ["Resolution timing", "Support reviews should be acknowledged quickly, with a proposed resolution and expected timeline shared in writing."],
     ],

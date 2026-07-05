@@ -1,7 +1,7 @@
 export const brand = {
-  name: "Giftora",
-  logoText: "GIFTORA",
-  email: "support@giftora.in",
+  name: "Ikonnic",
+  logoText: "IKONNIC",
+  email: "support@ikonnic.in",
   phone: "+91 90000 12345",
   whatsapp: "919000012345",
   copyrightYear: 2026,

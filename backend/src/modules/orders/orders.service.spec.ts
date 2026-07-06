@@ -21,6 +21,7 @@ describe('OrdersService', () => {
 
   const prismaMock = {
     order: { findFirst: jest.fn(), findUnique: jest.fn() },
+    orderItem: { findMany: jest.fn() },
     product: { findMany: jest.fn() },
     $transaction: jest.fn(async (cb: (tx: typeof txMock) => Promise<unknown>) => cb(txMock)),
   };
@@ -38,6 +39,7 @@ describe('OrdersService', () => {
     txMock.order.create.mockImplementation(async ({ data }: any) => ({ id: 'o1', ...data }));
     txMock.order.update.mockImplementation(async ({ data }: any) => ({ id: 'o1', ...data }));
     txMock.orderItem.findMany.mockResolvedValue([]);
+    prismaMock.orderItem.findMany.mockResolvedValue([]);
     txMock.orderStatusHistory.create.mockResolvedValue({});
     txMock.inventoryRecord.updateMany.mockResolvedValue({});
     txMock.payment.create.mockResolvedValue({});

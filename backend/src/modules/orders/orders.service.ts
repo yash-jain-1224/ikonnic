@@ -186,8 +186,9 @@ export class OrdersService {
       }
     }
 
-    // Invalidate user's orders cache
+    // Invalidate user's orders cache and cached product details whose stock changed
     await this.redis.del(`user:${userId}:orders`);
+    await Promise.all(products.map((p) => this.redis.del(`product:${p.slug}`)));
 
     // Send order confirmation email (async, non-blocking)
     this.sendOrderNotifications(order).catch((err) => {
@@ -335,6 +336,18 @@ export class OrdersService {
 
       return updatedOrder;
     });
+
+    if (status === OrderStatus.CANCELLED) {
+      const items = await this.prisma.orderItem.findMany({
+        where: { orderId },
+        select: { productId: true },
+      });
+      const restocked = await this.prisma.product.findMany({
+        where: { id: { in: items.map((i) => i.productId) } },
+        select: { slug: true },
+      });
+      await Promise.all(restocked.map((p) => this.redis.del(`product:${p.slug}`)));
+    }
 
     // Send email notification for status updates (async)
     if ((order as any).user?.email) {

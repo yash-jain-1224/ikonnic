@@ -102,7 +102,10 @@ export class ProductsService {
   async findBySlug(slug: string) {
     // Check cache first
     const cached = await this.redis.getJson(`product:${slug}`);
-    if (cached) return cached;
+    if (cached) {
+      if ((cached as any).isActive === false) throw new NotFoundException('Product not found');
+      return cached;
+    }
 
     const product = await this.prisma.product.findUnique({
       where: { slug },
@@ -122,7 +125,7 @@ export class ProductsService {
       },
     });
 
-    if (!product) {
+    if (!product || product.isActive === false) {
       throw new NotFoundException('Product not found');
     }
 

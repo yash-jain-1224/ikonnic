@@ -3,6 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { InventoryTransactionType } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 import { OrdersService } from '../orders/orders.service';
 
 describe('AdminService — inventory', () => {
@@ -33,6 +34,7 @@ describe('AdminService — inventory', () => {
       providers: [
         AdminService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: RedisService, useValue: { del: jest.fn() } },
         { provide: OrdersService, useValue: { updateStatus: jest.fn() } },
       ],
     }).compile();

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InventoryTransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 import { OrdersService } from '../orders/orders.service';
 import { normalizePage, normalizeLimit } from '../../common/pagination';
 
@@ -8,6 +9,7 @@ import { normalizePage, normalizeLimit } from '../../common/pagination';
 export class AdminService {
   constructor(
     private prisma: PrismaService,
+    private redis: RedisService,
     private ordersService: OrdersService,
   ) {}
 
@@ -274,6 +276,9 @@ export class AdminService {
     });
 
     await this.syncProductOptions(id, data.sizeOptions, data.thicknessOptions);
+    // Storefront caches product detail by slug — drop both old and new keys
+    await this.redis.del(`product:${exists.slug}`);
+    if (product.slug !== exists.slug) await this.redis.del(`product:${product.slug}`);
     return product;
   }
 
@@ -286,8 +291,10 @@ export class AdminService {
       // Products referenced by orders/carts cannot be hard-deleted (FK
       // constraints) — deactivate instead so history stays intact.
       await this.prisma.product.update({ where: { id }, data: { isActive: false } });
+      await this.redis.del(`product:${exists.slug}`);
       return { message: 'Product has existing orders — deactivated instead of deleted' };
     }
+    await this.redis.del(`product:${exists.slug}`);
     return { message: 'Product deleted successfully' };
   }
 
@@ -452,6 +459,8 @@ export class AdminService {
         },
       }),
     ]);
+
+    await this.redis.del(`product:${product.slug}`);
 
     return { product: updatedProduct, change, stockStatus };
   }

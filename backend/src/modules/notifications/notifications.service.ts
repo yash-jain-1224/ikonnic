@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as nodemailer from 'nodemailer';
@@ -334,6 +334,34 @@ export class NotificationsService implements OnModuleInit {
       </div>
     `;
     await this.sendEmail({ to: email, subject: `Order ${orderNumber} Cancelled`, html, userId, channel: 'order_cancelled' });
+  }
+
+  // ─── User-Facing Notification Feed ─────────────────────
+
+  async listForUser(userId: string, limit = 50) {
+    return this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(Math.max(1, limit), 100),
+      select: {
+        id: true, type: true, channel: true, subject: true,
+        status: true, sentAt: true, readAt: true, createdAt: true,
+      },
+    });
+  }
+
+  async markRead(userId: string, id: string) {
+    const notification = await this.prisma.notification.findFirst({ where: { id, userId } });
+    if (!notification) throw new NotFoundException('Notification not found');
+    return this.prisma.notification.update({ where: { id }, data: { readAt: new Date() } });
+  }
+
+  async markAllRead(userId: string) {
+    const result = await this.prisma.notification.updateMany({
+      where: { userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    return { message: 'All notifications marked as read', count: result.count };
   }
 
   // ─── Health Check ──────────────────────────────────────

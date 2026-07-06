@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Apple, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Play, Youtube } from "lucide-react";
 import { PageContainer } from "@/components/ui/PageContainer";
 
@@ -134,6 +135,21 @@ export function SiteFooter() {
       <div className="border-t border-slate-900">
         <PageContainer className="flex flex-col gap-2 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <span>Copyright 2016-2026 © Ikonnic. All rights reserved.</span>
+          <a
+            href="https://akechiwebcraft.com"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-slate-400 transition hover:text-white"
+          >
+            Powered by
+            <Image
+              src="/images/akechi-logo.webp"
+              alt="Akechi Webcraft IT Solutions"
+              width={90}
+              height={24}
+              className="inline-block brightness-0 invert opacity-70 hover:opacity-100 transition"
+            />
+          </a>
           <span>
             Made with <span className="text-[#d90000]">♥</span> in India
           </span>

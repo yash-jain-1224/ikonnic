@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgePercent, Boxes, ClipboardList, Factory, Images, LayoutDashboard, LineChart, Package, Star, Ticket, Truck, Users } from "lucide-react";
+import { BadgePercent, Boxes, ClipboardList, Factory, FolderTree, Images, LayoutDashboard, LineChart, Package, Star, Ticket, Truck, Users } from "lucide-react";
 import { PageContainer } from "@/components/ui/PageContainer";
 
 export const metadata: Metadata = { title: "Admin Console | Ikonnic" };
 
 const modules = [
   { title: "Dashboard", Icon: LayoutDashboard, href: "/admin/dashboard", body: "Orders, revenue, AOV, failed payments, top products, support, and production queue.", live: true },
-  { title: "Products", Icon: Package, href: "/admin/products", body: "Products, categories, variants, galleries, templates, price rules, SEO, FAQ, and related products.", live: true },
+  { title: "Products", Icon: Package, href: "/admin/products", body: "Create, edit, and delete products with images, galleries, pricing, stock, tags, and variants.", live: true },
+  { title: "Categories", Icon: FolderTree, href: "/admin/categories", body: "Create, edit, and delete categories — images, accent colours, featured flag, and visibility.", live: true },
   { title: "Orders", Icon: ClipboardList, href: "/admin/orders", body: "Customisation JSON, uploaded image refs, preview image, status updates, notes, invoice, refund, reprint.", live: true },
   { title: "Inventory", Icon: Boxes, href: "/admin/inventory", body: "Stock levels, reservations, low-stock alerts, manual adjustments, and full transaction audit trail.", live: true },
   { title: "Analytics", Icon: LineChart, href: "/admin/analytics", body: "Daily revenue trend, order status funnel, new customers, AOV, and top-selling products.", live: true },

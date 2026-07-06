@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InventoryTransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -17,8 +17,20 @@ export class AdminService {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const [totalOrders, totalRevenue, totalUsers, recentOrders, ordersByStatus, topProducts] = await Promise.all([
+    const [
+      totalOrders,
+      nonCancelledCount,
+      totalRevenue,
+      totalUsers,
+      recentOrders,
+      ordersByStatus,
+      topProducts,
+      recentOrdersList,
+      lowStockProducts,
+      lowStockCount,
+    ] = await Promise.all([
       this.prisma.order.count(),
+      this.prisma.order.count({ where: { status: { not: 'CANCELLED' } } }),
       this.prisma.order.aggregate({ _sum: { total: true }, where: { status: { not: 'CANCELLED' } } }),
       this.prisma.user.count({ where: { role: 'CUSTOMER' } }),
       this.prisma.order.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
@@ -29,16 +41,50 @@ export class AdminService {
         orderBy: { _sum: { total: 'desc' } },
         take: 10,
       }),
+      // Recent orders for the dashboard activity feed
+      this.prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 8,
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          total: true,
+          createdAt: true,
+          user: { select: { firstName: true, lastName: true, email: true } },
+        },
+      }),
+      // Low-stock alerts: active, stock-tracked products at or below threshold
+      this.prisma.product.findMany({
+        where: {
+          isActive: true,
+          OR: [{ stockStatus: { in: ['low_stock', 'out_of_stock'] } }, { stockCount: { lte: 10 } }],
+        },
+        orderBy: { stockCount: 'asc' },
+        take: 8,
+        select: { id: true, slug: true, title: true, image: true, stockCount: true, stockStatus: true },
+      }),
+      this.prisma.product.count({
+        where: {
+          isActive: true,
+          OR: [{ stockStatus: { in: ['low_stock', 'out_of_stock'] } }, { stockCount: { lte: 10 } }],
+        },
+      }),
     ]);
 
+    const revenueSum = totalRevenue._sum.total || 0;
     return {
       totalOrders,
-      totalRevenue: totalRevenue._sum.total || 0,
+      totalRevenue: revenueSum,
       totalUsers,
       recentOrders,
       ordersByStatus,
       topProducts,
-      aov: totalOrders > 0 ? (totalRevenue._sum.total || 0) / totalOrders : 0,
+      recentOrdersList,
+      lowStockProducts,
+      lowStockCount,
+      // AOV over fulfilled (non-cancelled) orders, matching the revenue numerator
+      aov: nonCancelledCount > 0 ? revenueSum / nonCancelledCount : 0,
     };
   }
 
@@ -285,17 +331,36 @@ export class AdminService {
   async deleteProduct(id: string) {
     const exists = await this.prisma.product.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Product not found');
-    try {
-      await this.prisma.product.delete({ where: { id } });
-    } catch {
-      // Products referenced by orders/carts cannot be hard-deleted (FK
-      // constraints) — deactivate instead so history stays intact.
+
+    // A product that was ever ordered must stay in the DB so order history
+    // remains intact — deactivate it instead of hard-deleting.
+    const orderItemCount = await this.prisma.orderItem.count({ where: { productId: id } });
+    if (orderItemCount > 0) {
       await this.prisma.product.update({ where: { id }, data: { isActive: false } });
       await this.redis.del(`product:${exists.slug}`);
-      return { message: 'Product has existing orders — deactivated instead of deleted' };
+      return { message: 'Product has existing orders — deactivated instead of deleted', deactivated: true };
+    }
+
+    // No orders reference it — remove dependent rows (options, images, cart
+    // items, inventory records/transactions) then hard-delete.
+    try {
+      await this.prisma.$transaction([
+        this.prisma.productOption.deleteMany({ where: { productId: id } }),
+        this.prisma.productImage.deleteMany({ where: { productId: id } }),
+        this.prisma.cartItem.deleteMany({ where: { productId: id } }),
+        this.prisma.wishlistItem.deleteMany({ where: { productId: id } }),
+        this.prisma.inventoryTransaction.deleteMany({ where: { productId: id } }),
+        this.prisma.inventoryRecord.deleteMany({ where: { productId: id } }),
+        this.prisma.product.delete({ where: { id } }),
+      ]);
+    } catch {
+      // Any remaining FK reference — fall back to a safe deactivate.
+      await this.prisma.product.update({ where: { id }, data: { isActive: false } });
+      await this.redis.del(`product:${exists.slug}`);
+      return { message: 'Product is referenced elsewhere — deactivated instead of deleted', deactivated: true };
     }
     await this.redis.del(`product:${exists.slug}`);
-    return { message: 'Product deleted successfully' };
+    return { message: 'Product deleted successfully', deactivated: false };
   }
 
   // ─── Category CRUD ─────────────────────────────────────────
@@ -309,7 +374,9 @@ export class AdminService {
 
   async createCategory(data: any) {
     const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    return this.prisma.category.create({
+    const existing = await this.prisma.category.findUnique({ where: { slug } });
+    if (existing) throw new BadRequestException(`A category with slug "${slug}" already exists`);
+    const category = await this.prisma.category.create({
       data: {
         name: data.name,
         slug,
@@ -317,14 +384,18 @@ export class AdminService {
         image: data.image || '',
         accent: data.accent || '#e11d48',
         featured: data.featured ?? false,
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.parentId && { parentId: data.parentId }),
       },
     });
+    await this.redis.del('categories:all');
+    return category;
   }
 
   async updateCategory(id: string, data: any) {
     const exists = await this.prisma.category.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Category not found');
-    return this.prisma.category.update({
+    const category = await this.prisma.category.update({
       where: { id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
@@ -333,19 +404,28 @@ export class AdminService {
         ...(data.image !== undefined && { image: data.image }),
         ...(data.accent !== undefined && { accent: data.accent }),
         ...(data.featured !== undefined && { featured: data.featured }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
       },
     });
+    await this.redis.del('categories:all');
+    return category;
   }
 
   async deleteCategory(id: string) {
     const exists = await this.prisma.category.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Category not found');
-    // Check for products in this category
+    // A category with products (active or inactive) can't be removed — the
+    // products hold a FK to it. Surface a 409 Conflict, not a 404.
     const productCount = await this.prisma.product.count({ where: { categoryId: id } });
     if (productCount > 0) {
-      throw new NotFoundException(`Cannot delete: ${productCount} products are in this category`);
+      throw new ConflictException(`Cannot delete: ${productCount} product(s) are still in this category. Reassign or remove them first.`);
+    }
+    const childCount = await this.prisma.category.count({ where: { parentId: id } });
+    if (childCount > 0) {
+      throw new ConflictException(`Cannot delete: ${childCount} subcategory(ies) belong to this category.`);
     }
     await this.prisma.category.delete({ where: { id } });
+    await this.redis.del('categories:all');
     return { message: 'Category deleted successfully' };
   }
 

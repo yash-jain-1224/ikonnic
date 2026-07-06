@@ -182,11 +182,11 @@ export class CreateCategoryDto {
   @MaxLength(100)
   name: string;
 
-  @ApiProperty({ example: 'wall-photos' })
+  @ApiPropertyOptional({ example: 'wall-photos', description: 'Generated from name when omitted' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(100)
-  slug: string;
+  slug?: string;
 
   @ApiPropertyOptional({ example: 'Custom wall photos for your home' })
   @IsOptional()
@@ -203,6 +203,17 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsString()
   image?: string;
+
+  @ApiPropertyOptional({ example: '#e11d48', description: 'Accent colour hex' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  accent?: string;
+
+  @ApiPropertyOptional({ example: false, description: 'Show on the homepage featured strip' })
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
@@ -238,6 +249,17 @@ export class UpdateCategoryDto {
   @IsOptional()
   @IsString()
   image?: string;
+
+  @ApiPropertyOptional({ example: '#e11d48' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  accent?: string;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()

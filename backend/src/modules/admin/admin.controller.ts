@@ -43,8 +43,8 @@ export class AdminController {
 
   @Patch('orders/:id/status')
   @ApiOperation({ summary: 'Update order status (admin)' })
-  async updateOrderStatus(@Param('id') id: string, @Body() body: UpdateOrderStatusDto) {
-    return this.adminService.updateOrderStatus(id, body.status, body.note);
+  async updateOrderStatus(@Param('id') id: string, @Body() body: UpdateOrderStatusDto, @Req() req?: any) {
+    return this.adminService.updateOrderStatus(id, body.status, body.note, req?.user?.id);
   }
 
   // ─── Product CRUD ──────────────────────────────────────────

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { api, uploadAPI } from "@/lib/api";
+import { adminAPI, api, uploadAPI } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
 import { Plus, Pencil, Trash2, Loader2, Search, Image as ImageIcon, X, Save } from "lucide-react";
 import Link from "next/link";
@@ -51,7 +51,7 @@ const emptyForm: ProductForm = {
   longDescription: "",
   image: "",
   gallery: [],
-  stockStatus: "IN_STOCK",
+  stockStatus: "in_stock",
   stockCount: null,
   sale: false,
   featured: false,
@@ -63,6 +63,7 @@ const emptyForm: ProductForm = {
 export function AdminProductsClient() {
   const { isAuthenticated, user } = useAuthStore();
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -99,6 +100,16 @@ export function AdminProductsClient() {
     if (isAdmin) fetchProducts();
   }, [isAdmin, fetchProducts]);
 
+  // Load categories once so the product form offers a proper dropdown
+  useEffect(() => {
+    if (!isAdmin) return;
+    adminAPI.getCategories()
+      .then(({ data }) => setCategories(
+        (Array.isArray(data) ? data : []).map((c: { name: string; slug: string }) => ({ name: c.name, slug: c.slug }))
+      ))
+      .catch(() => {});
+  }, [isAdmin]);
+
   const openCreate = () => {
     setForm(emptyForm);
     setEditing("new");
@@ -120,7 +131,7 @@ export function AdminProductsClient() {
         longDescription: data.longDescription || "",
         image: data.image || "",
         gallery: data.gallery || [],
-        stockStatus: data.stockStatus || "IN_STOCK",
+        stockStatus: (data.stockStatus || "in_stock").toLowerCase(),
         stockCount: data.stockCount ?? null,
         sale: data.sale || false,
         featured: data.featured || false,
@@ -248,12 +259,26 @@ export function AdminProductsClient() {
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
-              Category Slug *
-              <input
-                value={form.categorySlug}
-                onChange={(e) => setForm((prev) => ({ ...prev, categorySlug: e.target.value }))}
-                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
-              />
+              Category *
+              {categories.length > 0 ? (
+                <select
+                  value={form.categorySlug}
+                  onChange={(e) => setForm((prev) => ({ ...prev, categorySlug: e.target.value }))}
+                  className="mt-1 w-full rounded-xl border border-rosegold-200 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                >
+                  <option value="">Select a category…</option>
+                  {categories.map((c) => (
+                    <option key={c.slug} value={c.slug}>{c.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={form.categorySlug}
+                  onChange={(e) => setForm((prev) => ({ ...prev, categorySlug: e.target.value }))}
+                  placeholder="category-slug"
+                  className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                />
+              )}
             </label>
             <label className="text-xs font-bold text-slate-600">
               Price (₹) *
@@ -280,10 +305,10 @@ export function AdminProductsClient() {
                 onChange={(e) => setForm((prev) => ({ ...prev, stockStatus: e.target.value }))}
                 className="mt-1 w-full rounded-xl border border-rosegold-200/60 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               >
-                <option value="IN_STOCK">In Stock</option>
-                <option value="LOW_STOCK">Low Stock</option>
-                <option value="OUT_OF_STOCK">Out of Stock</option>
-                <option value="MADE_TO_ORDER">Made to Order</option>
+                <option value="in_stock">In Stock</option>
+                <option value="low_stock">Low Stock</option>
+                <option value="out_of_stock">Out of Stock</option>
+                <option value="made_to_order">Made to Order</option>
               </select>
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -453,9 +478,9 @@ export function AdminProductsClient() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                        product.stockStatus === "IN_STOCK" ? "bg-emerald-50 text-emerald-700" :
-                        product.stockStatus === "LOW_STOCK" ? "bg-amber-50 text-amber-700" :
-                        product.stockStatus === "OUT_OF_STOCK" ? "bg-red-50 text-red-700" :
+                        product.stockStatus?.toLowerCase() === "in_stock" ? "bg-emerald-50 text-emerald-700" :
+                        product.stockStatus?.toLowerCase() === "low_stock" ? "bg-amber-50 text-amber-700" :
+                        product.stockStatus?.toLowerCase() === "out_of_stock" ? "bg-red-50 text-red-700" :
                         "bg-blue-50 text-blue-700"
                       }`}>
                         {product.stockStatus?.replace(/_/g, " ") || "—"}

@@ -349,13 +349,17 @@ export class OrdersService {
       await Promise.all(restocked.map((p) => this.redis.del(`product:${p.slug}`)));
     }
 
-    // Send email notification for status updates (async)
+    // Send email notification for status updates (await to ensure delivery on serverless)
     if ((order as any).user?.email) {
       const user = (order as any).user;
-      if (status === OrderStatus.CANCELLED) {
-        this.notifications.sendOrderCancelledEmail(user.email, order.orderNumber, note || 'No reason provided', order.userId).catch(() => {});
-      } else {
-        this.notifications.sendShippingUpdate(user.email, order.orderNumber, status, undefined, order.userId, user.phone).catch(() => {});
+      try {
+        if (status === OrderStatus.CANCELLED) {
+          await this.notifications.sendOrderCancelledEmail(user.email, order.orderNumber, note || 'No reason provided', order.userId);
+        } else {
+          await this.notifications.sendShippingUpdate(user.email, order.orderNumber, status, undefined, order.userId, user.phone);
+        }
+      } catch (e) {
+        this.logger.warn(`Email send failed for order ${order.orderNumber}: ${(e as Error).message}`);
       }
     }
 

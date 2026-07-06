@@ -27,6 +27,7 @@ enum AuthProvider {
   GOOGLE
   FACEBOOK
   APPLE
+  MICROSOFT
 }
 
 model User {
@@ -511,7 +512,8 @@ enum OrderStatus {
 }
 
 enum PaymentMethod {
-  RAZORPAY
+  RAZORPAY  // Legacy — now handled by PhonePe
+  PHONEPE
   STRIPE
   PAYPAL
   COD

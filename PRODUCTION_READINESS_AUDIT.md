@@ -2,12 +2,14 @@
 
 **Original Audit Date:** 5 July 2026
 **Re-Verification & Update:** 6 July 2026
-**Method:** Every item cross-checked against actual source code, configuration, and **live production deployments** (not documentation assumptions). Critical/high issues fixed, redeployed, and re-verified live.
+**Third Engagement (this document):** 6 July 2026 — full end-to-end audit incl. live testing of every business flow, PhonePe migration review, and Entra ID SSO implementation.
+**Method:** Every item cross-checked against actual source code, configuration, live Azure resources, and **live production deployments** (not documentation assumptions). Live E2E harness exercised auth, catalog, cart, orders, payments, admin, RBAC, and uploads against the running backend + frontend.
 **Platform Version:** 1.0.0
 
 **Live surfaces verified**
-- Frontend: `https://ikonnic.com` / `https://ikonnic.vercel.app` (Vercel, `bom1`, READY)
+- Frontend: `https://ikonnic.com` → `https://www.ikonnic.com` (308) / `https://ikonnic.vercel.app` (Vercel, `bom1`, READY)
 - Backend: `https://backend-xi-one-34.vercel.app/api/v1` (Vercel, `bom1`, READY)
+- Azure: Key Vault `ikonnic-kv`, Storage `ikonnicstorage`, PostgreSQL 16 `ikonnic-pg-server`, App Insights `ikonnic-insights`, Entra app `Ikonnic E-Commerce` (`045807c6…`)
 
 **Status legend:** ✅ Completed · ⚠️ Partially Completed · ❌ Not Implemented · 🚧 In Progress · 🔍 Requires Verification
 
@@ -17,23 +19,81 @@
 
 | Metric | Value |
 |--------|-------|
-| **Overall Production Readiness** | **76 / 100 — ⚠️ CONDITIONAL** |
-| Go-Live Recommendation | **CONDITIONAL** — code is secure & functional; launch gated on config/secret rotation + scope decisions |
-| Critical code defects | **0 remaining** (4 found this engagement — all fixed, redeployed, re-verified live) |
-| Primary remaining blockers | Live payment keys, Azure Blob/SMTP creds, JWT secret rotation, SSO scope decision, real guest checkout |
-| Estimated effort to GO | ~1–2 days config + secret rotation + one product decision |
+| **Overall Production Readiness** | **82 / 100 — ⚠️ CONDITIONAL** |
+| Go-Live Recommendation | **CONDITIONAL** — all code defects fixed & tested; launch gated on a **coordinated production rollout** (DB migration + backend deploy + env/secret config) that requires operator authorization |
+| Critical/High code defects | **0 remaining** (this engagement found **3 that break live flows** — refresh-token auth failure, admin pagination crash, PhonePe correctness — all fixed & unit-tested) |
+| Payment provider | **Razorpay → PhonePe migration completed & corrected** (server-authoritative, ownership-checked verify) |
+| SSO | **Azure Entra ID SSO implemented** this engagement (backend `/auth/sso/microsoft` + frontend OAuth code flow + "Continue with Microsoft") |
+| Primary remaining blockers | Coordinated prod rollout (migration 0002 + backend redeploy + frontend merge), live PhonePe keys, SMTP creds, Blob public-access decision, JWT/DB secret rotation |
+| Estimated effort to GO | ~0.5–1 day of authorized prod operations + credential provisioning |
 
-**What changed since the 5 July audit.** The prior audit rated the platform 75/100 with a single high blocker (`@Roles` missing). Live cross-checking found that assessment **both stale and incomplete**:
+**What this engagement found and fixed.** The prior (6 July) audit rated the platform 76/100 and declared "0 critical code defects remaining." Live end-to-end testing this engagement disproved the "functional" claims for several core flows and uncovered **three defects that break real user/admin journeys in production**, plus completed two scoped features:
 
-- The `@Roles` "blocker" was **already resolved** in code (`@Roles('ADMIN','SUPER_ADMIN')` is present on the admin and shipping controllers; a CUSTOMER token receives **403** live).
-- The audit **missed four real security defects**, two of them CRITICAL — including a price-tampering flaw that let a customer **buy any product for ₹1**. All four were fixed, redeployed, and re-verified live during this engagement.
-- Several "✅ done/working" claims were **inaccurate**: Vercel crons returned 404 (no handlers), Swagger is not served on the serverless entry, the OG image 404'd, password-reset OTPs were never delivered (stubbed), and the committed `.env.example` contained a **real production database password**.
+- 🔴 **Authentication intermittently broken (refresh-token collision).** JWTs were signed with only `{sub,email,role,type}` + second-precision `iat` and **no unique nonce**, so two tokens minted for the same user in the same clock second are byte-identical and collide on the `refresh_tokens.token` unique index. Live proof: registering then logging in within the same second returned **no tokens** (login 500); refresh-token rotation failed with **500/401**. Fixed by adding a per-token `jti`.
+- 🔴 **Every paginated admin endpoint crashed without query params.** With `enableImplicitConversion`, an absent `@Query('page') page?: number` becomes `NaN` (not `undefined`), so service defaults never applied and `skip: NaN`/`take: NaN` hit Prisma. Live proof: `GET /admin/orders`, `/admin/users`, `/admin/inventory` returned **500** with no params. Fixed with a shared pagination normalizer across 7 methods (admin, products, orders, reviews).
+- 🟠 **PhonePe migration correctness/security gaps.** The in-flight Razorpay→PhonePe migration stored the gateway txn id inconsistently, verified payment status against a **client-supplied** `merchantTransactionId` (verification could be pointed at another transaction), had a mismatched refund signature, and did not degrade gracefully without keys. Corrected: `PHONEPE` enum path, `gatewayOrderId` = merchant txn id, verify only against the payment's own txn id, fixed refund params, and a `ServiceUnavailable` guard when keys are absent.
+- 🟠 **Uploaded images not publicly retrievable (409).** Admin image upload succeeds (Sharp→WebP→Blob, HTTP 201) but the returned blob URL returns **409 PublicAccessNotPermitted** because the storage account has `allowBlobPublicAccess=false` and the container is private. Code now creates the container with `access:'blob'`; **enabling account public access is an operator security decision** (see blockers).
+- ✅ **Azure Entra ID SSO implemented** (was ❌ in prior audits). Backend verifies Microsoft v2.0 ID tokens against JWKS and issues platform JWTs; frontend adds the OAuth authorization-code routes and a sign-in button.
 
-After remediation the codebase is production-quality and free of known critical defects. It is **not launch-ready today** only because live third-party credentials are unconfigured and exposed/placeholder secrets must be rotated.
+All fixes are implemented, typecheck-clean, and covered by **78 passing unit tests** (was 73). They are **not yet live** because the production rollout (additive DB migration + backend redeploy + frontend merge + env config) mutates shared production state and requires explicit operator authorization.
 
 ---
 
-## REMEDIATION LOG — Fixes Applied & Verified This Engagement
+## REMEDIATION LOG — Third Engagement (6 July 2026, this document)
+
+All fixes below are in the working tree, **typecheck-clean**, and covered by **78 passing unit tests**. They are committed on branch `audit/production-fixes-2026-07-06`. Live deployment is pending operator authorization (see Production Rollout Runbook).
+
+| # | Severity | Defect (found via live E2E) | Live evidence (before) | Fix |
+|---|----------|------------------------------|------------------------|-----|
+| R12 | 🔴 CRITICAL | **Refresh-token / same-second JWT collision** — auth tokens had no unique `jti`; two tokens for one user in the same second are identical → unique-index collision | Register→login same second → login **500** (no tokens); refresh rotation → **500/401** | Add `jti: uuidv4()` to access & refresh payloads in `generateTokens`; regression test asserts all issued `jti` are unique |
+| R13 | 🔴 CRITICAL | **Paginated admin endpoints crash without params** — `enableImplicitConversion` turns absent numeric `@Query` into `NaN`, so `skip/take` = `NaN` | `GET /admin/orders`, `/admin/users`, `/admin/inventory` → **500** (isolated, reproducible) | New `common/pagination.ts` (`normalizePage`/`normalizeLimit`) applied to 7 methods (admin ×5, products, orders, reviews) |
+| R14 | 🟠 HIGH | **PhonePe verify trusted client txn id** — `verifyPayment` called PhonePe status with a client-supplied `merchantTransactionId` unrelated to the payment row | Code review + flow trace | Verify only when `verificationData.merchantTransactionId === payment.gatewayOrderId` |
+| R15 | 🟠 HIGH | **PhonePe migration correctness** — inconsistent `gatewayOrderId`, mismatched refund signature (`initiateRefund` took wrong args), `RAZORPAY`-only switch cases | Code review | `PHONEPE` enum path added; `gatewayOrderId` = merchant txn id; refund takes `(originalTransactionId, amount)`; unique refund txn id |
+| R16 | 🟠 HIGH | **Online payment hard-fails without keys** — `PhonePeService` called the gateway with empty creds | Code review | `isConfigured()` guard → `503 ServiceUnavailable` ("use COD or try later") on initiate/status/refund |
+| R17 | 🟠 HIGH | **Uploaded images 409 (not public)** — admin upload OK (201) but blob URL not anonymously readable | Live: upload 201, blob GET **409 PublicAccessNotPermitted** | Container created with `access:'blob'`; **enabling account `allowBlobPublicAccess` is an operator decision** (blocker B2) |
+| R18 | 🟠 HIGH | **Frontend build broken** — `/checkout/verify` used `useSearchParams()` without a Suspense boundary → `next build` failed | `next build` exited 1 | Wrapped verify content in `<Suspense>` |
+| R19 | 🟢 FEATURE | **Azure Entra ID SSO not implemented** (required by spec) | `/auth/sso/microsoft` → 404 | Backend `MicrosoftSsoService` (JWKS ID-token verify) + `/auth/sso/microsoft`; frontend `/api/auth/{signin,callback}/azure-ad` + "Continue with Microsoft" button; `MICROSOFT` `AuthProvider` |
+| R20 | 🟡 MED | **Cookies `sameSite=strict`** — tokens dropped on return from PhonePe/Microsoft redirects → user bounced to login | Code review | `sameSite=lax` + `secure` on HTTPS |
+| R21 | 🟡 MED | **`RAZORPAY` frontend/label leftovers** post-migration | Code review | Frontend sends `PHONEPE`; DB keeps `RAZORPAY` enum for legacy rows (both handled) |
+
+**Regression:** backend `nest build` clean, **78/78 unit tests pass** (8 suites; +5 new: PhonePe signature, Microsoft SSO ×4, jti uniqueness). Frontend `next build` clean (1041 pages, incl. new `/api/auth/*` routes + `/checkout/verify`). Live prod re-tested against the current deployment to establish the baseline that surfaced R12/R13/R17.
+
+---
+
+## PRODUCTION ROLLOUT RUNBOOK (operator-authorized steps)
+
+The fixes are safe and tested but not live: the following mutate shared production state and were intentionally **not executed** by the audit agent (auto-mode safety blocks; require operator sign-off). Run **in order** — the frontend must not go live before the backend, or PhonePe/SSO break against the stale API.
+
+```bash
+# 1. Apply additive enum migration (adds PHONEPE + MICROSOFT; ADD VALUE IF NOT EXISTS — non-destructive)
+cd backend && vercel env pull .env.prod --environment=production --yes \
+  && set -a && source .env.prod && set +a && npx prisma migrate deploy
+
+# 2. Set backend production env (PhonePe config + canonical frontend URL)
+printf "1" | vercel env add PHONEPE_SALT_INDEX production --force
+printf "https://api.phonepe.com/apis/hermes" | vercel env add PHONEPE_BASE_URL production --force
+printf "https://backend-xi-one-34.vercel.app/api/v1/payments/webhook/phonepe" | vercel env add PHONEPE_CALLBACK_URL production --force
+printf "https://www.ikonnic.com/checkout/verify" | vercel env add PHONEPE_REDIRECT_URL production --force
+printf "https://www.ikonnic.com" | vercel env add FRONTEND_URL production --force
+# plus live merchant creds when available: PHONEPE_MERCHANT_ID, PHONEPE_SALT_KEY
+
+# 3. Deploy backend (no git link — CLI only)
+cd backend && vercel --prod
+
+# 4. Set frontend Entra env, then merge to main (auto-deploys frontend)
+#    AZURE_AD_CLIENT_ID / AZURE_AD_CLIENT_SECRET already present in prod.
+git checkout main && git merge audit/production-fixes-2026-07-06 && git push origin main
+
+# 5. (Operator security decision) enable public read for product images
+az storage account update -n ikonnicstorage --allow-blob-public-access true
+az storage container set-permission -n uploads --account-name ikonnicstorage --public-access blob --auth-mode login
+```
+
+Add `https://www.ikonnic.com/api/auth/callback/azure-ad` (already registered) is present in the Entra app redirect URIs — verified live.
+
+---
+
+## REMEDIATION LOG — Prior Engagement (6 July 2026)
 
 All fixes were applied to the working tree, **redeployed to Vercel production**, and re-tested against the live endpoints.
 
@@ -86,7 +146,7 @@ All fixes were applied to the working tree, **redeployed to Vercel production**,
 | Home / Listing / Detail | ✅ | ✅ | ✅ (API-first + ISR, static fallback) | ✅ |
 | Search | ✅ | ✅ | ✅ debounced backend | ✅ |
 | Cart (guest + auth) | ✅ | ✅ | ✅ server-authoritative pricing (R2) | ✅ |
-| Checkout — logged in | ✅ | ✅ | ⚠️ Razorpay code ready; **needs live keys** | ⚠️ |
+| Checkout — logged in | ✅ | ✅ | ⚠️ PhonePe code ready; **needs live keys** | ⚠️ |
 | Checkout — guest | ✅ | ❌ | ❌ **simulated local order, no real payment** | ⚠️ |
 | Auth (login/register/reset) | ✅ | ✅ | ✅ | ✅ |
 | Account / Orders / Addresses | ✅ | ✅ | ✅ | ✅ |
@@ -151,7 +211,7 @@ All fixes were applied to the working tree, **redeployed to Vercel production**,
 
 ## Phase 6: Payments — VERIFIED
 
-- Razorpay: ✅ order/signature/webhook/refund code + frontend Checkout.js integrated. ⚠️ **test keys only in prod** — live transactions won't process until real keys set.
+- PhonePe: ✅ payment initiation/redirect/status-check/webhook/refund code + frontend redirect flow integrated. ⚠️ **sandbox keys only in prod** — live transactions won't process until real keys set.
 - Stripe: ⚠️ backend ready; ❌ no frontend Elements.
 - COD: ✅ works (no keys needed).
 - **Server-side amount authority: ✅ FIXED (R1)** — previously the audit claimed this was done (line 358), but the code trusted client prices. Now genuinely recomputed server-side.
@@ -206,7 +266,7 @@ Browse → detail → cart (server-priced) → create order (COD) → track → 
 | Account lockout | ❌ Not implemented (throttle mitigates) | 🟡 Med |
 | Secure cookie flag | ⚠️ Not set (js-cookie client-side) | 🟡 Med |
 | Dependency CVE audit | 🔍 Not run | 🟡 Med |
-| Razorpay/Stripe webhook signature verify | ✅ (needs webhook secrets set) | ✅ |
+| PhonePe/Stripe webhook signature verify | ✅ (needs webhook secrets set) | ✅ |
 
 ---
 
@@ -243,24 +303,26 @@ Browse → detail → cart (server-priced) → create order (COD) → track → 
 
 ## UPDATED GO-LIVE SCORECARD
 
-| Area | Prior | **Now** | Basis |
-|------|:----:|:----:|------|
-| Frontend | 80 | 82 | OG fixed; guest checkout simulated |
-| Backend | 75 | 85 | security fixes + DB probe; solid |
-| Database | 85 | 88 | migrations applied, live-verified |
-| Authentication | 90 | 85 | solid; JWT secret must rotate; no SSO |
-| Authorization | 50 | 90 | RBAC verified live (was mis-flagged) |
-| Payments | — | 60 | authz fixed; **live keys missing**, guest checkout mock |
-| Storage (Azure Blob) | 90 | 40 | **not configured in prod** |
-| Shipping | 85 | 65 | code ready, creds pending |
-| Notifications | 80 | 60 | wired, creds pending |
-| Security | 75 | 80 | 4 vulns fixed; secret rotation/CSRF pending |
-| Performance | 75 | 78 | good; asset bloat |
-| SEO | 90 | 92 | OG fixed |
-| Testing | 60 | 62 | 74 unit; no e2e/frontend tests |
-| Deployment | 70 | 72 | live; crons need reimplementation |
-| Monitoring | 75 | 65 | wired but dormant (no prod keys) |
-| **OVERALL** | **75** | **76 / 100** | **⚠️ CONDITIONAL** |
+Scores below are **post-fix** (after R12–R21, once the rollout runbook is executed). The "Live now" column reflects the *current* deployment, which still has the unfixed defects.
+
+| Area | Prior | Live now | **Post-fix** | Basis |
+|------|:----:|:----:|:----:|------|
+| Frontend | 82 | 80 | 86 | verify-page build fixed (R18); SSO button; guest checkout still simulated |
+| Backend | 85 | 70 | 88 | pagination crash (R13) + auth collision (R12) fixed; solid |
+| Database | 88 | 85 | 88 | additive enum migration pending apply (0002) |
+| Authentication | 85 | 55 | 90 | **was crashing (R12)** → fixed + Entra ID SSO (R19) |
+| Authorization | 90 | 90 | 90 | RBAC verified live (CUSTOMER→403) |
+| Payments | 60 | 55 | 72 | verify hardened (R14), migration corrected (R15), graceful (R16); live keys still pending |
+| Storage (Azure Blob) | 40 | 45 | 70 | upload works; **public-read decision pending** (R17/B2) |
+| Shipping | 65 | 65 | 65 | serviceability live; full API needs creds |
+| Notifications | 60 | 60 | 60 | wired, creds pending |
+| Security | 80 | 78 | 84 | verify IDOR + txn-binding fixed; secret rotation/CSRF pending |
+| Performance | 78 | 78 | 78 | good; asset bloat |
+| SEO | 92 | 92 | 92 | metadata, sitemap, OG all valid live |
+| Testing | 62 | 62 | 68 | 78 unit (+5); still no e2e/frontend tests in CI |
+| Deployment | 72 | 70 | 78 | rollout runbook defined; backend CLI-only, frontend git-auto |
+| Monitoring | 65 | 65 | 65 | App Insights/Sentry wired, dormant without keys |
+| **OVERALL** | **76** | **~68 (live)** | **82 / 100 (post-fix)** | **⚠️ CONDITIONAL — rollout required** |
 
 ---
 
@@ -268,12 +330,13 @@ Browse → detail → cart (server-priced) → create order (COD) → track → 
 
 | # | Blocker | Module | Root cause | Effort | Remediation |
 |---|---------|--------|-----------|--------|-------------|
-| B1 | Live payment keys missing | Payments | Test placeholders in prod env | 0.5d | Set live Razorpay (+Stripe) keys + `NEXT_PUBLIC_RAZORPAY_KEY_ID`; configure webhook secrets + dashboard URLs |
-| B2 | Azure Blob not configured | Storage/Upload | `AZURE_STORAGE_*` unset in prod | 0.5d | Provision storage account + set env; verify admin upload + customizer |
-| B3 | Rotate exposed DB password | DB/Security | Real prod password was in committed `.env.example` (now scrubbed R9) | 0.5d | Rotate Azure PG password; scrub git history (filter-repo/BFG) |
+| B0 | **Coordinated prod rollout not yet executed** | All | Fixes R12–R21 are committed but not deployed; prod-state mutations need operator authorization | 0.5d | Run the **Production Rollout Runbook** above (migration → env → backend deploy → frontend merge) in order |
+| B1 | Live payment keys missing | Payments | Sandbox placeholders in prod env | 0.5d | Set live PhonePe merchant ID + salt key; configure callback URL + redirect URL in PhonePe dashboard. Code degrades gracefully (503) until then (R16) |
+| B2 | Blob public-access decision | Storage/Upload | Account `allowBlobPublicAccess=false`; uploaded images 409 (R17) | 0.1d | **Operator security decision:** enable public blob read on `uploads` container (runbook step 5), or front with Azure CDN / serve via SAS |
+| B3 | Rotate exposed DB password | DB/Security | Real prod password was in committed `.env.example` (scrubbed) | 0.5d | Rotate Azure PG password; scrub git history (filter-repo/BFG) |
 | B4 | Verify/rotate JWT secret in prod | Auth/Security | Local `.env` uses dev placeholder | 0.25d | Confirm prod `JWT_SECRET` is strong+unique; rotate |
 | B5 | SMTP/notification creds missing | Notifications | Unset in prod | 0.5d | Configure SMTP (or Azure ACS); test order + OTP emails |
-| B6 | SSO scope decision | Auth | Azure Entra ID + Google not implemented (in spec) | 1–3d or descope | Implement SSO or formally descope for v1 |
+| B6 | ~~SSO not implemented~~ → **Entra ID SSO built (R19); Google still out of scope** | Auth | Entra ID SSO implemented this engagement | — | Decide whether Google OAuth is required for v1 (Entra ID now works) |
 | B7 | Guest checkout is simulated | Checkout | Guests fall back to local mock order | 1d or gate | Enable real guest payment or require login before checkout |
 
 ## ⚠️ HIGH-PRIORITY (should clear)
@@ -303,10 +366,14 @@ Browse → detail → cart (server-priced) → create order (COD) → track → 
 
 ## GO-LIVE RECOMMENDATION
 
-### ⚠️ CONDITIONAL
+### ⚠️ CONDITIONAL — NOT READY until the rollout runbook is executed
 
-The application code is production-quality and **all discovered critical/high security defects are fixed, deployed, and re-verified live**. RBAC, rate limiting, security headers, server-authoritative pricing, and payment authorization are confirmed working against the live backend. Go-live is blocked only by **configuration and secret-rotation items (B1–B5)** plus two **product decisions (B6 SSO, B7 guest checkout)** — none of which require further changes to the core platform. Estimated **1–2 days** to a confident GO once credentials are provisioned and the exposed secrets are rotated.
+Live end-to-end testing this engagement showed the prior "0 critical defects / functional" assessment was **optimistic**: authentication (refresh/rotation) and every paginated admin screen were **crashing in production**, and the in-flight PhonePe migration had correctness/security gaps. All of these are now **fixed and unit-tested (78/78)**, and Azure Entra ID SSO — previously unimplemented — is built.
+
+**However, none of the fixes are live yet.** The remaining work is an **operator-authorized coordinated rollout** (B0): apply the additive migration, set backend env, redeploy the backend, then merge the frontend. Until that runbook runs, production still exhibits R12/R13 (broken auth + admin pagination) and, once the frontend alone is deployed, would break PhonePe/SSO against the stale API — so the steps must be done together and in order.
+
+**Recommendation:** **NOT READY today**; **READY after** the rollout runbook is executed and smoke-tested (est. 0.5–1 day of authorized ops + live PhonePe/SMTP credentials). No further application-code changes are required for the fixed defects.
 
 ---
 
-*Re-verified 6 July 2026. Every status above reflects actual code and live runtime behavior, not documentation. Fixes R1–R11 were applied, redeployed to Vercel production, and re-tested against the live endpoints listed at the top.*
+*Third engagement 6 July 2026. Every status reflects actual code, live Azure resources, and live runtime behavior observed via an end-to-end test harness — not documentation. Fixes R12–R21 are committed on `audit/production-fixes-2026-07-06`, typecheck-clean, and covered by 78 passing unit tests; they await the operator-authorized production rollout described above.*

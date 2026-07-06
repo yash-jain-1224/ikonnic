@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InventoryTransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { normalizePage, normalizeLimit } from '../../common/pagination';
 
 @Injectable()
 export class AdminService {
@@ -36,6 +37,8 @@ export class AdminService {
   }
 
   async getOrdersForAdmin(page = 1, limit = 20, status?: string) {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 20);
     const skip = (page - 1) * limit;
     const where: any = {};
     if (status) where.status = status;
@@ -57,6 +60,8 @@ export class AdminService {
   }
 
   async getUsersForAdmin(page = 1, limit = 20) {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 20);
     const skip = (page - 1) * limit;
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -80,6 +85,8 @@ export class AdminService {
   // ─── Product CRUD ──────────────────────────────────────────
 
   async getProductsForAdmin(page = 1, limit = 20, search?: string) {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 20);
     const skip = (page - 1) * limit;
     const where: any = {};
     if (search) {
@@ -264,6 +271,8 @@ export class AdminService {
   // ─── Inventory Management ──────────────────────────────────
 
   async getInventoryForAdmin(page = 1, limit = 20, search?: string, lowStockOnly = false) {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 20);
     const skip = (page - 1) * limit;
     const where: any = { isActive: true };
     if (search) {
@@ -378,7 +387,7 @@ export class AdminService {
       where: { productId },
       include: { warehouse: { select: { name: true, code: true } } },
       orderBy: { createdAt: 'desc' },
-      take: Number(limit),
+      take: normalizeLimit(limit, 20),
     });
   }
 

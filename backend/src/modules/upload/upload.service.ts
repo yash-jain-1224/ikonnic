@@ -48,7 +48,11 @@ export class UploadService {
   private async ensureContainer(): Promise<void> {
     try {
       const containerClient = this.blobServiceClient.getContainerClient(this.containerName);
-      await containerClient.createIfNotExists({ access: undefined }); // private access
+      // 'blob' = anonymous read of individual blobs (no container listing).
+      // Product/customiser images are public web assets and must be fetchable
+      // by unauthenticated browsers, so the returned blob URLs render. Requires
+      // the storage account to allow blob public access.
+      await containerClient.createIfNotExists({ access: 'blob' });
       this.logger.log(`Azure Blob container "${this.containerName}" ready`);
     } catch (error) {
       this.logger.warn(`Could not ensure container: ${(error as Error).message}`);

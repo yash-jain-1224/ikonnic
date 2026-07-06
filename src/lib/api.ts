@@ -23,8 +23,12 @@ export const tokenStorage = {
   getAccessToken: () => Cookies.get(ACCESS_TOKEN_KEY) || null,
   getRefreshToken: () => Cookies.get(REFRESH_TOKEN_KEY) || null,
   setTokens: (accessToken: string, refreshToken: string) => {
-    Cookies.set(ACCESS_TOKEN_KEY, accessToken, { expires: 1 / 96, sameSite: "strict" }); // ~15 min
-    Cookies.set(REFRESH_TOKEN_KEY, refreshToken, { expires: 7, sameSite: "strict" });
+    // sameSite=lax (not strict): cookies must survive top-level redirects back
+    // from external sites (PhonePe payment page, Microsoft login) or the
+    // middleware bounces returning users to /login mid-flow.
+    const secure = typeof window !== "undefined" && window.location.protocol === "https:";
+    Cookies.set(ACCESS_TOKEN_KEY, accessToken, { expires: 1 / 96, sameSite: "lax", secure }); // ~15 min
+    Cookies.set(REFRESH_TOKEN_KEY, refreshToken, { expires: 7, sameSite: "lax", secure });
   },
   clearTokens: () => {
     Cookies.remove(ACCESS_TOKEN_KEY);

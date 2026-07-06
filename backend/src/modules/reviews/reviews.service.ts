@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { normalizePage, normalizeLimit } from '../../common/pagination';
 
 @Injectable()
 export class ReviewsService {
   constructor(private prisma: PrismaService) {}
 
   async getProductReviews(productId: string, page = 1, limit = 10) {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 10);
     const skip = (page - 1) * limit;
     const [reviews, total] = await Promise.all([
       this.prisma.review.findMany({

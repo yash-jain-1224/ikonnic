@@ -205,6 +205,11 @@ az keyvault secret set --vault-name $KEYVAULT_NAME --name "storage-connection-st
 az keyvault secret set --vault-name $KEYVAULT_NAME --name "appinsights-connection-string" --value "$APP_INSIGHTS_CONN" --output none
 echo "  ✓ Core secrets stored"
 
+# PhonePe secrets (set manually after merchant onboarding)
+echo "  ℹ️  PhonePe secrets must be added manually after merchant approval:"
+echo "    az keyvault secret set --vault-name $KEYVAULT_NAME --name \"phonepe-merchant-id\" --value \"<YOUR_MERCHANT_ID>\""
+echo "    az keyvault secret set --vault-name $KEYVAULT_NAME --name \"phonepe-salt-key\" --value \"<YOUR_SALT_KEY>\""
+
 # ─── 7. Microsoft Entra ID - App Registration ─────────────────────
 echo ""
 echo "► Step 7: Creating Entra ID App Registration..."

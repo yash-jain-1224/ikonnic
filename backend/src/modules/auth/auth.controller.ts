@@ -10,6 +10,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { LogoutDto } from './dto/logout.dto';
+import { MicrosoftSsoDto } from './dto/microsoft-sso.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('auth')
@@ -34,6 +35,16 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('sso/microsoft')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login or register with an Azure Entra ID (Microsoft) ID token' })
+  @ApiResponse({ status: 200, description: 'SSO login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid Microsoft token' })
+  async microsoftSso(@Body() dto: MicrosoftSsoDto) {
+    return this.authService.loginWithMicrosoft(dto.idToken);
   }
 
   @Post('refresh')

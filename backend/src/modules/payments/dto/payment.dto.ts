@@ -7,7 +7,7 @@ export class InitiatePaymentDto {
   @IsNotEmpty()
   orderId: string;
 
-  @ApiProperty({ example: 'RAZORPAY', description: 'Payment method (RAZORPAY, STRIPE, COD)' })
+  @ApiProperty({ example: 'PHONEPE', description: 'Payment method (PHONEPE, STRIPE, COD)' })
   @IsString()
   @IsNotEmpty()
   method: string;
@@ -19,7 +19,7 @@ export class VerifyPaymentDto {
   @IsNotEmpty()
   paymentId: string;
 
-  @ApiProperty({ description: 'Gateway-specific verification data (e.g. razorpay_payment_id, razorpay_signature)' })
+  @ApiProperty({ description: 'Gateway-specific verification data (e.g. merchantTransactionId for PhonePe)' })
   @IsObject()
   @IsNotEmpty()
   verificationData: Record<string, any>;

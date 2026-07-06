@@ -58,10 +58,10 @@ export class PaymentsController {
   async webhook(
     @Param('provider') provider: string,
     @Body() payload: any,
-    @Headers('x-razorpay-signature') razorpaySignature?: string,
+    @Headers('x-verify') phonePeSignature?: string,
     @Headers('stripe-signature') stripeSignature?: string,
   ) {
-    const signature = razorpaySignature || stripeSignature || '';
+    const signature = phonePeSignature || stripeSignature || '';
     return this.paymentsService.handleWebhook(provider, payload, signature);
   }
 }

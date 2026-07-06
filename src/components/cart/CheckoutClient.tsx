@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Script from "next/script";
 import { CheckCircle2, CreditCard, Loader2, Truck } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { CartSummary } from "@/components/cart/CartSummary";
@@ -11,12 +10,6 @@ import { useOrderStore } from "@/store/orders";
 import { useAuthStore } from "@/store/auth";
 import { ordersAPI, paymentsAPI, shippingAPI, usersAPI } from "@/lib/api";
 import { formatAddress, type SavedAddress } from "@/components/account/AddressBook";
-
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
 
 export function CheckoutClient() {
   const items = useCartStore((state) => state.items);
@@ -30,7 +23,7 @@ export function CheckoutClient() {
   const [city, setCity] = useState("");
   const [stateName, setStateName] = useState("");
   const [loadingPin, setLoadingPin] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "COD">("RAZORPAY");
+  const [paymentMethod, setPaymentMethod] = useState<"PHONEPE" | "COD">("PHONEPE");
   const [processing, setProcessing] = useState(false);
   const [serviceability, setServiceability] = useState<{ serviceable: boolean; estimatedDays?: number; codAvailable?: boolean } | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -109,41 +102,19 @@ export function CheckoutClient() {
 
   const subtotal = items.reduce((sum, item) => sum + (item.finalTotal ?? item.price * item.quantity), 0);
 
-  // Handle Razorpay payment
-  const handleRazorpayPayment = async (orderId: string, paymentData: any) => {
-    return new Promise<boolean>((resolve) => {
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: paymentData.gatewayData?.amount,
-        currency: "INR",
-        name: "Ikonnic",
-        description: "Personalised Gifts Order",
-        order_id: paymentData.gatewayOrderId,
-        handler: async (response: any) => {
-          try {
-            await paymentsAPI.verify(paymentData.paymentId, {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-            resolve(true);
-          } catch {
-            resolve(false);
-          }
-        },
-        prefill: {
-          name: user?.firstName || "",
-          email: user?.email || "",
-        },
-        theme: { color: "#e11d48" },
-        modal: {
-          ondismiss: () => resolve(false),
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    });
+  // Handle PhonePe payment — redirect-based flow
+  const handlePhonePePayment = async (orderId: string, paymentData: any) => {
+    // PhonePe returns a redirect URL — navigate the user to PhonePe's payment page
+    const redirectUrl = paymentData.gatewayData?.redirectUrl;
+    if (redirectUrl) {
+      // Store order info for post-payment verification
+      sessionStorage.setItem("phonepe_payment_id", paymentData.paymentId);
+      sessionStorage.setItem("phonepe_order_id", orderId);
+      sessionStorage.setItem("phonepe_txn_id", paymentData.gatewayData?.merchantTransactionId || paymentData.gatewayOrderId);
+      window.location.href = redirectUrl;
+      return true; // Will redirect
+    }
+    return false;
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -199,14 +170,17 @@ export function CheckoutClient() {
 
         const { data: order } = await ordersAPI.create(orderPayload);
 
-        if (paymentMethod === "RAZORPAY") {
-          // Initiate payment
-          const { data: paymentData } = await paymentsAPI.initiate(order.id, "RAZORPAY");
-          const success = await handleRazorpayPayment(order.id, paymentData);
-          if (!success) {
-            setProcessing(false);
+        if (paymentMethod === "PHONEPE") {
+          // Initiate PhonePe payment — will redirect to PhonePe
+          const { data: paymentData } = await paymentsAPI.initiate(order.id, "PHONEPE");
+          const redirecting = await handlePhonePePayment(order.id, paymentData);
+          if (redirecting) {
+            // User is being redirected to PhonePe — don't clear cart yet
             return;
           }
+          // If redirect failed
+          setProcessing(false);
+          return;
         }
 
         setPlacedOrderId(order.orderNumber);
@@ -248,7 +222,6 @@ export function CheckoutClient() {
 
   return (
     <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <form onSubmit={submit} className="grid gap-7 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5">
           {!isAuthenticated && (
@@ -325,9 +298,9 @@ export function CheckoutClient() {
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
             <h2 className="text-lg font-black">Payment method</h2>
             <div className="mt-4 space-y-3">
-              <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${paymentMethod === "RAZORPAY" ? "border-ikonnic-red bg-red-50" : "border-slate-200"}`}>
-                <input type="radio" name="payment" value="RAZORPAY" checked={paymentMethod === "RAZORPAY"} onChange={() => setPaymentMethod("RAZORPAY")} className="accent-ikonnic-red" />
-                <div><p className="text-sm font-black">Pay Online</p><p className="text-xs text-slate-500">UPI, Cards, Net Banking, Wallets (Razorpay)</p></div>
+              <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${paymentMethod === "PHONEPE" ? "border-ikonnic-red bg-red-50" : "border-slate-200"}`}>
+                <input type="radio" name="payment" value="PHONEPE" checked={paymentMethod === "PHONEPE"} onChange={() => setPaymentMethod("PHONEPE")} className="accent-ikonnic-red" />
+                <div><p className="text-sm font-black">Pay Online</p><p className="text-xs text-slate-500">UPI, Cards, Net Banking, Wallets (PhonePe)</p></div>
               </label>
               <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${paymentMethod === "COD" ? "border-ikonnic-red bg-red-50" : "border-slate-200"} ${serviceability?.codAvailable === false ? "opacity-50 pointer-events-none" : ""}`}>
                 <input type="radio" name="payment" value="COD" checked={paymentMethod === "COD"} onChange={() => setPaymentMethod("COD")} disabled={serviceability?.codAvailable === false} className="accent-ikonnic-red" />
@@ -362,7 +335,7 @@ export function CheckoutClient() {
             {processing ? <Loader2 size={17} className="animate-spin" /> : <CreditCard size={17} />}
             {processing ? "Processing..." : paymentMethod === "COD" ? "Place Order (COD)" : "Pay & Place Order"}
           </button>
-          <p className="text-center text-xs font-semibold text-slate-500">Secure payments powered by Razorpay. 256-bit SSL encryption.</p>
+          <p className="text-center text-xs font-semibold text-slate-500">Secure payments powered by PhonePe. 256-bit SSL encryption.</p>
         </div>
       </form>
     </>

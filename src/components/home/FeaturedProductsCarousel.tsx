@@ -38,13 +38,13 @@ export function FeaturedProductsCarousel({ products = defaultProducts }: { produ
         <div className="hidden gap-2 sm:flex">
           <button
             onClick={scrollLeft}
-            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fffbf9] text-rosegold-700 transition hover:bg-rosegold-100"
+            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fce4da] text-rosegold-700 transition hover:bg-rosegold-100"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={scrollRight}
-            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fffbf9] text-rosegold-700 transition hover:bg-rosegold-100"
+            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fce4da] text-rosegold-700 transition hover:bg-rosegold-100"
           >
             <ChevronRight size={20} />
           </button>

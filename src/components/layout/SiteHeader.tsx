@@ -19,7 +19,7 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-rosegold-200/60 bg-[#fffbf9]">
+      <header className="sticky top-0 z-50 border-b border-rosegold-200/60 bg-[#fce4da]">
         <div className="mx-auto grid h-[68px] max-w-[1240px] grid-cols-3 items-center px-4 sm:px-6">
           <div className="flex items-center gap-1">
             <button

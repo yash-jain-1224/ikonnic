@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
 
@@ -39,12 +40,13 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
-            <WhatsAppButton />
-          </div>
+          <LayoutWrapper
+            header={<SiteHeader />}
+            footer={<SiteFooter />}
+            whatsapp={<WhatsAppButton />}
+          >
+            {children}
+          </LayoutWrapper>
         </AuthProvider>
       </body>
     </html>

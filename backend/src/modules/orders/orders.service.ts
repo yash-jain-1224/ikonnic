@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
+import { CouponsService } from '../coupons/coupons.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 
@@ -9,27 +10,56 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private couponsService: CouponsService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto) {
+    if (!dto.items || dto.items.length === 0) {
+      throw new BadRequestException('Order must contain at least one item');
+    }
+
     // Generate order number
     const orderNumber = `GFT-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
-    // Calculate totals
+    // Load authoritative product data — NEVER trust client-supplied prices.
+    const productIds = [...new Set(dto.items.map((i) => i.productId))];
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    // Recompute every line total from server-side prices.
     let subtotal = 0;
+    let taxTotal = 0;
     const orderItems = dto.items.map((item) => {
-      const itemTotal = (item.unitPrice + (item.optionsPrice || 0) - (item.discount || 0)) * item.quantity;
-      subtotal += itemTotal;
+      const product = productMap.get(item.productId);
+      if (!product) {
+        throw new BadRequestException(`Product not found: ${item.productId}`);
+      }
+      if (product.isActive === false) {
+        throw new BadRequestException(`Product is not available: ${product.title}`);
+      }
+
+      const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      const unitPrice = product.price; // server authority
+      const optionsPrice = Math.max(0, Number(item.optionsPrice) || 0);
+      const lineTotal = (unitPrice + optionsPrice) * quantity;
+      const taxRate = product.taxRate ?? 18;
+      const lineTax = Math.round(lineTotal * (taxRate / 100) * 100) / 100;
+
+      subtotal += lineTotal;
+      taxTotal += lineTax;
+
       return {
-        productId: item.productId,
-        title: item.title,
-        sku: item.sku,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        optionsPrice: item.optionsPrice || 0,
-        discount: item.discount || 0,
-        tax: Math.round(item.unitPrice * item.quantity * 0.18 * 100) / 100, // 18% GST
-        total: itemTotal,
+        productId: product.id,
+        title: product.title,
+        sku: product.sku,
+        quantity,
+        unitPrice,
+        optionsPrice,
+        discount: 0,
+        tax: lineTax,
+        total: lineTotal,
         selectedOptions: item.selectedOptions || {},
         uploadedImageRef: item.uploadedImageRef,
         previewImage: item.previewImage,
@@ -37,10 +67,18 @@ export class OrdersService {
       };
     });
 
-    const tax = Math.round(subtotal * 0.18 * 100) / 100;
+    // Derive the discount from a server-validated coupon — never trust dto.discount.
+    let discount = 0;
+    let appliedCouponCode: string | undefined;
+    if (dto.couponCode) {
+      const validated = await this.couponsService.validateCoupon(dto.couponCode, subtotal, userId);
+      discount = Math.min(validated.calculatedDiscount, subtotal);
+      appliedCouponCode = validated.code;
+    }
+
+    const tax = Math.round(taxTotal * 100) / 100;
     const shippingCost = subtotal >= 999 ? 0 : 99; // Free shipping above 999
-    const discount = dto.discount || 0;
-    const total = subtotal + tax + shippingCost - discount;
+    const total = Math.max(0, Math.round((subtotal + tax + shippingCost - discount) * 100) / 100);
 
     // Create order with items in a transaction
     const order = await this.prisma.$transaction(async (tx) => {
@@ -56,7 +94,7 @@ export class OrdersService {
           tax,
           shippingCost,
           total,
-          couponCode: dto.couponCode,
+          couponCode: appliedCouponCode,
           paymentMethod: dto.paymentMethod as any,
           customerNotes: dto.customerNotes,
           items: {
@@ -90,6 +128,15 @@ export class OrdersService {
 
       return createdOrder;
     });
+
+    // Record coupon usage (best-effort; the order already exists).
+    if (appliedCouponCode) {
+      try {
+        await this.couponsService.applyCoupon(appliedCouponCode, userId, order.id);
+      } catch {
+        // Non-fatal: usage accounting shouldn't roll back a paid order.
+      }
+    }
 
     // Invalidate user's orders cache
     await this.redis.del(`user:${userId}:orders`);

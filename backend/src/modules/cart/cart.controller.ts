@@ -36,15 +36,26 @@ export class CartController {
   }
 
   @Put('items/:id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Update cart item quantity or options' })
-  async updateItem(@Param('id') id: string, @Body() dto: UpdateCartItemDto) {
-    return this.cartService.updateItem(id, dto);
+  async updateItem(
+    @Param('id') id: string,
+    @Body() dto: UpdateCartItemDto,
+    @Query('guestSessionId') guestSessionId?: string,
+    @Req() req?: any,
+  ) {
+    return this.cartService.updateItem(id, dto, req?.user?.id, guestSessionId);
   }
 
   @Delete('items/:id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Remove item from cart' })
-  async removeItem(@Param('id') id: string) {
-    return this.cartService.removeItem(id);
+  async removeItem(
+    @Param('id') id: string,
+    @Query('guestSessionId') guestSessionId?: string,
+    @Req() req?: any,
+  ) {
+    return this.cartService.removeItem(id, req?.user?.id, guestSessionId);
   }
 
   @Delete()

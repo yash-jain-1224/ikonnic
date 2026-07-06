@@ -12,9 +12,12 @@ export class AddToCartDto {
   @Min(1)
   quantity?: number = 1;
 
-  @ApiProperty({ example: 699 })
+  // Accepted for backward compatibility but IGNORED: the server derives the
+  // authoritative unit price from the product record.
+  @ApiPropertyOptional({ example: 699 })
+  @IsOptional()
   @IsNumber()
-  unitPrice: number;
+  unitPrice?: number;
 
   @ApiPropertyOptional({ example: 0 })
   @IsOptional()

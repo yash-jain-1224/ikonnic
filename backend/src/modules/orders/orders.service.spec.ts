@@ -4,6 +4,7 @@ import { OrderStatus } from '@prisma/client';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
+import { CouponsService } from '../coupons/coupons.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -17,10 +18,12 @@ describe('OrdersService', () => {
 
   const prismaMock = {
     order: { findFirst: jest.fn(), findUnique: jest.fn() },
+    product: { findMany: jest.fn() },
     $transaction: jest.fn(async (cb: (tx: typeof txMock) => Promise<unknown>) => cb(txMock)),
   };
 
   const redisMock = { del: jest.fn() };
+  const couponsMock = { validateCoupon: jest.fn(), applyCoupon: jest.fn() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -29,12 +32,17 @@ describe('OrdersService', () => {
     txMock.orderItem.findMany.mockResolvedValue([]);
     txMock.orderStatusHistory.create.mockResolvedValue({});
     txMock.inventoryRecord.updateMany.mockResolvedValue({});
+    // Authoritative product prices come from the DB, never the client payload.
+    prismaMock.product.findMany.mockResolvedValue([
+      { id: 'p1', title: 'Acrylic Wall Photo', sku: null, price: 500, taxRate: 18, isActive: true },
+    ]);
 
     const moduleRef = await Test.createTestingModule({
       providers: [
         OrdersService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: RedisService, useValue: redisMock },
+        { provide: CouponsService, useValue: couponsMock },
       ],
     }).compile();
 
@@ -59,17 +67,45 @@ describe('OrdersService', () => {
     };
 
     it('recalculates totals server-side (subtotal, 18% GST, free shipping above 999)', async () => {
+      // A raw client-supplied discount must be IGNORED — discount only comes
+      // from a server-validated coupon.
       await service.createOrder('u1', { ...baseDto, discount: 100 } as any);
 
       const orderData = txMock.order.create.mock.calls[0][0].data;
-      // (500 + 100) * 2 = 1200
+      // (500 + 100) * 2 = 1200 using the server product price of 500
       expect(orderData.subtotal).toBe(1200);
       expect(orderData.tax).toBe(216); // 18% of 1200
       expect(orderData.shippingCost).toBe(0); // free above 999
-      expect(orderData.discount).toBe(100);
-      expect(orderData.total).toBe(1316); // 1200 + 216 + 0 - 100
+      expect(orderData.discount).toBe(0); // client discount ignored, no coupon
+      expect(orderData.total).toBe(1416); // 1200 + 216 + 0 - 0
       expect(orderData.status).toBe(OrderStatus.PENDING);
       expect(orderData.orderNumber).toMatch(/^GFT-\d{4}-/);
+    });
+
+    it('ignores a tampered client unitPrice and uses the DB product price', async () => {
+      const dto = {
+        ...baseDto,
+        items: [{ productId: 'p1', title: 'Acrylic Wall Photo', quantity: 1, unitPrice: 1 }],
+      };
+
+      await service.createOrder('u1', dto as any);
+
+      const orderData = txMock.order.create.mock.calls[0][0].data;
+      // Server price 500 wins over the tampered unitPrice of 1
+      expect(orderData.subtotal).toBe(500);
+      expect(orderData.items.create[0].unitPrice).toBe(500);
+    });
+
+    it('applies a server-validated coupon discount when a coupon code is supplied', async () => {
+      couponsMock.validateCoupon.mockResolvedValue({ code: 'WELCOME10', calculatedDiscount: 120 });
+
+      await service.createOrder('u1', { ...baseDto, couponCode: 'welcome10' } as any);
+
+      const orderData = txMock.order.create.mock.calls[0][0].data;
+      expect(couponsMock.validateCoupon).toHaveBeenCalledWith('welcome10', 1200, 'u1');
+      expect(orderData.discount).toBe(120);
+      expect(orderData.couponCode).toBe('WELCOME10');
+      expect(orderData.total).toBe(1200 + 216 + 0 - 120);
     });
 
     it('charges ₹99 shipping below the free-shipping threshold', async () => {

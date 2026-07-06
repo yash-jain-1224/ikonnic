@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
@@ -56,6 +56,15 @@ export class CartService {
   }
 
   async addItem(userId: string | undefined, guestSessionId: string | undefined, dto: AddToCartDto) {
+    // Resolve the authoritative unit price from the product — never trust the client.
+    const product = await this.prisma.product.findUnique({ where: { id: dto.productId } });
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.isActive === false) throw new BadRequestException('Product is not available');
+
+    const unitPrice = product.price;
+    const optionsPrice = Math.max(0, Number(dto.optionsPrice) || 0);
+    const quantity = Math.max(1, Math.floor(Number(dto.quantity) || 1));
+
     // Get or create cart
     let cart = await this.getOrCreateCart(userId, guestSessionId);
 
@@ -68,10 +77,10 @@ export class CartService {
     });
 
     if (existingItem) {
-      // Update quantity
+      // Update quantity and refresh the price to the current server value
       return this.prisma.cartItem.update({
         where: { id: existingItem.id },
-        data: { quantity: existingItem.quantity + (dto.quantity || 1) },
+        data: { quantity: existingItem.quantity + quantity, unitPrice, optionsPrice },
         include: { product: true },
       });
     }
@@ -81,10 +90,10 @@ export class CartService {
       data: {
         cartId: cart.id,
         productId: dto.productId,
-        quantity: dto.quantity || 1,
-        unitPrice: dto.unitPrice,
-        optionsPrice: dto.optionsPrice || 0,
-        discount: dto.discount || 0,
+        quantity,
+        unitPrice,
+        optionsPrice,
+        discount: 0,
         selectedOptions: dto.selectedOptions || {},
         uploadedImagePreview: dto.uploadedImagePreview,
         uploadedImageRef: dto.uploadedImageRef,
@@ -95,9 +104,18 @@ export class CartService {
     });
   }
 
-  async updateItem(cartItemId: string, dto: UpdateCartItemDto) {
-    const item = await this.prisma.cartItem.findUnique({ where: { id: cartItemId } });
+  async updateItem(
+    cartItemId: string,
+    dto: UpdateCartItemDto,
+    userId?: string,
+    guestSessionId?: string,
+  ) {
+    const item = await this.prisma.cartItem.findUnique({
+      where: { id: cartItemId },
+      include: { cart: true },
+    });
     if (!item) throw new NotFoundException('Cart item not found');
+    this.assertOwnership(item.cart, userId, guestSessionId);
 
     const updateData: any = { quantity: dto.quantity ?? item.quantity };
     if (dto.selectedOptions) updateData.selectedOptions = dto.selectedOptions;
@@ -109,12 +127,30 @@ export class CartService {
     });
   }
 
-  async removeItem(cartItemId: string) {
-    const item = await this.prisma.cartItem.findUnique({ where: { id: cartItemId } });
+  async removeItem(cartItemId: string, userId?: string, guestSessionId?: string) {
+    const item = await this.prisma.cartItem.findUnique({
+      where: { id: cartItemId },
+      include: { cart: true },
+    });
     if (!item) throw new NotFoundException('Cart item not found');
+    this.assertOwnership(item.cart, userId, guestSessionId);
 
     await this.prisma.cartItem.delete({ where: { id: cartItemId } });
     return { message: 'Item removed from cart' };
+  }
+
+  /**
+   * Ensures the caller owns the cart the item belongs to. Authenticated users
+   * must match on userId; guests must present the matching guestSessionId.
+   */
+  private assertOwnership(
+    cart: { userId: string | null; guestSessionId: string | null },
+    userId?: string,
+    guestSessionId?: string,
+  ) {
+    if (userId && cart.userId === userId) return;
+    if (guestSessionId && cart.guestSessionId === guestSessionId) return;
+    throw new ForbiddenException('You do not have access to this cart item');
   }
 
   async clearCart(userId?: string, guestSessionId?: string) {

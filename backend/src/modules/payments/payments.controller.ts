@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Param, Headers, UseGuards, Req, Get, RawBodyRequest } from '@nestjs/common';
+import { Controller, Post, Body, Param, Headers, UseGuards, Req, Get } from '@nestjs/common';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { InitiatePaymentDto, VerifyPaymentDto, RefundPaymentDto } from './dto/payment.dto';
 
 @ApiTags('payments')
@@ -17,9 +19,10 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Initiate payment for an order' })
   async initiate(
     @Body() body: InitiatePaymentDto,
+    @Req() req: any,
     @Headers('x-idempotency-key') idempotencyKey?: string,
   ) {
-    return this.paymentsService.initiatePayment(body.orderId, body.method as any, idempotencyKey);
+    return this.paymentsService.initiatePayment(body.orderId, body.method as any, idempotencyKey, req.user?.id);
   }
 
   @Post('verify')
@@ -27,14 +30,15 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify payment after gateway callback' })
-  async verify(@Body() body: VerifyPaymentDto) {
-    return this.paymentsService.verifyPayment(body.paymentId, body.verificationData);
+  async verify(@Body() body: VerifyPaymentDto, @Req() req: any) {
+    return this.paymentsService.verifyPayment(body.paymentId, body.verificationData, req.user?.id);
   }
 
   @Post('refund')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'SUPER_ADMIN')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Initiate refund for an order' })
+  @ApiOperation({ summary: 'Initiate refund for an order (admin only)' })
   async refund(@Body() body: RefundPaymentDto) {
     return this.paymentsService.initiateRefund(body.orderId, body.amount, body.reason);
   }
@@ -43,8 +47,9 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get payment history for an order' })
-  async history(@Param('orderId') orderId: string) {
-    return this.paymentsService.getPaymentHistory(orderId);
+  async history(@Param('orderId') orderId: string, @Req() req: any) {
+    const isAdmin = req.user?.role === 'ADMIN' || req.user?.role === 'SUPER_ADMIN';
+    return this.paymentsService.getPaymentHistory(orderId, req.user?.id, isAdmin);
   }
 
   @Post('webhook/:provider')

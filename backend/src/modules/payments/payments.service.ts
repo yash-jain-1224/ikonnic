@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RazorpayService } from './razorpay.service';
@@ -14,15 +14,32 @@ export class PaymentsService {
     private stripe: StripeService,
   ) {}
 
-  async initiatePayment(orderId: string, method: PaymentMethod, idempotencyKey?: string) {
+  /**
+   * Verifies the caller owns the order (admins bypass). Prevents users from
+   * initiating/verifying payments or reading payment data for others' orders.
+   */
+  private async assertOrderAccess(orderId: string, userId?: string, isAdmin = false) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (!isAdmin && userId && order.userId !== userId) {
+      throw new ForbiddenException('You do not have access to this order');
+    }
+    return order;
+  }
+
+  async initiatePayment(
+    orderId: string,
+    method: PaymentMethod,
+    idempotencyKey?: string,
+    userId?: string,
+  ) {
     // Check idempotency
     if (idempotencyKey) {
       const existing = await this.prisma.payment.findUnique({ where: { idempotencyKey } });
       if (existing) return existing;
     }
 
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
-    if (!order) throw new BadRequestException('Order not found');
+    const order = await this.assertOrderAccess(orderId, userId);
 
     let gatewayResponse: any;
 
@@ -70,13 +87,16 @@ export class PaymentsService {
     };
   }
 
-  async verifyPayment(paymentId: string, verificationData: any) {
+  async verifyPayment(paymentId: string, verificationData: any, userId?: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: { order: true },
     });
 
     if (!payment) throw new BadRequestException('Payment not found');
+    if (userId && payment.order?.userId !== userId) {
+      throw new ForbiddenException('You do not have access to this payment');
+    }
 
     let isValid = false;
 
@@ -200,7 +220,8 @@ export class PaymentsService {
     return refund;
   }
 
-  async getPaymentHistory(orderId: string) {
+  async getPaymentHistory(orderId: string, userId?: string, isAdmin = false) {
+    await this.assertOrderAccess(orderId, userId, isAdmin);
     return this.prisma.payment.findMany({
       where: { orderId },
       orderBy: { createdAt: 'desc' },

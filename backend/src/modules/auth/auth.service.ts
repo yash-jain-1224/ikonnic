@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -15,6 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private redis: RedisService,
+    private notifications: NotificationsService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -314,21 +316,26 @@ export class AuthService {
     return sanitized;
   }
 
-  // Notification stubs - connect to actual notification service
+  // Notification delivery — wired to NotificationsService. All calls degrade
+  // gracefully (the service catches transport failures internally) so auth
+  // flows never fail because email/SMS is unavailable.
   private async sendVerificationEmail(email: string, name: string) {
-    // TODO: Implement via NotificationsModule
-    console.log(`[Email] Verification email to ${email} for ${name}`);
+    await this.notifications.sendWelcomeEmail(email, name);
   }
 
   private async sendPasswordResetEmail(email: string, otp: string, name: string) {
-    console.log(`[Email] Password reset OTP ${otp} to ${email}`);
+    await this.notifications.sendPasswordResetOtp(email, otp, name);
   }
 
   private async sendOtpEmail(email: string, otp: string) {
-    console.log(`[Email] OTP ${otp} to ${email}`);
+    await this.notifications.sendEmail(
+      email,
+      'Your Ikonnic verification code',
+      `<p>Your one-time code is <strong style="font-size:20px;letter-spacing:4px">${otp}</strong>. It expires in 10 minutes.</p>`,
+    );
   }
 
   private async sendOtpSms(phone: string, otp: string) {
-    console.log(`[SMS] OTP ${otp} to ${phone}`);
+    await this.notifications.sendSms(phone, `Ikonnic: your one-time code is ${otp}. It expires in 10 minutes.`);
   }
 }

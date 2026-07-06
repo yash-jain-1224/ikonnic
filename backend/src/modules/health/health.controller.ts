@@ -1,13 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @ApiTags('health')
 @SkipThrottle()
 @Controller('health')
 export class HealthController {
+  constructor(private readonly prisma: PrismaService) {}
+
   @Get()
-  @ApiOperation({ summary: 'Health check endpoint' })
+  @ApiOperation({ summary: 'Liveness check endpoint' })
   check() {
     return {
       status: 'ok',
@@ -18,8 +21,13 @@ export class HealthController {
   }
 
   @Get('ready')
-  @ApiOperation({ summary: 'Readiness probe' })
-  ready() {
-    return { status: 'ready' };
+  @ApiOperation({ summary: 'Readiness probe (verifies database connectivity)' })
+  async ready() {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+    } catch {
+      throw new ServiceUnavailableException({ status: 'not_ready', database: 'down' });
+    }
+    return { status: 'ready', database: 'up', timestamp: new Date().toISOString() };
   }
 }

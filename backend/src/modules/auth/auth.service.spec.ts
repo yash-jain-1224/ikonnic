@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -33,6 +34,12 @@ describe('AuthService', () => {
   const jwtMock = { signAsync: jest.fn().mockResolvedValue('signed-token') };
   const configMock = { get: jest.fn((_key: string, def?: string) => def) };
   const redisMock = { del: jest.fn() };
+  const notificationsMock = {
+    sendWelcomeEmail: jest.fn(),
+    sendPasswordResetOtp: jest.fn(),
+    sendEmail: jest.fn(),
+    sendSms: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -44,6 +51,7 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: jwtMock },
         { provide: ConfigService, useValue: configMock },
         { provide: RedisService, useValue: redisMock },
+        { provide: NotificationsService, useValue: notificationsMock },
       ],
     }).compile();
 

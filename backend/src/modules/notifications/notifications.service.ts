@@ -45,13 +45,10 @@ export class NotificationsService implements OnModuleInit {
       port,
       secure: port === 465,
       auth: { user, pass },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      connectionTimeout: 10_000,
-      greetingTimeout: 10_000,
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
       socketTimeout: 30_000,
-    });
+    } as nodemailer.TransportOptions);
 
     // Verify SMTP connection on startup
     try {
@@ -114,6 +111,12 @@ export class NotificationsService implements OnModuleInit {
       } catch (error) {
         const errMsg = (error as Error).message;
         this.logger.warn(`📧 Email attempt ${attempt}/${maxRetries} failed to ${opts.to}: ${errMsg}`);
+
+        // Re-initialize transporter on connection errors (stale sockets on serverless)
+        if (/ECONN|ETIMEDOUT|ESOCKET|ECONNRESET|EPIPE|socket/.test(errMsg)) {
+          this.logger.warn('📧 Connection error detected — re-initializing SMTP transporter');
+          await this.initializeTransporter();
+        }
 
         if (attempt < maxRetries) {
           await this.sleep(this.RETRY_DELAY_MS * attempt);
@@ -195,7 +198,7 @@ export class NotificationsService implements OnModuleInit {
     phone?: string,
     items?: Array<{ title: string; quantity: number; total: number }>,
   ) {
-    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://ikonnic.com');
+    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://www.ikonnic.com');
     const itemsHtml = items?.map((i) => `
       <tr>
         <td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155">${i.title}</td>
@@ -250,7 +253,7 @@ export class NotificationsService implements OnModuleInit {
   }
 
   async sendShippingUpdate(email: string, orderNumber: string, status: string, trackingNumber?: string, userId?: string, phone?: string) {
-    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://ikonnic.com');
+    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://www.ikonnic.com');
     const html = `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#ffffff">
         <div style="text-align:center;margin-bottom:32px">
@@ -277,7 +280,7 @@ export class NotificationsService implements OnModuleInit {
   }
 
   async sendWelcomeEmail(email: string, firstName: string, userId?: string) {
-    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://ikonnic.com');
+    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://www.ikonnic.com');
     const html = `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#ffffff">
         <div style="text-align:center;margin-bottom:32px">
@@ -315,7 +318,7 @@ export class NotificationsService implements OnModuleInit {
   }
 
   async sendOrderCancelledEmail(email: string, orderNumber: string, reason: string, userId?: string) {
-    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://ikonnic.com');
+    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://www.ikonnic.com');
     const html = `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#ffffff">
         <div style="text-align:center;margin-bottom:32px">

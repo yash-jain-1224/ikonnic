@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { products } from "@/data/products";
 import { WHITELISTED_CATEGORY_SLUGS } from "@/config/whitelist";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://ikonnic.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();

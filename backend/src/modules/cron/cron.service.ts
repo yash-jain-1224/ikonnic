@@ -87,7 +87,7 @@ export class CronService {
             <p>We hope you're loving your order (<strong>${order.orderNumber}</strong>)!</p>
             <p>Items: ${productNames}</p>
             <p>We'd love to hear your feedback — it helps other customers and our artisans.</p>
-            <a href="https://ikonnic.com/orders-tracking?order=${order.orderNumber}" style="display:inline-block;background:#e11d48;color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700">Leave a Review</a>
+            <a href="https://www.ikonnic.com/orders-tracking?order=${order.orderNumber}" style="display:inline-block;background:#e11d48;color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700">Leave a Review</a>
           </div>`;
 
         await this.notifications.sendEmail(order.user.email, subject, html, order.user.id);

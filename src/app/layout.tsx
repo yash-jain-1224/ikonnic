@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ikonnic.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
 
 export const metadata: Metadata = {
   title: {

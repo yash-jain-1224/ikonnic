@@ -28,7 +28,7 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-card sm:p-9">
+    <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-rosegold-200/60 bg-white p-7 shadow-card sm:p-9">
       <div className="mx-auto inline-flex items-center gap-1 rounded-sm bg-black px-2.5 py-1 text-sm font-black tracking-[0.12em] text-white">
         IKONNIC<span className="grid size-4 place-items-center rounded-sm bg-ikonnic-red text-[9px]">◆</span>
       </div>
@@ -45,7 +45,7 @@ export function ForgotPasswordForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red"
+          className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red"
         />
       </label>
 

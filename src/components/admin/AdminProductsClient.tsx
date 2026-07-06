@@ -219,14 +219,14 @@ export function AdminProductsClient() {
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-black text-slate-950">{editing === "new" ? "Create Product" : "Edit Product"}</h1>
-          <button onClick={() => setEditing(null)} className="rounded-full p-2 hover:bg-slate-100">
+          <button onClick={() => setEditing(null)} className="rounded-full p-2 hover:bg-rosegold-100">
             <X size={20} />
           </button>
         </div>
 
         {error && <div className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">{error}</div>}
 
-        <div className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="space-y-6 rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-sm">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-xs font-bold text-slate-600">
               Title *
@@ -236,7 +236,7 @@ export function AdminProductsClient() {
                   const title = e.target.value;
                   setForm((prev) => ({ ...prev, title, slug: editing === "new" ? generateSlug(title) : prev.slug }));
                 }}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -244,7 +244,7 @@ export function AdminProductsClient() {
               <input
                 value={form.slug}
                 onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -252,7 +252,7 @@ export function AdminProductsClient() {
               <input
                 value={form.categorySlug}
                 onChange={(e) => setForm((prev) => ({ ...prev, categorySlug: e.target.value }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -261,7 +261,7 @@ export function AdminProductsClient() {
                 type="number"
                 value={form.price}
                 onChange={(e) => setForm((prev) => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -270,7 +270,7 @@ export function AdminProductsClient() {
                 type="number"
                 value={form.oldPrice ?? ""}
                 onChange={(e) => setForm((prev) => ({ ...prev, oldPrice: parseFloat(e.target.value) || undefined }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -278,7 +278,7 @@ export function AdminProductsClient() {
               <select
                 value={form.stockStatus}
                 onChange={(e) => setForm((prev) => ({ ...prev, stockStatus: e.target.value }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200/60 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               >
                 <option value="IN_STOCK">In Stock</option>
                 <option value="LOW_STOCK">Low Stock</option>
@@ -292,7 +292,7 @@ export function AdminProductsClient() {
                 type="number"
                 value={form.stockCount ?? ""}
                 onChange={(e) => setForm((prev) => ({ ...prev, stockCount: e.target.value ? parseInt(e.target.value) : null }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
             <label className="text-xs font-bold text-slate-600">
@@ -300,7 +300,7 @@ export function AdminProductsClient() {
               <input
                 value={form.filterTags.join(", ")}
                 onChange={(e) => setForm((prev) => ({ ...prev, filterTags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) }))}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+                className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
               />
             </label>
           </div>
@@ -311,7 +311,7 @@ export function AdminProductsClient() {
               rows={3}
               value={form.description}
               onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+              className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
             />
           </label>
 
@@ -321,7 +321,7 @@ export function AdminProductsClient() {
               rows={5}
               value={form.longDescription || ""}
               onChange={(e) => setForm((prev) => ({ ...prev, longDescription: e.target.value }))}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+              className="mt-1 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
             />
           </label>
 
@@ -376,7 +376,7 @@ export function AdminProductsClient() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 border-t border-slate-100 pt-4">
+          <div className="flex gap-3 border-t border-rosegold-200/40 pt-4">
             <button
               onClick={handleSave}
               disabled={saving || !form.title || !form.price}
@@ -385,7 +385,7 @@ export function AdminProductsClient() {
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {saving ? "Saving..." : editing === "new" ? "Create Product" : "Update Product"}
             </button>
-            <button onClick={() => setEditing(null)} className="rounded-full border border-slate-200 px-6 py-3 text-sm font-bold">
+            <button onClick={() => setEditing(null)} className="rounded-full border border-rosegold-200 px-6 py-3 text-sm font-bold">
               Cancel
             </button>
           </div>
@@ -419,9 +419,9 @@ export function AdminProductsClient() {
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-ikonnic-red" size={32} /></div>
       ) : (
         <>
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-rosegold-200/60 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50">
+              <thead className="border-b border-rosegold-200/40 bg-rosegold-50">
                 <tr>
                   <th className="px-4 py-3 font-bold text-slate-600">Product</th>
                   <th className="px-4 py-3 font-bold text-slate-600">Category</th>
@@ -433,7 +433,7 @@ export function AdminProductsClient() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-slate-50">
+                  <tr key={product.id} className="hover:bg-rosegold-100">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img src={product.image || "/images/placeholder.webp"} alt="" className="size-10 rounded-lg object-cover" />
@@ -465,7 +465,7 @@ export function AdminProductsClient() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex gap-1">
-                        <button onClick={() => openEdit(product)} className="rounded-lg p-2 hover:bg-slate-100" title="Edit">
+                        <button onClick={() => openEdit(product)} className="rounded-lg p-2 hover:bg-rosegold-100" title="Edit">
                           <Pencil size={15} className="text-slate-600" />
                         </button>
                         <button onClick={() => handleDelete(product.id)} className="rounded-lg p-2 hover:bg-red-50" title="Delete">

@@ -38,13 +38,13 @@ export function FeaturedProductsCarousel({ products = defaultProducts }: { produ
         <div className="hidden gap-2 sm:flex">
           <button
             onClick={scrollLeft}
-            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fce4da] text-rosegold-700 transition hover:bg-rosegold-100"
+            className="grid size-10 place-items-center rounded-full border border-rosegold-200/60 bg-white text-rosegold-700 shadow-card transition hover:bg-rosegold-100 hover:shadow-soft"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={scrollRight}
-            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fce4da] text-rosegold-700 transition hover:bg-rosegold-100"
+            className="grid size-10 place-items-center rounded-full border border-rosegold-200/60 bg-white text-rosegold-700 shadow-card transition hover:bg-rosegold-100 hover:shadow-soft"
           >
             <ChevronRight size={20} />
           </button>
@@ -61,7 +61,7 @@ export function FeaturedProductsCarousel({ products = defaultProducts }: { produ
             href={`/customise/${product.slug}`}
             className="group flex w-[260px] shrink-0 snap-start flex-col gap-3 sm:w-[280px]"
           >
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-100 shadow-sm transition group-hover:shadow-md">
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-rosegold-100 shadow-sm transition group-hover:shadow-md">
               <SmartImage
                 src={product.image}
                 alt={product.title}

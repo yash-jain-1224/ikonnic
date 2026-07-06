@@ -91,7 +91,7 @@ export function TrackingForm() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
-      <form onSubmit={submit} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
+      <form onSubmit={submit} className="rounded-3xl border border-rosegold-200/60 bg-white p-6 shadow-card">
         <h2 className="text-lg font-black">Find your shipment</h2>
         <div className="mt-5 space-y-4">
           <label className="block text-xs font-bold text-slate-600">
@@ -102,7 +102,7 @@ export function TrackingForm() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="GFT-2026-ABCDE or ORD-XXXX"
-              className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+              className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
             />
           </label>
           <label className="block text-xs font-bold text-slate-600">
@@ -113,7 +113,7 @@ export function TrackingForm() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="Used during checkout"
-              className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
+              className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red"
             />
           </label>
         </div>
@@ -135,7 +135,7 @@ export function TrackingForm() {
         </p>
       </form>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
+      <div className="rounded-3xl border border-rosegold-200/60 bg-white p-6 shadow-card">
         {tracked && result ? (
           <>
             <div className="flex items-center justify-between gap-4">
@@ -156,8 +156,8 @@ export function TrackingForm() {
             {result.events.length > 0 ? (
               <div className="mt-6 space-y-3">
                 {result.events.map((event, i) => (
-                  <div key={i} className="flex gap-3 rounded-xl border border-slate-100 p-3">
-                    <div className={`grid size-8 shrink-0 place-items-center rounded-full ${i === 0 ? "bg-red-50 text-ikonnic-red" : "bg-slate-100 text-slate-400"}`}>
+                  <div key={i} className="flex gap-3 rounded-xl border border-rosegold-200/40 p-3">
+                    <div className={`grid size-8 shrink-0 place-items-center rounded-full ${i === 0 ? "bg-red-50 text-ikonnic-red" : "bg-rosegold-100 text-slate-400"}`}>
                       {i === 0 ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -177,8 +177,8 @@ export function TrackingForm() {
                 {trackingStatuses.map((status, index) => {
                   const done = index <= activeIndex;
                   return (
-                    <div key={status} className="flex gap-3 rounded-xl border border-slate-100 p-3">
-                      <div className={`grid size-8 shrink-0 place-items-center rounded-full ${done ? "bg-red-50 text-ikonnic-red" : "bg-slate-100 text-slate-400"}`}>
+                    <div key={status} className="flex gap-3 rounded-xl border border-rosegold-200/40 p-3">
+                      <div className={`grid size-8 shrink-0 place-items-center rounded-full ${done ? "bg-red-50 text-ikonnic-red" : "bg-rosegold-100 text-slate-400"}`}>
                         {done ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                       </div>
                       <div>

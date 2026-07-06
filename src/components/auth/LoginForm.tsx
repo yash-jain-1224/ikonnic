@@ -58,7 +58,7 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-card sm:p-9">
+    <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-rosegold-200/60 bg-white p-7 shadow-card sm:p-9">
       <div className="mx-auto inline-flex items-center gap-1 rounded-sm bg-black px-2.5 py-1 text-sm font-black tracking-[0.12em] text-white">IKONNIC<span className="grid size-4 place-items-center rounded-sm bg-ikonnic-red text-[9px]">◆</span></div>
       <h1 className="mt-6 text-2xl font-black text-slate-950">{mode === "register" ? "Create account" : mode === "forgot" ? "Reset password" : "Welcome back"}</h1>
       <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -68,19 +68,19 @@ export function LoginForm() {
       {mode === "register" && (
         <label className="mt-6 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
           Full name
-          <input required name="name" placeholder="Your name" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+          <input required name="name" placeholder="Your name" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
         </label>
       )}
 
       <label className="mt-5 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
         {mode === "forgot" ? "Email" : "Email or phone"}
-        <input required name="identity" type={mode === "forgot" ? "email" : "text"} placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+        <input required name="identity" type={mode === "forgot" ? "email" : "text"} placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
       </label>
 
       {mode !== "forgot" && (
         <label className="mt-5 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
           Password
-          <input required name="password" type="password" placeholder="••••••••" minLength={6} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+          <input required name="password" type="password" placeholder="••••••••" minLength={6} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
         </label>
       )}
 
@@ -113,7 +113,7 @@ export function LoginForm() {
           </div>
           <a
             href="/api/auth/signin/azure-ad"
-            className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 bg-white px-6 py-3.5 text-sm font-black text-slate-800 hover:bg-slate-50"
+            className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 bg-white px-6 py-3.5 text-sm font-black text-slate-800 hover:bg-rosegold-100"
           >
             <svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true">
               <rect x="1" y="1" width="9" height="9" fill="#f25022" />

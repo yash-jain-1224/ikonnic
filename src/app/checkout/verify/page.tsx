@@ -65,7 +65,7 @@ function PaymentVerifyContent() {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/orders-tracking" className="rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white">Track order</Link>
-          <Link href="/account" className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700">My account</Link>
+          <Link href="/account" className="rounded-full border border-rosegold-200 px-5 py-3 text-sm font-black text-slate-700">My account</Link>
         </div>
       </div>
     );
@@ -80,7 +80,7 @@ function PaymentVerifyContent() {
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Link href="/checkout" className="rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white">Try again</Link>
-        <Link href="/contact-us" className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700">Contact support</Link>
+        <Link href="/contact-us" className="rounded-full border border-rosegold-200 px-5 py-3 text-sm font-black text-slate-700">Contact support</Link>
       </div>
     </div>
   );

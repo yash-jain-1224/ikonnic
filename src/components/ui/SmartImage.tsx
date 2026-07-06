@@ -42,7 +42,7 @@ export function SmartImage({
   const useNextImage = isLocal || isExternal;
 
   return (
-    <span className={`relative block overflow-hidden bg-slate-50 ${wrapperClassName}`}>
+    <span className={`relative block overflow-hidden bg-rosegold-50 ${wrapperClassName}`}>
       <span
         aria-hidden="true"
         className={`absolute inset-0 bg-[linear-gradient(135deg,#f8fafc_0%,#eef2f7_100%)] transition-opacity duration-200 ${loaded ? "opacity-0" : "opacity-100"} ${skeletonClassName}`}

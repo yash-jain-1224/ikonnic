@@ -32,7 +32,7 @@ export default function AdminPage() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {modules.map(({ title, Icon, href, body, live }) => (
-          <Link key={title} href={href} className={`group rounded-2xl border bg-white p-5 shadow-sm transition ${live ? "border-slate-200 hover:-translate-y-1 hover:shadow-card" : "border-dashed border-slate-300 opacity-60"}`}>
+          <Link key={title} href={href} className={`group rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm transition ${live ? "border-slate-200 hover:-translate-y-1 hover:shadow-card" : "border-dashed border-rosegold-200 opacity-60"}`}>
             <div className="flex items-center gap-2">
               <div className="grid size-10 place-items-center rounded-xl bg-red-50 text-ikonnic-red"><Icon size={20} /></div>
               {live && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">LIVE</span>}

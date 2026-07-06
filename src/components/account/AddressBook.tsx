@@ -142,14 +142,14 @@ export function AddressBook() {
     }
   };
 
-  const inputClass = "mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-ikonnic-red";
+  const inputClass = "mt-1 w-full rounded-lg border border-rosegold-200 px-3 py-2 text-xs outline-none focus:border-ikonnic-red";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+    <div className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 font-black text-slate-950"><MapPin size={16} /> Addresses</h3>
         {editing === null && (
-          <button type="button" onClick={startAdd} className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1.5 text-[11px] font-black text-slate-600 hover:border-ikonnic-red hover:text-ikonnic-red">
+          <button type="button" onClick={startAdd} className="inline-flex items-center gap-1 rounded-full border border-rosegold-200 px-2.5 py-1.5 text-[11px] font-black text-slate-600 hover:border-ikonnic-red hover:text-ikonnic-red">
             <Plus size={12} /> Add
           </button>
         )}
@@ -157,7 +157,7 @@ export function AddressBook() {
 
       {loading ? (
         <div className="mt-3 space-y-2">
-          {[1, 2].map((i) => <div key={i} className="h-14 animate-pulse rounded-lg bg-slate-100" />)}
+          {[1, 2].map((i) => <div key={i} className="h-14 animate-pulse rounded-lg bg-rosegold-100" />)}
         </div>
       ) : editing !== null ? (
         <div className="mt-3 space-y-2">
@@ -182,7 +182,7 @@ export function AddressBook() {
             <button type="button" disabled={saving} onClick={save} className="flex-1 rounded-full bg-ikonnic-red px-3 py-2 text-[11px] font-black text-white hover:bg-red-700 disabled:opacity-60">
               {saving ? <Loader2 size={12} className="mx-auto animate-spin" /> : editing === "new" ? "Save address" : "Update address"}
             </button>
-            <button type="button" onClick={() => setEditing(null)} className="rounded-full border border-slate-200 px-3 py-2 text-[11px] font-black text-slate-600"><X size={12} /></button>
+            <button type="button" onClick={() => setEditing(null)} className="rounded-full border border-rosegold-200 px-3 py-2 text-[11px] font-black text-slate-600"><X size={12} /></button>
           </div>
         </div>
       ) : addresses.length === 0 ? (
@@ -190,7 +190,7 @@ export function AddressBook() {
       ) : (
         <div className="mt-3 space-y-2">
           {addresses.map((addr) => (
-            <div key={addr.id} className="rounded-lg border border-slate-100 p-2.5 text-xs text-slate-600">
+            <div key={addr.id} className="rounded-lg border border-rosegold-200/40 p-2.5 text-xs text-slate-600">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="font-bold text-slate-800">

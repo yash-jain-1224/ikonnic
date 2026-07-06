@@ -97,7 +97,7 @@ export function CheckoutClient() {
     }
   }, [pin]);
 
-  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-white" />;
+  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-rosegold-100" />;
   if (!items.length && !placedOrderId) return <EmptyState title="Nothing to check out yet" />;
 
   const subtotal = items.reduce((sum, item) => sum + (item.finalTotal ?? item.price * item.quantity), 0);
@@ -214,7 +214,7 @@ export function CheckoutClient() {
         <p className="mt-4 font-black text-slate-950">{placedOrderId}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/orders-tracking" className="rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white">Track order</Link>
-          <Link href="/account" className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700">My account</Link>
+          <Link href="/account" className="rounded-full border border-rosegold-200 px-5 py-3 text-sm font-black text-slate-700">My account</Link>
         </div>
       </div>
     );
@@ -230,17 +230,17 @@ export function CheckoutClient() {
             </div>
           )}
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
+          <section className="rounded-3xl border border-rosegold-200/60 bg-white p-6 shadow-card">
             <h2 className="text-lg font-black">Customer details</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <label className="text-xs font-bold text-slate-600">Full name<input required name="name" defaultValue={user ? `${user.firstName} ${user.lastName || ""}`.trim() : ""} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
-              <label className="text-xs font-bold text-slate-600">Email<input required type="email" name="email" defaultValue={user?.email || ""} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
-              <label className="text-xs font-bold text-slate-600">Phone<input required type="tel" name="phone" defaultValue={user?.phone || ""} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
-              <label className="text-xs font-bold text-slate-600">Coupon<input name="coupon" defaultValue={coupon ?? ""} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm uppercase outline-none focus:border-ikonnic-red" /></label>
+              <label className="text-xs font-bold text-slate-600">Full name<input required name="name" defaultValue={user ? `${user.firstName} ${user.lastName || ""}`.trim() : ""} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+              <label className="text-xs font-bold text-slate-600">Email<input required type="email" name="email" defaultValue={user?.email || ""} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+              <label className="text-xs font-bold text-slate-600">Phone<input required type="tel" name="phone" defaultValue={user?.phone || ""} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+              <label className="text-xs font-bold text-slate-600">Coupon<input name="coupon" defaultValue={coupon ?? ""} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm uppercase outline-none focus:border-ikonnic-red" /></label>
             </div>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
+          <section className="rounded-3xl border border-rosegold-200/60 bg-white p-6 shadow-card">
             <h2 className="text-lg font-black">Shipping address</h2>
 
             {/* Saved addresses (signed-in users) */}
@@ -275,10 +275,10 @@ export function CheckoutClient() {
             {/* Manual address form (guests, or "new address") */}
             {(selectedAddressId === "new" || savedAddresses.length === 0) && (
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <label className="text-xs font-bold text-slate-600 sm:col-span-2">Street address<input required name="address" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+                <label className="text-xs font-bold text-slate-600 sm:col-span-2">Street address<input required name="address" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
                 <label className="text-xs font-bold text-slate-600">PIN code
                   <div className="relative">
-                    <input required name="pin" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" />
+                    <input required name="pin" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" />
                     {loadingPin && <div className="absolute right-3 top-5 size-4 animate-spin rounded-full border-2 border-ikonnic-red border-t-transparent" />}
                   </div>
                   {serviceability && !serviceability.serviceable && pin.length === 6 && (
@@ -288,14 +288,14 @@ export function CheckoutClient() {
                     <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-emerald-600"><Truck size={12} />Delivery in ~{serviceability.estimatedDays} days</p>
                   )}
                 </label>
-                <label className="text-xs font-bold text-slate-600">City<input required name="city" value={city} onChange={(e) => setCity(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
-                <label className="text-xs font-bold text-slate-600">State<input required name="state" value={stateName} onChange={(e) => setStateName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
-                <label className="text-xs font-bold text-slate-600 sm:col-span-2">Country<select name="country" className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"><option>India</option></select></label>
+                <label className="text-xs font-bold text-slate-600">City<input required name="city" value={city} onChange={(e) => setCity(e.target.value)} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+                <label className="text-xs font-bold text-slate-600">State<input required name="state" value={stateName} onChange={(e) => setStateName(e.target.value)} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+                <label className="text-xs font-bold text-slate-600 sm:col-span-2">Country<select name="country" className="mt-2 w-full rounded-xl border border-rosegold-200/60 bg-white px-4 py-3 text-sm outline-none focus:border-ikonnic-red"><option>India</option></select></label>
               </div>
             )}
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card">
+          <section className="rounded-3xl border border-rosegold-200/60 bg-white p-6 shadow-card">
             <h2 className="text-lg font-black">Payment method</h2>
             <div className="mt-4 space-y-3">
               <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${paymentMethod === "PHONEPE" ? "border-ikonnic-red bg-red-50" : "border-slate-200"}`}>
@@ -311,11 +311,11 @@ export function CheckoutClient() {
         </div>
 
         <div className="space-y-5">
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+          <section className="rounded-3xl border border-rosegold-200/60 bg-white p-5 shadow-card">
             <h2 className="font-black">Order summary</h2>
             <div className="mt-4 max-h-80 space-y-3 overflow-auto pr-1">
               {items.map((item) => (
-                <div key={item.lineId} className="flex gap-3 border-b border-slate-100 pb-3">
+                <div key={item.lineId} className="flex gap-3 border-b border-rosegold-200/40 pb-3">
                   <img src={item.previewImage || item.uploadedImagePreview || item.image} alt="" className="size-14 rounded-lg object-cover" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-bold">{item.title}</p>

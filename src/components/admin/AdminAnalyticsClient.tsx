@@ -67,7 +67,7 @@ export function AdminAnalyticsClient() {
           <p className="mt-1 text-sm text-slate-500">Revenue, order flow, and top sellers.</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex rounded-full border border-slate-200 bg-white p-1">
+          <div className="flex rounded-full border border-rosegold-200/60 bg-white p-1">
             {RANGES.map((range) => (
               <button
                 key={range}
@@ -92,7 +92,7 @@ export function AdminAnalyticsClient() {
           {/* Metric cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div key={label} className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm">
                 <div className={`grid size-10 place-items-center rounded-xl ${color}`}><Icon size={20} /></div>
                 <p className="mt-3 text-2xl font-black text-slate-950">{value}</p>
                 <p className="mt-1 text-xs font-bold text-slate-500">{label}</p>
@@ -101,7 +101,7 @@ export function AdminAnalyticsClient() {
           </div>
 
           {/* Revenue by day */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm">
             <h2 className="font-black text-slate-950">Daily revenue</h2>
             <div
               className="mt-4 flex h-40 items-end gap-px overflow-hidden"
@@ -128,7 +128,7 @@ export function AdminAnalyticsClient() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Orders by status */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm">
               <h2 className="font-black text-slate-950">Orders by status <span className="text-xs font-bold text-slate-400">(all time)</span></h2>
               {data.ordersByStatus.length === 0 ? (
                 <p className="mt-4 text-sm text-slate-500">No orders yet.</p>
@@ -140,7 +140,7 @@ export function AdminAnalyticsClient() {
                         <span className="text-slate-600">{s.status.replace(/_/g, " ")}</span>
                         <span className="text-slate-900">{s._count}</span>
                       </div>
-                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-rosegold-100">
                         <div className="h-full rounded-full bg-ikonnic-red/80" style={{ width: `${(s._count / maxStatusCount) * 100}%` }} />
                       </div>
                     </div>
@@ -150,7 +150,7 @@ export function AdminAnalyticsClient() {
             </section>
 
             {/* Top products */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm">
               <h2 className="font-black text-slate-950">Top products <span className="text-xs font-bold text-slate-400">(all time)</span></h2>
               {data.topProducts.length === 0 ? (
                 <p className="mt-4 text-sm text-slate-500">No sales yet.</p>

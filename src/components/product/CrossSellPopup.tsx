@@ -57,12 +57,12 @@ export function CrossSellPopup({
         </div>
 
         {recommendedProduct && (
-          <div className="bg-slate-50 px-6 py-6">
+          <div className="bg-rosegold-50 px-6 py-6">
             <p className="mb-4 text-center text-[12px] font-black uppercase tracking-[0.1em] text-slate-500">
               Frequently Bought Together
             </p>
             <div className="relative">
-              <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="flex items-center gap-4 rounded-xl border border-rosegold-200/60 bg-white p-3 shadow-sm">
                 <img
                   src={recommendedProduct.image}
                   alt={recommendedProduct.title}
@@ -82,14 +82,14 @@ export function CrossSellPopup({
                   <button
                     type="button"
                     onClick={prevSlide}
-                    className="absolute -left-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50"
+                    className="absolute -left-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full border border-rosegold-200/60 bg-white text-slate-500 shadow-sm transition hover:bg-rosegold-100"
                   >
                     <ChevronLeft size={16} />
                   </button>
                   <button
                     type="button"
                     onClick={nextSlide}
-                    className="absolute -right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50"
+                    className="absolute -right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full border border-rosegold-200/60 bg-white text-slate-500 shadow-sm transition hover:bg-rosegold-100"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -113,7 +113,7 @@ export function CrossSellPopup({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+            className="flex-1 rounded-xl border border-rosegold-200/60 bg-white py-3.5 text-sm font-black text-slate-700 transition hover:bg-rosegold-100"
           >
             Continue Shopping
           </button>

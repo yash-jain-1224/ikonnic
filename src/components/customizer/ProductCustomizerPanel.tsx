@@ -604,7 +604,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
               type="button"
               onClick={() => setTextToolOpen((value) => !value)}
               aria-pressed={textToolOpen}
-              className={`grid size-12 place-items-center rounded-xl text-[#07142f] transition hover:bg-slate-50 ${textToolOpen ? "bg-slate-50 ring-2 ring-blue-600" : ""}`}
+              className={`grid size-12 place-items-center rounded-xl text-[#07142f] transition hover:bg-rosegold-100 ${textToolOpen ? "bg-rosegold-50 ring-2 ring-blue-600" : ""}`}
             >
               <span className="relative text-[30px] font-black leading-none">A<span className="absolute -right-2 bottom-0 grid size-4 place-items-center rounded-full border border-[#07142f] bg-white text-[11px] leading-none">+</span></span>
             </button>
@@ -613,7 +613,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                 type="button"
                 aria-label="Clock face style"
                 title="Clock face style"
-                className="grid size-12 place-items-center rounded-xl border border-[#dfe4ec] bg-white text-[24px] font-black text-[#07142f] transition hover:bg-slate-50"
+                className="grid size-12 place-items-center rounded-xl border border-[#dfe4ec] bg-white text-[24px] font-black text-[#07142f] transition hover:bg-rosegold-100"
               >
                 12
               </button>
@@ -628,7 +628,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                       aria-pressed={selectedViewOrientation === option.id}
                       title={option.label}
                       onClick={() => setSelectedViewOrientation(option.id)}
-                      className={`grid size-12 place-items-center rounded-[4px] bg-white transition hover:bg-slate-50 ${
+                      className={`grid size-12 place-items-center rounded-[4px] bg-white transition hover:bg-rosegold-100 ${
                         selectedViewOrientation === option.id ? "ring-2 ring-blue-600 ring-offset-2" : ""
                       }`}
                     >
@@ -667,9 +667,9 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                   value={textLayer}
                   onChange={(event) => setTextLayer(event.target.value)}
                   placeholder="Add name, date, or short message"
-                  className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-blue-600"
+                  className="min-w-0 flex-1 rounded-xl border border-rosegold-200 px-4 py-3 text-sm font-semibold outline-none focus:border-blue-600"
                 />
-                <button type="button" onClick={() => setTextLayer("")} className="rounded-xl border border-slate-200 px-4 py-3 text-xs font-black text-slate-600 hover:bg-slate-50">
+                <button type="button" onClick={() => setTextLayer("")} className="rounded-xl border border-rosegold-200 px-4 py-3 text-xs font-black text-slate-600 hover:bg-rosegold-100">
                   Clear
                 </button>
               </div>
@@ -677,7 +677,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                 <select
                   value={selectedFont}
                   onChange={(e) => setSelectedFont(e.target.value)}
-                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold outline-none focus:border-blue-600"
+                  className="flex-1 rounded-xl border border-rosegold-200 px-4 py-2 text-sm font-semibold outline-none focus:border-blue-600"
                   style={{ fontFamily: selectedFont }}
                 >
                   {fontOptions.map(font => (
@@ -695,7 +695,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={() => setEditorMode("edit")}
-                className={`h-11 rounded-[10px] text-sm font-black transition ${editorMode === "edit" ? "bg-[#07142f] text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                className={`h-11 rounded-[10px] text-sm font-black transition ${editorMode === "edit" ? "bg-[#07142f] text-white" : "text-slate-500 hover:bg-rosegold-100"}`}
               >
                 2D Edit
               </button>
@@ -832,9 +832,9 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           <h1 className="text-[28px] font-black leading-tight tracking-[-0.03em] text-[#07142f] sm:text-[30px]">{productName}</h1>
           {template && !isClockProduct ? (
             <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">{template.productType}</span>
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">{template.previewType}</span>
-              {template.orientation ? <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">{template.orientation}</span> : null}
+              <span className="rounded-full border border-rosegold-200/60 bg-white px-3 py-1.5">{template.productType}</span>
+              <span className="rounded-full border border-rosegold-200/60 bg-white px-3 py-1.5">{template.previewType}</span>
+              {template.orientation ? <span className="rounded-full border border-rosegold-200/60 bg-white px-3 py-1.5">{template.orientation}</span> : null}
             </div>
           ) : null}
 
@@ -949,7 +949,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
         <Modal title="Why Ikonnic?" onClose={() => setShowWhyIkonnic(false)}>
           <div className="grid gap-3">
             {["Premium acrylic finish", "Easy mounting included", "Secure checkout", "Custom made with care"].map((item) => (
-              <div key={item} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 text-sm font-bold text-[#07142f]">
+              <div key={item} className="flex items-center gap-3 rounded-xl bg-rosegold-50 p-3 text-sm font-bold text-[#07142f]">
                 <Check className="text-emerald-600" size={18} />
                 {item}
               </div>
@@ -992,7 +992,7 @@ function Modal({ title, children, onClose }: { title: string; children: ReactNod
       <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-xl font-black text-[#07142f]">{title}</h2>
-          <button type="button" aria-label={`Close ${title}`} onClick={onClose} className="grid size-9 place-items-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <button type="button" aria-label={`Close ${title}`} onClick={onClose} className="grid size-9 place-items-center rounded-full bg-rosegold-100 text-slate-600 hover:bg-slate-200">
             <X size={18} />
           </button>
         </div>

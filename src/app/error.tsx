@@ -39,7 +39,7 @@ export default function ErrorBoundary({
           </button>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-rosegold-200/60 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-rosegold-100"
           >
             <Home size={16} />
             Back to Home

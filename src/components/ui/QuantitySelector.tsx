@@ -12,12 +12,12 @@ export function QuantitySelector({
   compact?: boolean;
 }) {
   return (
-    <div className={`inline-flex items-center rounded-full border border-slate-200 bg-white ${compact ? "p-0.5" : "p-1"}`}>
+    <div className={`inline-flex items-center rounded-full border border-rosegold-200/60 bg-white ${compact ? "p-0.5" : "p-1"}`}>
       <button
         type="button"
         aria-label="Decrease quantity"
         onClick={() => onChange(Math.max(1, value - 1))}
-        className="grid size-8 place-items-center rounded-full text-slate-600 transition hover:bg-slate-100"
+        className="grid size-8 place-items-center rounded-full text-slate-600 transition hover:bg-rosegold-100"
       >
         <Minus size={14} />
       </button>
@@ -26,7 +26,7 @@ export function QuantitySelector({
         type="button"
         aria-label="Increase quantity"
         onClick={() => onChange(value + 1)}
-        className="grid size-8 place-items-center rounded-full text-slate-600 transition hover:bg-slate-100"
+        className="grid size-8 place-items-center rounded-full text-slate-600 transition hover:bg-rosegold-100"
       >
         <Plus size={14} />
       </button>

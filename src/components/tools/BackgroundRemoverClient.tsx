@@ -20,9 +20,9 @@ export function BackgroundRemoverClient() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+      <section className="rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-card">
         <h2 className="text-lg font-black text-slate-950">Upload image</h2>
-        <label className="mt-5 grid min-h-64 cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:border-red-300">
+        <label className="mt-5 grid min-h-64 cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-slate-300 bg-rosegold-50 p-6 text-center hover:border-red-300">
           <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => readFile(event.target.files?.[0])} />
           <span className="grid size-14 place-items-center rounded-full bg-red-50 text-ikonnic-red"><ImagePlus size={24} /></span>
           <span className="mt-4 block font-black">Choose JPG, PNG, or WEBP</span>
@@ -32,14 +32,14 @@ export function BackgroundRemoverClient() {
           <WandSparkles size={16} /> Remove background
         </button>
       </section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+      <section className="rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-card">
         <h2 className="text-lg font-black text-slate-950">Before and after</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <PreviewPanel label="Before" src={preview} />
           <PreviewPanel label="After" src={preview} processed={processed} />
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
-          <button type="button" disabled={!processed} className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-3 text-xs font-black text-slate-600 disabled:cursor-not-allowed disabled:opacity-50">
+          <button type="button" disabled={!processed} className="inline-flex items-center gap-2 rounded-full border border-rosegold-200 px-4 py-3 text-xs font-black text-slate-600 disabled:cursor-not-allowed disabled:opacity-50">
             <Download size={15} /> Download PNG
           </button>
           <Link href={preview ? `/customise/acrylic-wall-photo-1` : "/category/acrylic-wall-photo"} className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-3 text-xs font-black text-white">
@@ -53,7 +53,7 @@ export function BackgroundRemoverClient() {
 
 function PreviewPanel({ label, src, processed = false }: { label: string; src: string; processed?: boolean }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+    <div className="rounded-2xl border border-rosegold-200/40 bg-rosegold-50 p-3">
       <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
       <div className={`mt-3 grid aspect-square place-items-center overflow-hidden rounded-xl ${processed ? "bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_75%,#e5e7eb_75%),linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_75%,#e5e7eb_75%)] bg-[length:24px_24px] bg-[position:0_0,12px_12px]" : "bg-white"}`}>
         {src ? <img src={src} alt="" className="max-h-full max-w-full object-contain" /> : <span className="text-sm text-slate-400">Awaiting upload</span>}

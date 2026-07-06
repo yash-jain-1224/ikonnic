@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #f6d3c5;
-  --foreground: #2d2424;
+  --background: #fffaf8;
+  --foreground: #1a1a1a;
 }
 
 * {
@@ -44,6 +44,6 @@ a {
 }
 
 ::selection {
-  background: #f5cfc2;
-  color: #6e3b44;
+  background: #f5e6e0;
+  color: #4a2c2a;
 }

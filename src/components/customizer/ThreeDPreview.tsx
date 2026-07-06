@@ -486,13 +486,13 @@ export function ThreeDPreview({
       >
         {/* Header */}
         <div className={`flex flex-wrap items-center justify-between gap-3 ${
-          mode === "inline" ? "px-3 pt-3 sm:px-5 sm:pt-4" : "border-b border-slate-200 bg-white px-4 py-3"
+          mode === "inline" ? "px-3 pt-3 sm:px-5 sm:pt-4" : "border-b border-rosegold-200/60 bg-white px-4 py-3"
         }`}>
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <div className="h-3 w-3 rounded-full bg-[#d90000] shadow-[0_0_8px_rgba(217,0,0,0.5)]" />
             <h2 className={`text-lg font-black ${mode === "inline" ? "text-white" : "text-[#07142f]"}`}>3D Preview</h2>
             <span className={`hidden rounded-full px-2.5 py-0.5 text-[11px] font-bold sm:inline-flex ${
-              mode === "inline" ? "bg-white/10 text-white/70" : "bg-slate-100 text-slate-600"
+              mode === "inline" ? "bg-white/10 text-white/70" : "bg-rosegold-100 text-slate-600"
             }`}>
               {previewType} / {thicknessMm}mm / {borderColor === "black" ? "Black" : "Light Blue"}
             </span>
@@ -502,7 +502,7 @@ export function ThreeDPreview({
               type="button"
               onClick={toggleFullscreen}
               className={`grid size-8 place-items-center rounded-lg transition ${
-                mode === "inline" ? "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-[#07142f]"
+                mode === "inline" ? "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white" : "bg-rosegold-100 text-slate-600 hover:bg-slate-200 hover:text-[#07142f]"
               }`}
               aria-label="Fullscreen"
             >
@@ -513,7 +513,7 @@ export function ThreeDPreview({
                 type="button"
                 onClick={onClose}
                 className={`grid size-8 place-items-center rounded-lg transition ${
-                  mode === "inline" ? "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-[#07142f]"
+                  mode === "inline" ? "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white" : "bg-rosegold-100 text-slate-600 hover:bg-slate-200 hover:text-[#07142f]"
                 }`}
                 aria-label="Close 3D Preview"
               >

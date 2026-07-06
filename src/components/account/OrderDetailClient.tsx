@@ -89,11 +89,11 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
     }
   };
 
-  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-white" />;
+  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-rosegold-100" />;
 
   if (!isAuthenticated) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-card">
+      <div className="rounded-2xl border border-rosegold-200/60 bg-white p-10 text-center shadow-card">
         <Package size={36} className="mx-auto text-slate-300" />
         <p className="mt-3 font-black text-slate-950">Sign in to view this order</p>
         <Link href="/login" className="mt-4 inline-block rounded-full bg-ikonnic-red px-5 py-2.5 text-sm font-black text-white">Sign in</Link>
@@ -141,7 +141,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="space-y-5">
           {/* Items */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+          <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
             <h2 className="flex items-center gap-2 font-black text-slate-950"><Package size={16} /> Items ({order.items.length})</h2>
             <div className="mt-4 space-y-3">
               {order.items.map((item) => (
@@ -158,7 +158,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
           </section>
 
           {/* Status timeline */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+          <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
             <h2 className="flex items-center gap-2 font-black text-slate-950"><Truck size={16} /> Order timeline</h2>
             <ol className="mt-4 space-y-4">
               {order.statusHistory.map((event, index) => (
@@ -176,7 +176,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
               ))}
             </ol>
             {order.shipment?.trackingNumber && (
-              <p className="mt-3 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-600">
+              <p className="mt-3 rounded-xl bg-rosegold-50 p-3 text-xs font-bold text-slate-600">
                 {order.shipment.courierName || "Courier"} · AWB {order.shipment.trackingNumber}
               </p>
             )}
@@ -185,7 +185,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
 
         <div className="space-y-5">
           {/* Payment summary */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+          <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
             <h2 className="flex items-center gap-2 font-black text-slate-950"><CreditCard size={16} /> Payment</h2>
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between"><dt className="text-slate-500">Subtotal</dt><dd className="font-bold">₹{order.subtotal.toLocaleString("en-IN")}</dd></div>
@@ -194,14 +194,14 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
               )}
               <div className="flex justify-between"><dt className="text-slate-500">GST</dt><dd className="font-bold">₹{order.tax.toLocaleString("en-IN")}</dd></div>
               <div className="flex justify-between"><dt className="text-slate-500">Shipping</dt><dd className="font-bold">{order.shippingCost === 0 ? "FREE" : `₹${order.shippingCost.toLocaleString("en-IN")}`}</dd></div>
-              <div className="flex justify-between border-t border-slate-100 pt-2 text-base"><dt className="font-black">Total</dt><dd className="font-black text-ikonnic-red">₹{order.total.toLocaleString("en-IN")}</dd></div>
+              <div className="flex justify-between border-t border-rosegold-200/40 pt-2 text-base"><dt className="font-black">Total</dt><dd className="font-black text-ikonnic-red">₹{order.total.toLocaleString("en-IN")}</dd></div>
             </dl>
             {order.paymentMethod && <p className="mt-3 text-xs font-bold text-slate-500">Paid via {order.paymentMethod}</p>}
           </section>
 
           {/* Shipping address */}
           {order.shippingAddress && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+            <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
               <h2 className="flex items-center gap-2 font-black text-slate-950"><MapPin size={16} /> Delivery address</h2>
               <div className="mt-3 text-sm text-slate-600">
                 <p className="font-bold text-slate-900">{order.shippingAddress.fullName}</p>
@@ -212,7 +212,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
           )}
 
           {order.customerNotes && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+            <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
               <h2 className="font-black text-slate-950">Order notes</h2>
               <p className="mt-2 text-sm text-slate-600">{order.customerNotes}</p>
             </section>

@@ -4,7 +4,7 @@ export function CartSummary({ subtotal, checkoutHref, buttonLabel = "Checkout" }
   const shipping = subtotal >= 999 ? 0 : 99;
   const total = subtotal + shipping;
   return (
-    <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+    <aside className="rounded-3xl border border-rosegold-200/60 bg-white p-5 shadow-card">
       <h2 className="text-lg font-black text-slate-950">Price summary</h2>
       <div className="mt-5 space-y-3 text-sm">
         <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>₹{subtotal.toLocaleString("en-IN")}</span></div>

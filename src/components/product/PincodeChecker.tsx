@@ -85,7 +85,7 @@ export function PincodeChecker() {
           }}
           placeholder="Enter pincode"
           maxLength={6}
-          className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-[#d90000] focus:ring-1 focus:ring-[#d90000]"
+          className="min-w-0 flex-1 rounded-xl border border-rosegold-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-[#d90000] focus:ring-1 focus:ring-[#d90000]"
         />
         <button
           type="button"

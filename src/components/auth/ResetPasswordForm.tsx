@@ -43,7 +43,7 @@ export function ResetPasswordForm() {
   };
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-card sm:p-9">
+    <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-rosegold-200/60 bg-white p-7 shadow-card sm:p-9">
       <div className="mx-auto inline-flex items-center gap-1 rounded-sm bg-black px-2.5 py-1 text-sm font-black tracking-[0.12em] text-white">
         IKONNIC<span className="grid size-4 place-items-center rounded-sm bg-ikonnic-red text-[9px]">◆</span>
       </div>
@@ -54,22 +54,22 @@ export function ResetPasswordForm() {
 
       <label className="mt-6 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
         Email
-        <input required type="email" name="email" placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+        <input required type="email" name="email" placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
       </label>
 
       <label className="mt-5 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
         OTP Code
-        <input required name="otp" placeholder="6-digit OTP" maxLength={6} inputMode="numeric" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+        <input required name="otp" placeholder="6-digit OTP" maxLength={6} inputMode="numeric" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
       </label>
 
       <label className="mt-5 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
         New Password
-        <input required name="password" type="password" placeholder="Min 6 characters" minLength={6} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+        <input required name="password" type="password" placeholder="Min 6 characters" minLength={6} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
       </label>
 
       <label className="mt-5 block text-xs font-black uppercase tracking-[0.13em] text-slate-500">
         Confirm Password
-        <input required name="confirmPassword" type="password" placeholder="Re-enter password" minLength={6} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
+        <input required name="confirmPassword" type="password" placeholder="Re-enter password" minLength={6} className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3.5 text-sm normal-case tracking-normal outline-none focus:border-ikonnic-red" />
       </label>
 
       {error && (

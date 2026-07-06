@@ -123,7 +123,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
       >
         <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
           {/* Search Input */}
-          <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center gap-3 border-b border-rosegold-200/40 px-5 py-4">
             {searching ? (
               <Loader2 size={20} className="animate-spin text-slate-400" />
             ) : (
@@ -140,7 +140,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="grid size-8 place-items-center rounded-lg bg-slate-100 text-slate-500 transition hover:bg-slate-200"
+              className="grid size-8 place-items-center rounded-lg bg-rosegold-100 text-slate-500 transition hover:bg-slate-200"
               aria-label="Close search"
             >
               <X size={16} />
@@ -158,7 +158,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                       key={term}
                       type="button"
                       onClick={() => setQuery(term)}
-                      className="rounded-full border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition hover:border-[#d90000] hover:text-[#d90000]"
+                      className="rounded-full border border-rosegold-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition hover:border-[#d90000] hover:text-[#d90000]"
                     >
                       {term}
                     </button>
@@ -183,7 +183,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                     key={cat.slug}
                     href={`/category/${cat.slug}`}
                     onClick={onClose}
-                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-slate-50"
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-rosegold-100"
                   >
                     {cat.image && (
                       <img src={cat.image} alt={cat.name} className="size-10 rounded-lg object-cover" />
@@ -209,7 +209,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                     key={product.id}
                     href={`/customise/${product.slug}`}
                     onClick={onClose}
-                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-slate-50"
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-rosegold-100"
                   >
                     <img
                       src={product.image}
@@ -230,9 +230,9 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-100 px-5 py-3">
+          <div className="border-t border-rosegold-200/40 px-5 py-3">
             <p className="text-center text-[11px] text-slate-400">
-              Press <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px]">ESC</kbd> to close
+              Press <kbd className="rounded bg-rosegold-100 px-1.5 py-0.5 font-mono text-[10px]">ESC</kbd> to close
             </p>
           </div>
         </div>

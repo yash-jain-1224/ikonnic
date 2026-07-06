@@ -50,7 +50,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         </div>
         <CategoryPageClient category={category} products={visibleProducts} />
 
-        <div className="mt-20 rounded-3xl bg-slate-50 p-6 sm:p-10">
+        <div className="mt-20 rounded-3xl bg-rosegold-50 p-6 sm:p-10">
           <h2 className="mb-6 text-2xl font-black text-slate-900">Questions about {category.name}?</h2>
           <FAQAccordion items={categoryFaqs} />
         </div>

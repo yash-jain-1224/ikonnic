@@ -70,15 +70,15 @@ export function AdminCustomersClient() {
 
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100" />)}
+          {[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-rosegold-100" />)}
         </div>
       ) : users.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">No customers yet.</div>
+        <div className="rounded-2xl border border-rosegold-200/60 bg-white p-10 text-center text-sm text-slate-500">No customers yet.</div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-rosegold-200/60 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-[11px] font-black uppercase tracking-wide text-slate-400">
+              <tr className="border-b border-rosegold-200/40 text-[11px] font-black uppercase tracking-wide text-slate-400">
                 <th className="px-4 py-3">Customer</th>
                 <th className="px-4 py-3">Phone</th>
                 <th className="px-4 py-3">Role</th>
@@ -89,7 +89,7 @@ export function AdminCustomersClient() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50/50">
+                <tr key={u.id} className="border-b border-slate-50 hover:bg-rosegold-100/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="grid size-9 place-items-center rounded-full bg-ikonnic-red text-sm font-black text-white">
@@ -103,7 +103,7 @@ export function AdminCustomersClient() {
                   </td>
                   <td className="px-4 py-3 text-slate-600">{u.phone || "—"}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${u.role === "CUSTOMER" ? "bg-slate-100 text-slate-600" : "bg-purple-50 text-purple-700"}`}>{u.role}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${u.role === "CUSTOMER" ? "bg-rosegold-100 text-slate-600" : "bg-purple-50 text-purple-700"}`}>{u.role}</span>
                   </td>
                   <td className="px-4 py-3 text-center">{u.isVerified ? "✅" : "—"}</td>
                   <td className="px-4 py-3 text-right font-black text-slate-900">{u._count?.orders ?? 0}</td>
@@ -119,9 +119,9 @@ export function AdminCustomersClient() {
 
       {total > 20 && (
         <div className="mt-4 flex items-center justify-between text-xs font-bold text-slate-600">
-          <button type="button" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full border border-slate-200 px-4 py-2 disabled:opacity-40">← Previous</button>
+          <button type="button" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full border border-rosegold-200 px-4 py-2 disabled:opacity-40">← Previous</button>
           <span>Page {page} of {Math.ceil(total / 20)}</span>
-          <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded-full border border-slate-200 px-4 py-2 disabled:opacity-40">Next →</button>
+          <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded-full border border-rosegold-200 px-4 py-2 disabled:opacity-40">Next →</button>
         </div>
       )}
     </div>

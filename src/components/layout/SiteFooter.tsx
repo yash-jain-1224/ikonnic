@@ -24,7 +24,7 @@ const socialLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-rosegold-800 bg-[#1f1418] text-white">
+    <footer className="mt-auto border-t border-rosegold-800/30 bg-[#1c1517] text-white/90">
       <PageContainer className="grid gap-10 py-12 lg:grid-cols-[1fr_1.12fr_.78fr]">
         <div>
           <Link href="/" aria-label="Ikonnic home" className="inline-flex h-9 items-center gap-1 rounded-[2px] bg-rosegold-50 px-2.5 text-[20px] font-black tracking-[-0.04em] text-rosegold-900">

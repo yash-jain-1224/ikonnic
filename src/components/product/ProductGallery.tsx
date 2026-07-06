@@ -23,7 +23,7 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
     <div className="flex flex-col gap-4">
       {/* Main Image */}
       <div 
-        className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
+        className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-2xl border border-rosegold-200/40 bg-white shadow-sm"
         onClick={() => setIsLightboxOpen(true)}
       >
         <SmartImage

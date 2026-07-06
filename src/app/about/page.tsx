@@ -43,7 +43,7 @@ export default function AboutPage() {
         {/* Stats */}
         <div className="mt-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {stats.map(([value, label]) => (
-            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
+            <div key={label} className="rounded-2xl border border-rosegold-200/60 bg-white p-5 text-center shadow-sm">
               <p className="text-2xl font-black text-ikonnic-red">{value}</p>
               <p className="mt-1 text-xs font-bold text-slate-500">{label}</p>
             </div>
@@ -51,7 +51,7 @@ export default function AboutPage() {
         </div>
 
         {/* Story */}
-        <div className="mt-14 rounded-3xl border border-slate-200 bg-white p-7 shadow-card sm:p-10">
+        <div className="mt-14 rounded-3xl border border-rosegold-200/60 bg-white p-7 shadow-card sm:p-10">
           <h2 className="text-2xl font-black text-slate-950">Our story</h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
             <p>
@@ -75,7 +75,7 @@ export default function AboutPage() {
         {/* Values */}
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {values.map(({ Icon, title, body }) => (
-            <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div key={title} className="rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-sm">
               <div className="grid size-11 place-items-center rounded-xl bg-red-50 text-ikonnic-red"><Icon size={22} /></div>
               <h3 className="mt-4 font-black text-slate-950">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-500">{body}</p>

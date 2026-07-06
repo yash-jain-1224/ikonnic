@@ -166,7 +166,7 @@ export function AdminCouponsClient() {
     );
   }
 
-  const inputClass = "mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ikonnic-red";
+  const inputClass = "mt-1 w-full rounded-lg border border-rosegold-200 px-3 py-2 text-sm outline-none focus:border-ikonnic-red";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -187,11 +187,11 @@ export function AdminCouponsClient() {
 
       {/* Editor */}
       {editing !== null && (
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm">
           <h2 className="font-black text-slate-950">{editing === "new" ? "Create coupon" : `Edit ${form.code}`}</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="text-xs font-bold text-slate-600">Code*
-              <input value={form.code} disabled={editing !== "new"} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="WELCOME10" className={`${inputClass} uppercase disabled:bg-slate-50 disabled:text-slate-400`} />
+              <input value={form.code} disabled={editing !== "new"} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="WELCOME10" className={`${inputClass} uppercase disabled:bg-rosegold-50 disabled:text-slate-400`} />
             </label>
             <label className="text-xs font-bold text-slate-600">Type*
               <select value={form.discountType} onChange={(e) => setForm({ ...form, discountType: e.target.value as CouponForm["discountType"] })} className={`${inputClass} bg-white`}>
@@ -230,7 +230,7 @@ export function AdminCouponsClient() {
             <button type="button" disabled={saving} onClick={save} className="inline-flex items-center gap-1.5 rounded-full bg-ikonnic-red px-5 py-2.5 text-xs font-black text-white hover:bg-red-700 disabled:opacity-60">
               {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />} {editing === "new" ? "Create" : "Save changes"}
             </button>
-            <button type="button" onClick={() => setEditing(null)} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-5 py-2.5 text-xs font-black text-slate-600">
+            <button type="button" onClick={() => setEditing(null)} className="inline-flex items-center gap-1.5 rounded-full border border-rosegold-200 px-5 py-2.5 text-xs font-black text-slate-600">
               <X size={13} /> Cancel
             </button>
           </div>
@@ -241,17 +241,17 @@ export function AdminCouponsClient() {
 
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-rosegold-100" />)}
         </div>
       ) : coupons.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+        <div className="rounded-2xl border border-rosegold-200/60 bg-white p-10 text-center text-sm text-slate-500">
           No coupons yet. Create your first discount code.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-rosegold-200/60 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-[11px] font-black uppercase tracking-wide text-slate-400">
+              <tr className="border-b border-rosegold-200/40 text-[11px] font-black uppercase tracking-wide text-slate-400">
                 <th className="px-4 py-3">Code</th>
                 <th className="px-4 py-3">Discount</th>
                 <th className="px-4 py-3">Conditions</th>
@@ -264,7 +264,7 @@ export function AdminCouponsClient() {
               {coupons.map((coupon) => {
                 const expired = coupon.validUntil ? new Date(coupon.validUntil) < new Date() : false;
                 return (
-                  <tr key={coupon.id} className="border-b border-slate-50 hover:bg-slate-50/50">
+                  <tr key={coupon.id} className="border-b border-slate-50 hover:bg-rosegold-100/50">
                     <td className="px-4 py-3">
                       <p className="font-black text-slate-900">{coupon.code}</p>
                       {coupon.description && <p className="text-[11px] text-slate-400">{coupon.description}</p>}
@@ -282,7 +282,7 @@ export function AdminCouponsClient() {
                       {coupon.usedCount}{coupon.usageLimit != null ? ` / ${coupon.usageLimit}` : ""}
                     </td>
                     <td className="px-4 py-3">
-                      <button type="button" onClick={() => toggleActive(coupon)} className={`rounded-full px-2.5 py-1 text-[11px] font-black ${coupon.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                      <button type="button" onClick={() => toggleActive(coupon)} className={`rounded-full px-2.5 py-1 text-[11px] font-black ${coupon.isActive ? "bg-emerald-50 text-emerald-700" : "bg-rosegold-100 text-slate-500"}`}>
                         {coupon.isActive ? "ACTIVE" : "INACTIVE"}
                       </button>
                     </td>

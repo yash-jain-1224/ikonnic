@@ -33,7 +33,7 @@ export function WhyIkonnic() {
   ];
 
   return (
-    <div className="mt-20 rounded-3xl bg-[#fce4da] px-6 py-12 shadow-[0_4px_20px_rgba(183,110,121,0.06)] sm:px-12 sm:py-16">
+    <div className="mt-20 rounded-3xl bg-rosegold-100/70 px-6 py-12 shadow-card sm:px-12 sm:py-16">
       <div className="text-center">
         <h2 className="text-3xl font-black text-rosegold-900 sm:text-4xl">Why Choose Ikonnic?</h2>
         <p className="mt-3 text-sm text-slate-500">

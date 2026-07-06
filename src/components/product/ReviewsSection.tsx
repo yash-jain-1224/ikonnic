@@ -48,7 +48,7 @@ function ReviewCard({ review }: { review: Review }) {
     .slice(0, 2);
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <div className="rounded-2xl border border-rosegold-200/40 bg-white p-5 shadow-sm transition hover:shadow-md">
       <div className="flex items-start gap-3">
         {review.avatar ? (
           <img
@@ -102,7 +102,7 @@ function ReviewCard({ review }: { review: Review }) {
             href={review.videoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+            className="inline-flex items-center gap-2 rounded-xl bg-rosegold-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-rosegold-100"
           >
             <Play size={14} className="text-[#d90000]" />
             Watch Video Review
@@ -128,7 +128,7 @@ function RatingBar({ star, count, total }: { star: number; count: number; total:
     <div className="flex items-center gap-2 text-[12px]">
       <span className="w-4 text-right font-bold text-slate-600">{star}</span>
       <Star size={11} className="fill-amber-400 text-amber-400" />
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-rosegold-100">
         <div
           className="h-full rounded-full bg-amber-400 transition-all duration-500"
           style={{ width: `${pct}%` }}
@@ -152,7 +152,7 @@ function WriteReviewForm({ productId, onDone }: { productId: string; onDone: () 
 
   if (!isAuthenticated) {
     return (
-      <div className="mt-4 rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm">
+      <div className="mt-4 rounded-2xl border border-rosegold-200/40 bg-white p-5 text-center shadow-sm">
         <p className="text-sm font-bold text-slate-700">Sign in to write a review</p>
         <Link
           href="/login"
@@ -200,7 +200,7 @@ function WriteReviewForm({ productId, onDone }: { productId: string; onDone: () 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="mt-4 rounded-2xl border border-rosegold-200/40 bg-white p-5 shadow-sm">
       <p className="text-sm font-black text-slate-900">Your Rating</p>
       <div className="mt-2 flex items-center gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -270,7 +270,7 @@ export function ReviewsSection({
     <button
       type="button"
       onClick={() => setShowForm(true)}
-      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-[#d90000] hover:text-[#d90000]"
+      className="inline-flex items-center gap-2 rounded-xl border border-rosegold-200/60 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-[#d90000] hover:text-[#d90000]"
     >
       <PenLine size={14} />
       Write a Review
@@ -280,7 +280,7 @@ export function ReviewsSection({
   if (total === 0) {
     return (
       <div className="mt-8">
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-8 text-center">
+        <div className="rounded-2xl border border-rosegold-200/40 bg-rosegold-50 p-8 text-center">
           <Star size={28} className="mx-auto text-slate-300" />
           <p className="mt-3 text-sm font-bold text-slate-500">No reviews yet</p>
           <p className="mt-1 text-[13px] text-slate-400">
@@ -304,7 +304,7 @@ export function ReviewsSection({
       {productId && showForm && <WriteReviewForm productId={productId} onDone={() => {}} />}
 
       {/* Summary bar */}
-      <div className="mt-4 flex flex-col gap-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
+      <div className="mt-4 flex flex-col gap-6 rounded-2xl border border-rosegold-200/40 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
         <div className="text-center sm:w-40">
           <div className="text-4xl font-black text-[#07142f]">{avg.toFixed(1)}</div>
           <div className="mt-1">
@@ -330,7 +330,7 @@ export function ReviewsSection({
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="mt-4 w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+          className="mt-4 w-full rounded-xl border border-rosegold-200/60 bg-white py-3 text-sm font-black text-slate-700 transition hover:bg-rosegold-100"
         >
           Show All {total} Reviews
         </button>

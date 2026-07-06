@@ -91,12 +91,12 @@ export function AdminOrdersClient() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold outline-none focus:border-ikonnic-red"
+          className="rounded-xl border border-rosegold-200 px-4 py-2 text-sm font-bold outline-none focus:border-ikonnic-red"
         >
           <option value="">All Statuses</option>
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
         </select>
-        <button onClick={fetchOrders} className="flex items-center gap-1 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold hover:bg-slate-50">
+        <button onClick={fetchOrders} className="flex items-center gap-1 rounded-xl border border-rosegold-200 px-4 py-2 text-sm font-bold hover:bg-rosegold-100">
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -105,14 +105,14 @@ export function AdminOrdersClient() {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-ikonnic-red" size={32} /></div>
       ) : orders.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-rosegold-200/60 bg-white p-12 text-center">
           <Package className="mx-auto text-slate-300" size={48} />
           <p className="mt-4 font-black text-slate-500">No orders found</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-rosegold-200/60 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50">
+            <thead className="border-b border-rosegold-200/40 bg-rosegold-50">
               <tr>
                 <th className="px-4 py-3 font-black text-slate-600">Order</th>
                 <th className="px-4 py-3 font-black text-slate-600">Customer</th>
@@ -137,7 +137,7 @@ export function AdminOrdersClient() {
                   </td>
                   <td className="px-4 py-3 font-bold">₹{order.total.toLocaleString("en-IN")}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold ${statusColor[order.status] || "bg-slate-100 text-slate-700"}`}>
+                    <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold ${statusColor[order.status] || "bg-rosegold-100 text-slate-700"}`}>
                       {order.status.replace(/_/g, " ")}
                     </span>
                   </td>
@@ -148,7 +148,7 @@ export function AdminOrdersClient() {
                         value={order.status}
                         onChange={(e) => updateStatus(order.id, e.target.value)}
                         disabled={updatingId === order.id}
-                        className="appearance-none rounded-lg border border-slate-200 bg-white px-3 py-1.5 pr-7 text-xs font-bold outline-none focus:border-ikonnic-red disabled:opacity-50"
+                        className="appearance-none rounded-lg border border-rosegold-200/60 bg-white px-3 py-1.5 pr-7 text-xs font-bold outline-none focus:border-ikonnic-red disabled:opacity-50"
                       >
                         {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
                       </select>

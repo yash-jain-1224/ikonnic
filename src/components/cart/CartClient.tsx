@@ -20,7 +20,7 @@ export function CartClient() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-white" />;
+  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-rosegold-100" />;
   if (!items.length) return <EmptyState />;
 
   const subtotal = items.reduce((sum, item) => sum + (item.finalTotal ?? item.price * item.quantity), 0);
@@ -29,8 +29,8 @@ export function CartClient() {
     <div className="grid gap-7 lg:grid-cols-[1fr_340px]">
       <div className="space-y-3">
         {items.map((item) => (
-          <article key={item.lineId} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">
-            <Link href={`/product/${item.slug}`} className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:size-32">
+          <article key={item.lineId} className="flex flex-col gap-4 rounded-2xl border border-rosegold-200/60 bg-white p-4 shadow-sm sm:flex-row">
+            <Link href={`/product/${item.slug}`} className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl bg-rosegold-100 sm:size-32">
               <Image src={item.previewImage || item.uploadedImagePreview || item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 128px" />
             </Link>
             <div className="min-w-0 flex-1">
@@ -52,10 +52,10 @@ export function CartClient() {
         ))}
       </div>
       <div className="space-y-4">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+        <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
           <h2 className="font-black text-slate-950">Coupon</h2>
           <div className="mt-3 flex gap-2">
-            <input defaultValue={coupon ?? ""} onBlur={(event) => applyCoupon(event.target.value)} placeholder="IKONNIC10" className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ikonnic-red" />
+            <input defaultValue={coupon ?? ""} onBlur={(event) => applyCoupon(event.target.value)} placeholder="IKONNIC10" className="min-w-0 flex-1 rounded-xl border border-rosegold-200 px-3 py-2 text-sm outline-none focus:border-ikonnic-red" />
             <button type="button" onClick={() => applyCoupon("IKONNIC10")} className="rounded-xl bg-slate-950 px-4 py-2 text-xs font-black text-white">Apply</button>
           </div>
           <p className="mt-2 text-xs text-slate-500">Coupon validation is a placeholder until checkout APIs are connected.</p>

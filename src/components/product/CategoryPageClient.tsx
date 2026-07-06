@@ -47,7 +47,7 @@ function CategoryPageClientInner({ category, products }: { category: Category; p
       {cappedProducts.length ? (
         <ProductGrid products={cappedProducts} />
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white py-14 text-center text-sm text-slate-500">
+        <div className="rounded-2xl border border-rosegold-200/60 bg-white py-14 text-center text-sm text-ikonnic-muted">
           No designs match this filter yet.
         </div>
       )}
@@ -57,7 +57,7 @@ function CategoryPageClientInner({ category, products }: { category: Category; p
 
 export function CategoryPageClient(props: { category: Category; products: Product[] }) {
   return (
-    <Suspense fallback={<div className="h-72 animate-pulse rounded-3xl bg-white" />}>
+    <Suspense fallback={<div className="h-72 animate-pulse rounded-3xl bg-rosegold-100" />}>
       <CategoryPageClientInner {...props} />
     </Suspense>
   );

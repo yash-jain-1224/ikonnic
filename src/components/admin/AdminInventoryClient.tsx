@@ -36,7 +36,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ${STATUS_STYLES[status] ?? "bg-slate-100 text-slate-600"}`}>
+    <span className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ${STATUS_STYLES[status] ?? "bg-rosegold-100 text-slate-600"}`}>
       {status.replace(/_/g, " ")}
     </span>
   );
@@ -168,17 +168,17 @@ export function AdminInventoryClient() {
 
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />)}
+          {[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-rosegold-100" />)}
         </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+        <div className="rounded-2xl border border-rosegold-200/60 bg-white p-10 text-center text-sm text-slate-500">
           No products found{lowStockOnly ? " with low stock" : ""}.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-rosegold-200/60 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-[11px] font-black uppercase tracking-wide text-slate-400">
+              <tr className="border-b border-rosegold-200/40 text-[11px] font-black uppercase tracking-wide text-slate-400">
                 <th className="px-4 py-3">Product</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Stock</th>
@@ -190,7 +190,7 @@ export function AdminInventoryClient() {
             <tbody>
               {rows.map((row) => (
                 <Fragment key={row.id}>
-                  <tr className="border-b border-slate-50 hover:bg-slate-50/50">
+                  <tr className="border-b border-slate-50 hover:bg-rosegold-100/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img src={row.image} alt={row.title} className="size-10 rounded-lg object-cover" />
@@ -209,7 +209,7 @@ export function AdminInventoryClient() {
                         <button
                           type="button"
                           onClick={() => openEditor(row)}
-                          className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-700 hover:border-ikonnic-red hover:text-ikonnic-red"
+                          className="rounded-full border border-rosegold-200 px-3 py-1.5 text-xs font-black text-slate-700 hover:border-ikonnic-red hover:text-ikonnic-red"
                         >
                           Adjust
                         </button>
@@ -234,17 +234,17 @@ export function AdminInventoryClient() {
                             Set stock to
                             <div className="mt-1 flex items-center gap-1">
                               {[-10, -1].map((d) => (
-                                <button key={d} type="button" onClick={() => setNewCount((c) => Math.max(0, c + d))} className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-black text-slate-600">{d}</button>
+                                <button key={d} type="button" onClick={() => setNewCount((c) => Math.max(0, c + d))} className="rounded-lg border border-rosegold-200/60 bg-white px-2 py-2 text-xs font-black text-slate-600">{d}</button>
                               ))}
                               <input
                                 type="number"
                                 min={0}
                                 value={newCount}
                                 onChange={(e) => setNewCount(Math.max(0, Number(e.target.value)))}
-                                className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-black outline-none focus:border-ikonnic-red"
+                                className="w-24 rounded-lg border border-rosegold-200 px-3 py-2 text-center text-sm font-black outline-none focus:border-ikonnic-red"
                               />
                               {[1, 10].map((d) => (
-                                <button key={d} type="button" onClick={() => setNewCount((c) => c + d)} className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-black text-slate-600">+{d}</button>
+                                <button key={d} type="button" onClick={() => setNewCount((c) => c + d)} className="rounded-lg border border-rosegold-200/60 bg-white px-2 py-2 text-xs font-black text-slate-600">+{d}</button>
                               ))}
                             </div>
                           </label>
@@ -254,7 +254,7 @@ export function AdminInventoryClient() {
                               value={note}
                               onChange={(e) => setNote(e.target.value)}
                               placeholder="e.g. restock, damaged batch"
-                              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ikonnic-red"
+                              className="mt-1 w-full rounded-lg border border-rosegold-200 px-3 py-2 text-sm outline-none focus:border-ikonnic-red"
                             />
                           </label>
                           <button
@@ -268,7 +268,7 @@ export function AdminInventoryClient() {
                           <button
                             type="button"
                             onClick={() => setEditingId(null)}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2.5 text-xs font-black text-slate-600"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-rosegold-200 px-4 py-2.5 text-xs font-black text-slate-600"
                           >
                             <X size={13} /> Cancel
                           </button>
@@ -279,7 +279,7 @@ export function AdminInventoryClient() {
 
                   {/* Transaction history */}
                   {historyId === row.id && (
-                    <tr className="border-b border-slate-50 bg-slate-50/60">
+                    <tr className="border-b border-slate-50 bg-rosegold-50/60">
                       <td colSpan={6} className="px-4 py-4">
                         {loadingHistory ? (
                           <div className="flex items-center gap-2 text-xs text-slate-500"><Loader2 size={13} className="animate-spin" /> Loading history…</div>
@@ -289,7 +289,7 @@ export function AdminInventoryClient() {
                           <div className="space-y-1.5">
                             {history.map((tx) => (
                               <div key={tx.id} className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-                                <span className={`rounded-full px-2 py-0.5 font-black ${tx.type === "STOCK_IN" ? "bg-emerald-50 text-emerald-700" : tx.type === "STOCK_OUT" ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-600"}`}>{tx.type}</span>
+                                <span className={`rounded-full px-2 py-0.5 font-black ${tx.type === "STOCK_IN" ? "bg-emerald-50 text-emerald-700" : tx.type === "STOCK_OUT" ? "bg-red-50 text-red-700" : "bg-rosegold-100 text-slate-600"}`}>{tx.type}</span>
                                 <strong>{tx.quantity}</strong>
                                 {tx.note && <span>· {tx.note}</span>}
                                 <span className="text-slate-400">· {new Date(tx.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
@@ -310,9 +310,9 @@ export function AdminInventoryClient() {
       {/* Pagination */}
       {total > 20 && (
         <div className="mt-4 flex items-center justify-between text-xs font-bold text-slate-600">
-          <button type="button" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full border border-slate-200 px-4 py-2 disabled:opacity-40">← Previous</button>
+          <button type="button" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full border border-rosegold-200 px-4 py-2 disabled:opacity-40">← Previous</button>
           <span>Page {page} of {Math.ceil(total / 20)}</span>
-          <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded-full border border-slate-200 px-4 py-2 disabled:opacity-40">Next →</button>
+          <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded-full border border-rosegold-200 px-4 py-2 disabled:opacity-40">Next →</button>
         </div>
       )}
     </div>

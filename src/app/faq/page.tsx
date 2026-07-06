@@ -78,7 +78,7 @@ export default function FAQPage() {
           ))}
         </div>
 
-        <div className="mt-12 rounded-3xl bg-slate-50 p-6 text-center sm:p-8">
+        <div className="mt-12 rounded-3xl bg-rosegold-50 p-6 text-center sm:p-8">
           <h2 className="text-lg font-black text-slate-900">Still have a question?</h2>
           <p className="mt-2 text-sm text-slate-500">Our support team replies within one business day.</p>
           <Link href="/contact-us" className="mt-4 inline-block rounded-full bg-ikonnic-red px-6 py-3 text-sm font-black text-white hover:bg-red-700">Contact Support</Link>

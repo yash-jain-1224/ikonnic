@@ -7,9 +7,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const imageSrc = product.image || product.thumbnail || (product.gallery && product.gallery[0]) || `/images/categories/${product.categorySlug}.webp` || "/images/placeholder.webp";
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card">
+    <article className="group relative overflow-hidden rounded-2xl border border-rosegold-200/60 bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-soft">
       {product.sale ? <span className="absolute left-2 top-2 z-10 rounded-md bg-ikonnic-red px-2 py-1 text-[10px] font-black text-white">SALE</span> : null}
-      <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-slate-50">
+      <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-rosegold-50">
         <SmartImage
           src={imageSrc}
           alt={product.alt || product.title || product.categoryName}

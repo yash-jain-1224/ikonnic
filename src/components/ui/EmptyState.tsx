@@ -9,7 +9,7 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center shadow-card">
+    <div className="rounded-3xl border border-rosegold-200/60 bg-white px-6 py-16 text-center shadow-card">
       <div className="mx-auto grid size-16 place-items-center rounded-full bg-red-50 text-ikonnic-red">
         <ShoppingBag size={28} />
       </div>

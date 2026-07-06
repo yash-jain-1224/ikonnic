@@ -59,7 +59,7 @@ export function AdminDashboardClient() {
       {/* Metric Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div key={card.label} className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-sm">
             <div className={`inline-flex size-10 items-center justify-center rounded-xl ${card.color}`}>
               <card.icon size={20} />
             </div>
@@ -70,11 +70,11 @@ export function AdminDashboardClient() {
       </div>
 
       {/* Orders by Status */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-sm">
         <h2 className="font-black text-slate-950">Orders by Status</h2>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {metrics.ordersByStatus.map((item) => (
-            <div key={item.status} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+            <div key={item.status} className="flex items-center justify-between rounded-xl bg-rosegold-50 px-4 py-3">
               <span className="text-xs font-bold text-slate-600">{item.status.replace(/_/g, " ")}</span>
               <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-black text-slate-900 shadow-sm">{item._count}</span>
             </div>
@@ -83,16 +83,16 @@ export function AdminDashboardClient() {
       </div>
 
       {/* Quick Links */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-sm">
         <h2 className="font-black text-slate-950">Quick Actions</h2>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link href="/admin/orders" className="rounded-full bg-ikonnic-red px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700">Manage Orders</Link>
-          <Link href="/admin" className="rounded-full border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">Module Overview</Link>
+          <Link href="/admin" className="rounded-full border border-rosegold-200 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-rosegold-100">Module Overview</Link>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-rosegold-200/60 bg-white p-6 shadow-sm">
         <h2 className="font-black text-slate-950">Recent Activity</h2>
         <p className="mt-2 text-sm text-slate-500">
           <strong>{metrics.recentOrders}</strong> orders in the last 30 days

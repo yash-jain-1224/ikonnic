@@ -200,7 +200,7 @@ export function CustomiseClient({ product }: { product: Product }) {
   return (
     <div className="grid gap-7 lg:grid-cols-[1.15fr_.85fr]">
       <div className="space-y-5">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+        <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-black text-slate-950">Preview canvas</h2>
@@ -213,7 +213,7 @@ export function CustomiseClient({ product }: { product: Product }) {
             </label>
           </div>
           <div
-            className="mt-5 grid min-h-96 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100"
+            className="mt-5 grid min-h-96 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-rosegold-100"
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => {
               event.preventDefault();
@@ -250,29 +250,29 @@ export function CustomiseClient({ product }: { product: Product }) {
             </div>
           </div>
           {preview ? (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rosegold-200/40 bg-rosegold-50 p-3">
               <p className="text-xs font-bold text-slate-600">{dimensions.width} x {dimensions.height} inch print area</p>
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:border-ikonnic-red hover:text-ikonnic-red">
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-full border border-rosegold-200/60 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:border-ikonnic-red hover:text-ikonnic-red">
                 Replace Photo
               </button>
             </div>
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+        <section className="rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card">
           <h2 className="text-lg font-black text-slate-950">Text and finishing</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_120px]">
-            <label className="text-xs font-bold text-slate-600">Text overlay<input value={text} onChange={(event) => setText(event.target.value)} placeholder="Name, date, or short message" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
-            <label className="text-xs font-bold text-slate-600">Text colour<input type="color" value={textColor} onChange={(event) => setTextColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white p-1" /></label>
+            <label className="text-xs font-bold text-slate-600">Text overlay<input value={text} onChange={(event) => setText(event.target.value)} placeholder="Name, date, or short message" className="mt-2 w-full rounded-xl border border-rosegold-200 px-4 py-3 text-sm outline-none focus:border-ikonnic-red" /></label>
+            <label className="text-xs font-bold text-slate-600">Text colour<input type="color" value={textColor} onChange={(event) => setTextColor(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-rosegold-200/60 bg-white p-1" /></label>
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600">
+          <button type="button" className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-rosegold-50 px-4 py-2 text-xs font-bold text-slate-600">
             <Sparkles size={15} />
             Background removal API placeholder
           </button>
         </section>
       </div>
 
-      <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-card lg:sticky lg:top-20 sm:p-7">
+      <aside className="h-fit rounded-2xl border border-rosegold-200/60 bg-white p-5 shadow-card lg:sticky lg:top-20 sm:p-7">
         <h2 className="text-lg font-black text-slate-950">{product.title}</h2>
         <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-ikonnic-red">{product.categoryName}</p>
         <div className="mt-5 space-y-4">
@@ -281,12 +281,12 @@ export function CustomiseClient({ product }: { product: Product }) {
           <OptionGroup label="Frame colour" values={frameColors} value={frameColor} onChange={setFrameColor} />
           <OptionGroup label="Border" values={borders} value={border} onChange={setBorder} />
           <OptionGroup label="Background" values={backgrounds} value={background} onChange={setBackground} />
-          <div className="flex items-center justify-between rounded-xl border border-slate-100 p-3">
+          <div className="flex items-center justify-between rounded-xl border border-rosegold-200/40 p-3">
             <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Quantity</span>
             <QuantitySelector value={quantity} onChange={setQuantity} compact />
           </div>
         </div>
-        <dl className="mt-6 space-y-3 border-y border-slate-100 py-5 text-sm">
+        <dl className="mt-6 space-y-3 border-y border-rosegold-200/40 py-5 text-sm">
           <div className="flex justify-between"><dt className="text-slate-500">Base</dt><dd className="font-bold">Rs {product.price.toLocaleString("en-IN")}</dd></div>
           <div className="flex justify-between"><dt className="text-slate-500">Options</dt><dd className="font-bold">Rs {optionsPrice.toLocaleString("en-IN")}</dd></div>
           <div className="flex justify-between"><dt className="text-slate-500">Discount</dt><dd className="font-bold">Rs {discount.toLocaleString("en-IN")}</dd></div>

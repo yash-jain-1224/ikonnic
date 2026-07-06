@@ -16,13 +16,13 @@ export function WishlistClient() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-white" />;
+  if (!mounted) return <div className="h-72 animate-pulse rounded-3xl bg-rosegold-100" />;
   if (!items.length) return <EmptyState title="Your wishlist is empty" description="Save products while browsing and move them to cart when you are ready." />;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
-        <article key={item.lineId} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <article key={item.lineId} className="overflow-hidden rounded-2xl border border-rosegold-200/60 bg-white shadow-sm">
           <Link href={`/product/${item.slug}`} className="relative block aspect-[4/3] w-full">
             <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" />
           </Link>

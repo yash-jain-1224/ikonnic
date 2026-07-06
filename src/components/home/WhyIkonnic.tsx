@@ -33,9 +33,9 @@ export function WhyIkonnic() {
   ];
 
   return (
-    <div className="mt-20 rounded-3xl bg-white px-6 py-12 shadow-[0_4px_20px_rgba(15,23,42,0.03)] sm:px-12 sm:py-16">
+    <div className="mt-20 rounded-3xl bg-[#fffbf9] px-6 py-12 shadow-[0_4px_20px_rgba(183,110,121,0.06)] sm:px-12 sm:py-16">
       <div className="text-center">
-        <h2 className="text-3xl font-black text-slate-900 sm:text-4xl">Why Choose Ikonnic?</h2>
+        <h2 className="text-3xl font-black text-rosegold-900 sm:text-4xl">Why Choose Ikonnic?</h2>
         <p className="mt-3 text-sm text-slate-500">
           We bring your memories to life with unmatched quality and care.
         </p>
@@ -49,7 +49,7 @@ export function WhyIkonnic() {
               <div className={`grid size-16 place-items-center rounded-2xl ${reason.bg} ${reason.color}`}>
                 <Icon size={32} />
               </div>
-              <h3 className="mt-5 text-lg font-bold text-slate-900">{reason.title}</h3>
+              <h3 className="mt-5 text-lg font-bold text-rosegold-900">{reason.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-500">{reason.description}</p>
             </div>
           );

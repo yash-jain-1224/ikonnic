@@ -6,7 +6,7 @@ export function CategoryTile({ category, featured = false, priority = false }: {
   return (
     <Link
       href={`/category/${category.slug}`}
-      className={`group relative overflow-hidden rounded-2xl bg-white shadow-card ${featured ? "sm:col-span-2 sm:row-span-2" : ""}`}
+      className={`group relative overflow-hidden rounded-2xl bg-[#fffbf9] shadow-card ${featured ? "sm:col-span-2 sm:row-span-2" : ""}`}
     >
       <SmartImage
         src={category.image || category.accent}

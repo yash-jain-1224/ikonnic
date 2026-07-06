@@ -32,19 +32,19 @@ export function FeaturedProductsCarousel({ products = defaultProducts }: { produ
     <div className="relative mt-16 w-full">
       <div className="mb-6 flex items-end justify-between px-4 sm:px-6">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 sm:text-3xl">Trending Gifts</h2>
+          <h2 className="text-2xl font-black text-rosegold-900 sm:text-3xl">Trending Gifts</h2>
           <p className="mt-1 text-sm text-slate-500">The most loved personalized products this week.</p>
         </div>
         <div className="hidden gap-2 sm:flex">
           <button
             onClick={scrollLeft}
-            className="grid size-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fffbf9] text-rosegold-700 transition hover:bg-rosegold-100"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={scrollRight}
-            className="grid size-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+            className="grid size-10 place-items-center rounded-full border border-rosegold-200 bg-[#fffbf9] text-rosegold-700 transition hover:bg-rosegold-100"
           >
             <ChevronRight size={20} />
           </button>
@@ -70,20 +70,20 @@ export function FeaturedProductsCarousel({ products = defaultProducts }: { produ
                 imageClassName="h-full w-full object-cover transition duration-300 group-hover:scale-105"
               />
               {product.sale && (
-                <div className="absolute left-3 top-3 rounded-full bg-[#d90000] px-3 py-1 text-[11px] font-black tracking-widest text-white shadow-sm">
+                <div className="absolute left-3 top-3 rounded-full bg-ikonnic-red px-3 py-1 text-[11px] font-black tracking-widest text-white shadow-sm">
                   SALE
                 </div>
               )}
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+              <p className="text-[11px] font-black uppercase tracking-wider text-rosegold-500">
                 {product.categoryName}
               </p>
-              <h3 className="mt-0.5 font-bold leading-snug text-slate-900 transition group-hover:text-[#d90000]">
+              <h3 className="mt-0.5 font-bold leading-snug text-rosegold-900 transition group-hover:text-ikonnic-red">
                 {product.title}
               </h3>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-lg font-black text-[#d90000]">
+                <span className="text-lg font-black text-ikonnic-red">
                   ₹{product.price.toLocaleString("en-IN")}
                 </span>
                 {product.oldPrice && (

@@ -21,7 +21,7 @@ export default async function HomePage() {
       <PageContainer className="py-14 sm:py-16">
         <div className="mb-8 text-center">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-ikonnic-red">Made around your memories</p>
-          <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">More Than Décor. It&apos;s Personal.</h2>
+          <h2 className="mt-2 text-3xl font-black tracking-tight text-rosegold-900 sm:text-4xl">More Than Décor. It&apos;s Personal.</h2>
           <p className="mx-auto mt-3 max-w-3xl text-sm leading-6 text-slate-500">
             Personalised acrylic photos, wall décor, clocks, frames, albums, keychains, tags, magnets, and gifts—designed to make everyday spaces feel more like yours.
           </p>

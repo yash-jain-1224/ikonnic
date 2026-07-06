@@ -421,3 +421,36 @@ export class AdjustInventoryDto {
   @MaxLength(500)
   note?: string;
 }
+
+// ─── Order Notes ─────────────────────────────────────────────────────
+
+export class UpdateOrderNotesDto {
+  @ApiPropertyOptional({ example: 'Customer requested gift wrap; artwork approved.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  internalNotes?: string;
+}
+
+// ─── User / Customer ─────────────────────────────────────────────────
+
+export class UpdateUserStatusDto {
+  @ApiProperty({ example: false, description: 'Activate or deactivate the account' })
+  @IsBoolean()
+  isActive: boolean;
+}
+
+// ─── Reviews ─────────────────────────────────────────────────────────
+
+export class ModerateReviewDto {
+  @ApiPropertyOptional({ example: true, description: 'Approve (publish) or hide the review' })
+  @IsOptional()
+  @IsBoolean()
+  isApproved?: boolean;
+
+  @ApiPropertyOptional({ example: 'Thanks for your feedback!' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  adminReply?: string;
+}

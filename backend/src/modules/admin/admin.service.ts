@@ -131,6 +131,126 @@ export class AdminService {
     return this.ordersService.updateStatus(orderId, status as any, note, adminId);
   }
 
+  /** Full order detail for admin — no owner scoping (unlike the customer endpoint). */
+  async getOrderByIdForAdmin(orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
+        items: { include: { product: { select: { slug: true, image: true, title: true } } } },
+        statusHistory: { orderBy: { createdAt: 'asc' } },
+        payments: true,
+        shipment: { include: { trackingEvents: { orderBy: { createdAt: 'desc' } } } },
+        billingAddress: true,
+        shippingAddress: true,
+        invoice: true,
+      },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+    return order;
+  }
+
+  /** Update internal (admin-only) order notes. */
+  async updateOrderNotes(orderId: string, internalNotes?: string) {
+    const exists = await this.prisma.order.findUnique({ where: { id: orderId }, select: { id: true } });
+    if (!exists) throw new NotFoundException('Order not found');
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { internalNotes: internalNotes ?? null },
+      select: { id: true, internalNotes: true },
+    });
+  }
+
+  // ─── Customers ─────────────────────────────────────────────
+
+  /** Customer detail with order history and addresses. */
+  async getUserByIdForAdmin(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true, email: true, firstName: true, lastName: true, phone: true,
+        role: true, isVerified: true, isActive: true, authProvider: true,
+        createdAt: true, lastLoginAt: true,
+        addresses: true,
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: { id: true, orderNumber: true, status: true, total: true, paymentMethod: true, createdAt: true },
+        },
+        _count: { select: { orders: true, reviews: true } },
+      },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    const revenue = await this.prisma.order.aggregate({
+      _sum: { total: true },
+      where: { userId, status: { not: 'CANCELLED' } },
+    });
+    return { ...user, lifetimeValue: revenue._sum.total || 0 };
+  }
+
+  /** Activate / deactivate a customer account. Admin accounts cannot be toggled here. */
+  async setUserActive(userId: string, isActive: boolean, actingAdminId?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
+    if (!user) throw new NotFoundException('User not found');
+    if (userId === actingAdminId) throw new BadRequestException('You cannot change your own account status');
+    if (user.role !== 'CUSTOMER') throw new BadRequestException('Only customer accounts can be toggled here');
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isActive },
+      select: { id: true, isActive: true },
+    });
+    return updated;
+  }
+
+  // ─── Reviews Moderation ────────────────────────────────────
+
+  async getReviewsForAdmin(page = 1, limit = 20, status?: 'approved' | 'pending') {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 20);
+    const skip = (page - 1) * limit;
+    const where: any = {};
+    if (status === 'approved') where.isApproved = true;
+    if (status === 'pending') where.isApproved = false;
+
+    const [reviews, total, pendingCount] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        include: {
+          user: { select: { firstName: true, lastName: true, email: true } },
+          product: { select: { title: true, slug: true, image: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.review.count({ where }),
+      this.prisma.review.count({ where: { isApproved: false } }),
+    ]);
+    return { data: reviews, meta: { total, page, limit, totalPages: Math.ceil(total / limit), pendingCount } };
+  }
+
+  async moderateReview(id: string, data: { isApproved?: boolean; adminReply?: string }) {
+    const exists = await this.prisma.review.findUnique({ where: { id }, select: { id: true } });
+    if (!exists) throw new NotFoundException('Review not found');
+    return this.prisma.review.update({
+      where: { id },
+      data: {
+        ...(data.isApproved !== undefined && { isApproved: data.isApproved }),
+        ...(data.adminReply !== undefined && {
+          adminReply: data.adminReply || null,
+          adminReplyAt: data.adminReply ? new Date() : null,
+        }),
+      },
+    });
+  }
+
+  async deleteReviewAsAdmin(id: string) {
+    const exists = await this.prisma.review.findUnique({ where: { id }, select: { id: true } });
+    if (!exists) throw new NotFoundException('Review not found');
+    await this.prisma.review.delete({ where: { id } });
+    return { message: 'Review deleted' };
+  }
+
   // ─── Product CRUD ──────────────────────────────────────────
 
   async getProductsForAdmin(page = 1, limit = 20, search?: string) {

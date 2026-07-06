@@ -128,7 +128,9 @@ export function AdminOrdersClient() {
             <tbody>
               {orders.map((order) => (
                 <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-25">
-                  <td className="px-4 py-3 font-bold text-ikonnic-red">{order.orderNumber}</td>
+                  <td className="px-4 py-3 font-bold text-ikonnic-red">
+                    <Link href={`/admin/orders/${order.id}`} className="hover:underline">{order.orderNumber}</Link>
+                  </td>
                   <td className="px-4 py-3">
                     <p className="font-bold">{order.user.firstName} {order.user.lastName}</p>
                     <p className="text-xs text-slate-500">{order.user.email}</p>

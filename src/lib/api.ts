@@ -246,9 +246,23 @@ export const adminAPI = {
   dashboard: () => api.get("/admin/dashboard"),
   getOrders: (page = 1, limit = 20, status?: string) =>
     api.get("/admin/orders", { params: { page, limit, status } }),
+  getOrder: (id: string) => api.get(`/admin/orders/${id}`),
+  updateOrderNotes: (id: string, internalNotes: string) =>
+    api.patch(`/admin/orders/${id}/notes`, { internalNotes }),
   getUsers: (page = 1, limit = 20) => api.get("/admin/users", { params: { page, limit } }),
+  getUser: (id: string) => api.get(`/admin/users/${id}`),
+  setUserStatus: (id: string, isActive: boolean) =>
+    api.patch(`/admin/users/${id}/status`, { isActive }),
   updateOrderStatus: (id: string, status: string, note?: string) =>
     api.patch(`/admin/orders/${id}/status`, { status, note }),
+  // Reviews moderation
+  getReviews: (page = 1, limit = 20, status?: "approved" | "pending") =>
+    api.get("/admin/reviews", { params: { page, limit, status } }),
+  moderateReview: (id: string, data: { isApproved?: boolean; adminReply?: string }) =>
+    api.patch(`/admin/reviews/${id}`, data),
+  deleteReview: (id: string) => api.delete(`/admin/reviews/${id}`),
+  // Shipping (admin actions)
+  createShipment: (orderId: string) => api.post(`/shipping/create-shipment/${orderId}`),
   // Products CRUD
   getProducts: (page = 1, limit = 20, search?: string) =>
     api.get("/admin/products", { params: { page, limit, search } }),

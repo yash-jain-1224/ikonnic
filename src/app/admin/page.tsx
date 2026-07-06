@@ -9,15 +9,15 @@ const modules = [
   { title: "Dashboard", Icon: LayoutDashboard, href: "/admin/dashboard", body: "Orders, revenue, AOV, failed payments, top products, support, and production queue.", live: true },
   { title: "Products", Icon: Package, href: "/admin/products", body: "Create, edit, and delete products with images, galleries, pricing, stock, tags, and variants.", live: true },
   { title: "Categories", Icon: FolderTree, href: "/admin/categories", body: "Create, edit, and delete categories — images, accent colours, featured flag, and visibility.", live: true },
-  { title: "Orders", Icon: ClipboardList, href: "/admin/orders", body: "Customisation JSON, uploaded image refs, preview image, status updates, notes, invoice, refund, reprint.", live: true },
+  { title: "Orders", Icon: ClipboardList, href: "/admin/orders", body: "Full order detail: customisation JSON, uploaded artwork, preview, status updates, timeline, internal notes, shipment.", live: true },
   { title: "Inventory", Icon: Boxes, href: "/admin/inventory", body: "Stock levels, reservations, low-stock alerts, manual adjustments, and full transaction audit trail.", live: true },
   { title: "Analytics", Icon: LineChart, href: "/admin/analytics", body: "Daily revenue trend, order status funnel, new customers, AOV, and top-selling products.", live: true },
   { title: "Coupons", Icon: BadgePercent, href: "/admin/coupons", body: "Create and manage discount codes — percentage or flat, usage limits, expiry, and redemption tracking.", live: true },
   { title: "Templates", Icon: Images, href: "#", body: "Printable area, safe zone, bleed, crop zone, masks, text zones, fonts, colours, and preview JSON.", live: false },
   { title: "Production", Icon: Factory, href: "#", body: "Image approval, background removal, printing, quality check, packing, dispatch, and damage queues.", live: false },
   { title: "Shipping", Icon: Truck, href: "#", body: "Pincode serviceability, courier assignment, AWB, tracking sync, failed delivery, return and replacement.", live: false },
-  { title: "Customers", Icon: Users, href: "/admin/customers", body: "Registered users with roles, verification status, order counts, and join dates.", live: true },
-  { title: "Reviews", Icon: Star, href: "#", body: "Moderation, verified purchase badge, media placeholders, admin replies, abuse handling and coupon rewards.", live: false },
+  { title: "Customers", Icon: Users, href: "/admin/customers", body: "Customer profiles, order history, lifetime value, addresses, and account activate/deactivate.", live: true },
+  { title: "Reviews", Icon: Star, href: "/admin/reviews", body: "Approve or hide reviews, verified-purchase badges, photo reviews, and public admin replies.", live: true },
   { title: "Support", Icon: Ticket, href: "#", body: "Contact tickets, WhatsApp support, refunds, damaged item claims, delays, replacements and internal notes.", live: false },
 ];
 

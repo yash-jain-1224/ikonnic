@@ -80,8 +80,13 @@
   "redirects": [
     {
       "source": "/shop",
-      "destination": "/category/all",
-      "permanent": true
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/category/all",
+      "destination": "/",
+      "permanent": false
     },
     {
       "source": "/products/:slug",

@@ -22,8 +22,28 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async updateProfile(userId: string, data: { firstName?: string; lastName?: string; phone?: string; avatar?: string }) {
-    return this.prisma.user.update({ where: { id: userId }, data });
+  async updateProfile(
+    userId: string,
+    data: { name?: string; firstName?: string; lastName?: string; phone?: string; avatar?: string },
+  ) {
+    const { name, ...rest } = data;
+    const update: { firstName?: string; lastName?: string; phone?: string; avatar?: string } = { ...rest };
+
+    // Accept a combined display name and split it onto the stored columns
+    if (name && !update.firstName) {
+      const parts = name.trim().split(/\s+/);
+      update.firstName = parts[0];
+      update.lastName = parts.slice(1).join(' ') || undefined;
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: update,
+      select: {
+        id: true, email: true, phone: true, firstName: true, lastName: true,
+        avatar: true, role: true, isVerified: true, createdAt: true,
+      },
+    });
   }
 
   async getAddresses(userId: string) {

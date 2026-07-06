@@ -139,8 +139,32 @@ export class OrdersService {
         },
       });
 
-      // Reserve inventory
+      // Reserve inventory. For stock-tracked products the decrement is
+      // conditional (stockCount >= quantity) so concurrent orders cannot
+      // oversell — a failed decrement rolls the whole order back.
       for (const item of orderItems) {
+        const product = productMap.get(item.productId);
+        if (product && product.stockCount != null) {
+          const decremented = await tx.product.updateMany({
+            where: { id: item.productId, stockCount: { gte: item.quantity } },
+            data: { stockCount: { decrement: item.quantity } },
+          });
+          if (decremented.count === 0) {
+            throw new BadRequestException(
+              `Insufficient stock for "${item.title}" — only ${product.stockCount} unit(s) available`,
+            );
+          }
+          const fresh = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { stockCount: true },
+          });
+          if (fresh?.stockCount != null) {
+            const stockStatus =
+              fresh.stockCount <= 0 ? 'out_of_stock' : fresh.stockCount <= 10 ? 'low_stock' : 'in_stock';
+            await tx.product.update({ where: { id: item.productId }, data: { stockStatus } });
+          }
+        }
+
         await tx.inventoryRecord.updateMany({
           where: { productId: item.productId },
           data: {
@@ -286,6 +310,11 @@ export class OrdersService {
       if (status === OrderStatus.CANCELLED) {
         const items = await tx.orderItem.findMany({ where: { orderId } });
         for (const item of items) {
+          // Restore tracked stock counts (mirror of the order-time decrement)
+          await tx.product.updateMany({
+            where: { id: item.productId, stockCount: { not: null } },
+            data: { stockCount: { increment: item.quantity } },
+          });
           await tx.inventoryRecord.updateMany({
             where: { productId: item.productId },
             data: {

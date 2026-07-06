@@ -156,11 +156,20 @@ export class AdminService {
       const cat = await this.prisma.category.findUnique({ where: { slug: data.categorySlug } });
       if (cat) categoryId = cat.id;
     }
+    if (!categoryId) {
+      throw new BadRequestException('A valid categoryId or categorySlug is required');
+    }
 
-    return this.prisma.product.create({
+    const existingSlug = await this.prisma.product.findUnique({ where: { slug } });
+    if (existingSlug) {
+      throw new BadRequestException(`A product with slug "${slug}" already exists`);
+    }
+
+    const product = await this.prisma.product.create({
       data: {
         title: data.title,
         slug,
+        sku: data.sku || null,
         description: data.description || '',
         longDescription: data.longDescription,
         price: parseFloat(data.price),
@@ -168,13 +177,62 @@ export class AdminService {
         image: data.image || '',
         gallery: data.gallery || [],
         filterTags: data.filterTags || [],
-        stockStatus: data.stockStatus || 'in_stock',
+        stockStatus: String(data.stockStatus || 'in_stock').toLowerCase(),
         stockCount: data.stockCount ?? null,
         sale: data.sale || false,
         isFeatured: data.featured || false,
+        isActive: data.isActive ?? true,
+        taxRate: data.taxRate ?? undefined,
+        hsnCode: data.hsnCode || null,
+        weight: data.weight ?? null,
         categoryId,
       },
     });
+
+    await this.syncProductOptions(product.id, data.sizeOptions, data.thicknessOptions);
+    return product;
+  }
+
+  /** Replace size/thickness option rows when the payload provides them. */
+  private async syncProductOptions(
+    productId: string,
+    sizeOptions?: Array<{ label: string; value: string; priceDelta?: number; disabled?: boolean; sortOrder?: number }>,
+    thicknessOptions?: Array<{ label: string; value: string; priceDelta?: number; disabled?: boolean; sortOrder?: number }>,
+  ) {
+    if (sizeOptions !== undefined) {
+      await this.prisma.productOption.deleteMany({ where: { sizeProductId: productId, type: 'size' } });
+      if (sizeOptions.length) {
+        await this.prisma.productOption.createMany({
+          data: sizeOptions.map((o, i) => ({
+            productId,
+            sizeProductId: productId,
+            type: 'size',
+            label: o.label,
+            value: o.value,
+            priceDelta: o.priceDelta ?? 0,
+            disabled: o.disabled ?? false,
+            sortOrder: o.sortOrder ?? i,
+          })),
+        });
+      }
+    }
+    if (thicknessOptions !== undefined) {
+      await this.prisma.productOption.deleteMany({ where: { thicknessProductId: productId, type: 'thickness' } });
+      if (thicknessOptions.length) {
+        await this.prisma.productOption.createMany({
+          data: thicknessOptions.map((o, i) => ({
+            productId,
+            thicknessProductId: productId,
+            type: 'thickness',
+            label: o.label,
+            value: o.value,
+            priceDelta: o.priceDelta ?? 0,
+            disabled: o.disabled ?? false,
+            sortOrder: o.sortOrder ?? i,
+          })),
+        });
+      }
+    }
   }
 
   async updateProduct(id: string, data: any) {
@@ -190,11 +248,12 @@ export class AdminService {
       categoryId = data.categoryId;
     }
 
-    return this.prisma.product.update({
+    const product = await this.prisma.product.update({
       where: { id },
       data: {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.slug !== undefined && { slug: data.slug }),
+        ...(data.sku !== undefined && { sku: data.sku || null }),
         ...(data.description !== undefined && { description: data.description }),
         ...(data.longDescription !== undefined && { longDescription: data.longDescription }),
         ...(data.price !== undefined && { price: parseFloat(data.price) }),
@@ -202,19 +261,33 @@ export class AdminService {
         ...(data.image !== undefined && { image: data.image }),
         ...(data.gallery !== undefined && { gallery: data.gallery }),
         ...(data.filterTags !== undefined && { filterTags: data.filterTags }),
-        ...(data.stockStatus !== undefined && { stockStatus: data.stockStatus }),
+        ...(data.stockStatus !== undefined && { stockStatus: String(data.stockStatus).toLowerCase() }),
         ...(data.stockCount !== undefined && { stockCount: data.stockCount }),
         ...(data.sale !== undefined && { sale: data.sale }),
         ...(data.featured !== undefined && { isFeatured: data.featured }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.taxRate !== undefined && { taxRate: data.taxRate }),
+        ...(data.hsnCode !== undefined && { hsnCode: data.hsnCode || null }),
+        ...(data.weight !== undefined && { weight: data.weight }),
         ...(categoryId && { categoryId }),
       },
     });
+
+    await this.syncProductOptions(id, data.sizeOptions, data.thicknessOptions);
+    return product;
   }
 
   async deleteProduct(id: string) {
     const exists = await this.prisma.product.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Product not found');
-    await this.prisma.product.delete({ where: { id } });
+    try {
+      await this.prisma.product.delete({ where: { id } });
+    } catch {
+      // Products referenced by orders/carts cannot be hard-deleted (FK
+      // constraints) — deactivate instead so history stays intact.
+      await this.prisma.product.update({ where: { id }, data: { isActive: false } });
+      return { message: 'Product has existing orders — deactivated instead of deleted' };
+    }
     return { message: 'Product deleted successfully' };
   }
 

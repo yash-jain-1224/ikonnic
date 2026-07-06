@@ -5,6 +5,7 @@ import { OrdersService } from './orders.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -14,6 +15,8 @@ describe('OrdersService', () => {
     orderItem: { findMany: jest.fn() },
     orderStatusHistory: { create: jest.fn() },
     inventoryRecord: { updateMany: jest.fn() },
+    payment: { create: jest.fn(), updateMany: jest.fn() },
+    product: { updateMany: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
   };
 
   const prismaMock = {
@@ -24,6 +27,11 @@ describe('OrdersService', () => {
 
   const redisMock = { del: jest.fn() };
   const couponsMock = { validateCoupon: jest.fn(), applyCoupon: jest.fn() };
+  const notificationsMock = {
+    sendOrderConfirmation: jest.fn().mockResolvedValue(undefined),
+    sendOrderCancelledEmail: jest.fn().mockResolvedValue(undefined),
+    sendShippingUpdate: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -32,6 +40,11 @@ describe('OrdersService', () => {
     txMock.orderItem.findMany.mockResolvedValue([]);
     txMock.orderStatusHistory.create.mockResolvedValue({});
     txMock.inventoryRecord.updateMany.mockResolvedValue({});
+    txMock.payment.create.mockResolvedValue({});
+    txMock.payment.updateMany.mockResolvedValue({});
+    txMock.product.updateMany.mockResolvedValue({ count: 1 });
+    txMock.product.findUnique.mockResolvedValue({ stockCount: 10 });
+    txMock.product.update.mockResolvedValue({});
     // Authoritative product prices come from the DB, never the client payload.
     prismaMock.product.findMany.mockResolvedValue([
       { id: 'p1', title: 'Acrylic Wall Photo', sku: null, price: 500, taxRate: 18, isActive: true },
@@ -43,6 +56,7 @@ describe('OrdersService', () => {
         { provide: PrismaService, useValue: prismaMock },
         { provide: RedisService, useValue: redisMock },
         { provide: CouponsService, useValue: couponsMock },
+        { provide: NotificationsService, useValue: notificationsMock },
       ],
     }).compile();
 
@@ -78,8 +92,8 @@ describe('OrdersService', () => {
       expect(orderData.shippingCost).toBe(0); // free above 999
       expect(orderData.discount).toBe(0); // client discount ignored, no coupon
       expect(orderData.total).toBe(1416); // 1200 + 216 + 0 - 0
-      expect(orderData.status).toBe(OrderStatus.PENDING);
-      expect(orderData.orderNumber).toMatch(/^GFT-\d{4}-/);
+      expect(orderData.status).toBe(OrderStatus.PAYMENT_CONFIRMED); // COD auto-confirms
+      expect(orderData.orderNumber).toMatch(/^IKN-\d{4}-/);
     });
 
     it('ignores a tampered client unitPrice and uses the DB product price', async () => {

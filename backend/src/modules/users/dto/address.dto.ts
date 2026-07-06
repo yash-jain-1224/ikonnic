@@ -8,12 +8,6 @@ export enum AddressType {
 }
 
 export class CreateAddressDto {
-  @ApiProperty({ example: 'Home' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(50)
-  label: string;
-
   @ApiProperty({ example: 'John Doe' })
   @IsString()
   @IsNotEmpty()
@@ -30,13 +24,19 @@ export class CreateAddressDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
-  addressLine1: string;
+  streetLine1: string;
+
+  @ApiPropertyOptional({ example: 'Apartment 4B' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  streetLine2?: string;
 
   @ApiPropertyOptional({ example: 'Near Park' })
   @IsOptional()
   @IsString()
   @MaxLength(200)
-  addressLine2?: string;
+  landmark?: string;
 
   @ApiProperty({ example: 'Mumbai' })
   @IsString()
@@ -75,12 +75,6 @@ export class CreateAddressDto {
 }
 
 export class UpdateAddressDto {
-  @ApiPropertyOptional({ example: 'Office' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  label?: string;
-
   @ApiPropertyOptional({ example: 'John Doe' })
   @IsOptional()
   @IsString()
@@ -97,13 +91,19 @@ export class UpdateAddressDto {
   @IsOptional()
   @IsString()
   @MaxLength(200)
-  addressLine1?: string;
+  streetLine1?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   @MaxLength(200)
-  addressLine2?: string;
+  streetLine2?: string;
+
+  @ApiPropertyOptional({ example: 'Near Park' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  landmark?: string;
 
   @ApiPropertyOptional({ example: 'Delhi' })
   @IsOptional()

@@ -3,6 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { InventoryTransactionType } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { OrdersService } from '../orders/orders.service';
 
 describe('AdminService — inventory', () => {
   let service: AdminService;
@@ -29,7 +30,11 @@ describe('AdminService — inventory', () => {
     prismaMock.inventoryTransaction.create.mockResolvedValue({});
 
     const moduleRef = await Test.createTestingModule({
-      providers: [AdminService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [
+        AdminService,
+        { provide: PrismaService, useValue: prismaMock },
+        { provide: OrdersService, useValue: { updateStatus: jest.fn() } },
+      ],
     }).compile();
 
     service = moduleRef.get(AdminService);

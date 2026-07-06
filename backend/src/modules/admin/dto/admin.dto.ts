@@ -1,20 +1,51 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean, IsArray, IsEnum, Min, Max, MaxLength } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean, IsArray, IsEnum, Min, Max, MaxLength, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional, PartialType, OmitType } from '@nestjs/swagger';
+import { OrderStatus } from '@prisma/client';
 
 // ─── Products ────────────────────────────────────────────────────────
+
+export class ProductOptionInputDto {
+  @ApiProperty({ example: '8x12 inches' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  label: string;
+
+  @ApiProperty({ example: '8x12' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  value: string;
+
+  @ApiPropertyOptional({ example: 200 })
+  @IsOptional()
+  @IsNumber()
+  priceDelta?: number;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  disabled?: boolean;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  sortOrder?: number;
+}
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Acrylic Wall Photo' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
-  name: string;
+  title: string;
 
-  @ApiProperty({ example: 'acrylic-wall-photo' })
+  @ApiPropertyOptional({ example: 'acrylic-wall-photo', description: 'Generated from title when omitted' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(200)
-  slug: string;
+  slug?: string;
 
   @ApiPropertyOptional({ example: 'Beautiful acrylic wall photo with HD print' })
   @IsOptional()
@@ -27,16 +58,27 @@ export class CreateProductDto {
   @Min(0)
   price: number;
 
-  @ApiPropertyOptional({ example: 799 })
+  @ApiPropertyOptional({ example: 'Long form marketing copy' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20000)
+  longDescription?: string;
+
+  @ApiPropertyOptional({ example: 799, description: 'Strike-through compare-at price' })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  compareAtPrice?: number;
+  oldPrice?: number;
 
-  @ApiPropertyOptional({ example: 'category-uuid' })
+  @ApiPropertyOptional({ example: 'category-cuid' })
   @IsOptional()
   @IsString()
   categoryId?: string;
+
+  @ApiPropertyOptional({ example: 'acrylic-wall-photo' })
+  @IsOptional()
+  @IsString()
+  categorySlug?: string;
 
   @ApiPropertyOptional({ example: 'SKU-001' })
   @IsOptional()
@@ -44,27 +86,56 @@ export class CreateProductDto {
   @MaxLength(50)
   sku?: string;
 
-  @ApiPropertyOptional({ example: 100 })
+  @ApiPropertyOptional({ example: '/images/products/hero.webp' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  image?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  gallery?: string[];
+
+  @ApiPropertyOptional({ type: [String], example: ['Portrait', 'Gift'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  filterTags?: string[];
+
+  @ApiPropertyOptional({ example: 'in_stock', enum: ['in_stock', 'low_stock', 'out_of_stock'] })
+  @IsOptional()
+  @IsString()
+  stockStatus?: string;
+
+  @ApiPropertyOptional({ example: 100, nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  stockCount?: number;
+  stockCount?: number | null;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  sale?: boolean;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[];
-
-  @ApiPropertyOptional({ example: 18 })
+  @ApiPropertyOptional({ example: 18, description: 'GST rate percent' })
   @IsOptional()
   @IsNumber()
-  gstPercent?: number;
+  @Min(0)
+  @Max(100)
+  taxRate?: number;
 
   @ApiPropertyOptional({ example: '392611' })
   @IsOptional()
@@ -76,82 +147,30 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   weight?: number;
-}
 
-export class UpdateProductDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  name?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  slug?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(5000)
-  description?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  price?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  compareAtPrice?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  categoryId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  sku?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  stockCount?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
-
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: [ProductOptionInputDto] })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  images?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => ProductOptionInputDto)
+  sizeOptions?: ProductOptionInputDto[];
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: [ProductOptionInputDto] })
   @IsOptional()
-  @IsNumber()
-  gstPercent?: number;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductOptionInputDto)
+  thicknessOptions?: ProductOptionInputDto[];
+}
 
-  @ApiPropertyOptional()
+export class UpdateProductDto extends PartialType(
+  OmitType(CreateProductDto, ['title'] as const),
+) {
+  @ApiPropertyOptional({ example: 'Acrylic Wall Photo' })
   @IsOptional()
   @IsString()
-  hsnCode?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  weight?: number;
+  @MaxLength(200)
+  title?: string;
 }
 
 // ─── Categories ──────────────────────────────────────────────────────
@@ -349,10 +368,9 @@ export class UpdateCouponDto {
 // ─── Order Status ────────────────────────────────────────────────────
 
 export class UpdateOrderStatusDto {
-  @ApiProperty({ example: 'CONFIRMED' })
-  @IsString()
-  @IsNotEmpty()
-  status: string;
+  @ApiProperty({ example: 'PRINTING', enum: OrderStatus })
+  @IsEnum(OrderStatus, { message: `status must be one of: ${Object.values(OrderStatus).join(', ')}` })
+  status: OrderStatus;
 
   @ApiPropertyOptional({ example: 'Order confirmed by admin' })
   @IsOptional()

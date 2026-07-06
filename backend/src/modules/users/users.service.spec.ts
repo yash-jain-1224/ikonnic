@@ -52,10 +52,24 @@ describe('UsersService', () => {
 
       const result = await service.updateProfile('u1', { firstName: 'Jane' });
       expect(result.firstName).toBe('Jane');
-      expect(prismaMock.user.update).toHaveBeenCalledWith({
-        where: { id: 'u1' },
-        data: { firstName: 'Jane' },
-      });
+      expect(prismaMock.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'u1' },
+          data: { firstName: 'Jane' },
+        }),
+      );
+    });
+
+    it('splits a combined name onto firstName/lastName columns', async () => {
+      prismaMock.user.update.mockResolvedValue({ id: 'u1', firstName: 'Jane', lastName: 'Ann Doe' });
+
+      await service.updateProfile('u1', { name: 'Jane Ann Doe' });
+      expect(prismaMock.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'u1' },
+          data: { firstName: 'Jane', lastName: 'Ann Doe' },
+        }),
+      );
     });
   });
 

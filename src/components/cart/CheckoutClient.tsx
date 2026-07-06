@@ -115,6 +115,8 @@ export function CheckoutClient() {
         if (selectedAddressId !== "new") {
           addressId = selectedAddressId;
         } else {
+          // A COD order cannot be fulfilled without a delivery address, so a
+          // failed address save must block the order — not be swallowed.
           try {
             const { data: newAddress } = await usersAPI.addAddress({
               type: "BOTH",
@@ -127,9 +129,19 @@ export function CheckoutClient() {
               country: String(data.get("country") || "India"),
             });
             addressId = newAddress?.id;
-          } catch {
-            // Order can still proceed without a saved address record
+          } catch (addressErr: any) {
+            const msg = addressErr.response?.data?.message;
+            alert(
+              Array.isArray(msg) ? `Please check your delivery address: ${msg.join(", ")}` : msg || "We could not save your delivery address. Please check the details and try again."
+            );
+            setProcessing(false);
+            return;
           }
+        }
+        if (!addressId) {
+          alert("A delivery address is required to place a Cash on Delivery order.");
+          setProcessing(false);
+          return;
         }
 
         // Real backend flow

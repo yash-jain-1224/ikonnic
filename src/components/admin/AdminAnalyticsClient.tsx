@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { adminAPI } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
-import { IndianRupee, LineChart, Loader2, ShoppingCart, TrendingUp, UserPlus } from "lucide-react";
+import { Download, IndianRupee, LineChart, Loader2, ShoppingCart, TrendingUp, UserPlus } from "lucide-react";
 
 type Analytics = {
   days: number;
@@ -48,6 +48,28 @@ export function AdminAnalyticsClient() {
     );
   }
 
+  const exportCsv = () => {
+    if (!data) return;
+    const rows = [
+      ["Date", "Revenue", "Orders"],
+      ...data.revenueByDay.map((d) => [d.date, String(d.revenue), String(d.orders)]),
+      [],
+      ["Top Products", "Quantity", "Revenue"],
+      ...data.topProducts.map((p) => [p.title.replace(/"/g, '""'), String(p.quantity), String(p.revenue)]),
+      [],
+      ["Orders by Status", "Count"],
+      ...data.ordersByStatus.map((s) => [s.status, String(s._count)]),
+    ];
+    const csv = rows.map((r) => r.map((c) => (/[",\n]/.test(c) ? `"${c}"` : c)).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ikonnic-analytics-${data.days}d.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const maxDayRevenue = Math.max(1, ...(data?.revenueByDay.map((d) => d.revenue) ?? [1]));
   const maxStatusCount = Math.max(1, ...(data?.ordersByStatus.map((s) => s._count) ?? [1]));
   const cards = data
@@ -79,6 +101,14 @@ export function AdminAnalyticsClient() {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={exportCsv}
+            disabled={!data}
+            className="inline-flex items-center gap-1.5 rounded-full border border-rosegold-200 bg-white px-3.5 py-1.5 text-xs font-black text-slate-700 hover:border-ikonnic-red hover:text-ikonnic-red disabled:opacity-40"
+          >
+            <Download size={13} /> Export CSV
+          </button>
           <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
         </div>
       </div>

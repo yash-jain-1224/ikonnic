@@ -91,15 +91,15 @@ export function AdminCustomersClient() {
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-slate-50 hover:bg-rosegold-100/50">
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
+                    <Link href={`/admin/customers/${u.id}`} className="flex items-center gap-3 group">
                       <div className="grid size-9 place-items-center rounded-full bg-ikonnic-red text-sm font-black text-white">
                         {u.firstName?.[0]?.toUpperCase() || "U"}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate font-bold text-slate-900">{u.firstName} {u.lastName || ""}</p>
+                        <p className="truncate font-bold text-slate-900 group-hover:text-ikonnic-red group-hover:underline">{u.firstName} {u.lastName || ""}</p>
                         <p className="truncate text-[11px] text-slate-400">{u.email}</p>
                       </div>
-                    </div>
+                    </Link>
                   </td>
                   <td className="px-4 py-3 text-slate-600">{u.phone || "—"}</td>
                   <td className="px-4 py-3">

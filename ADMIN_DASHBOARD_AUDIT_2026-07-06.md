@@ -44,15 +44,20 @@ The Admin Portal was **functional but had one launch-blocking defect and several
 
 ---
 
-## 2. Missing / Partially Implemented (remaining, non-blocking)
+## 2. Missing / Partially Implemented
 
-These are advertised on the admin landing page as future modules and are **not yet built** (marked non-live in the UI):
+> **Update (round 2):** the items originally listed here — order detail, internal notes,
+> reviews moderation, customer detail + account status, and reports export — have now been
+> **built and deployed**. See [§11 Round 2](#11-round-2--additional-pages-built). The list below
+> is what genuinely remains.
 
-- **Order detail view** — the orders screen is list + status dropdown only. There is no drill-down for customisation JSON, uploaded artwork, preview image, address, full timeline, invoice/refund/reprint actions. *(Backend order detail data exists; only an admin-facing detail screen is missing.)*
-- **Internal order notes** — schema has `Order.internalNotes`; no admin endpoint/UI to edit it.
-- **Templates, Production queue, Shipping ops, Reviews moderation, Support tickets** — placeholder modules, not implemented.
+Still not built (require larger, dedicated subsystems — marked non-live in the console):
+
+- **Templates editor** — customizer template geometry (printable area, safe zone, bleed, masks, text zones). Needs a visual editor + template schema work.
+- **Production queue** — per-item production workflow (image approval → print → QC → pack → dispatch). Needs a production-ops domain.
+- **Standalone Shipping dashboard** — bulk courier assignment / AWB / failed-delivery queues. *(Per-order shipment creation via Shiprocket is wired on the order detail page.)*
+- **Support tickets** — contact/ticketing subsystem.
 - **Granular roles** — `PRODUCTION_MANAGER` / `SUPPORT_AGENT` exist in the enum but admin access is all-or-nothing (`ADMIN`/`SUPER_ADMIN`). No per-role scoping.
-- **Reports export (CSV/PDF)** — analytics are on-screen only; no export.
 
 None block go-live for a COD storefront; they are operational-maturity enhancements.
 
@@ -148,3 +153,42 @@ None block go-live for a COD storefront; they are operational-maturity enhanceme
 - Per-instance in-memory cache (5–10 min TTL) rather than shared Redis — bounded staleness, non-blocking.
 
 **Deployment:** backend + frontend built clean, committed to branch `admin-audit-fixes` (pushed), and deployed to production via Vercel CLI (`backend-xi-one-34.vercel.app`, `www.ikonnic.com`). Merge `admin-audit-fixes` → `main` to align git integration.
+
+---
+
+## 11. Round 2 — Additional Pages Built
+
+A second pass built the operational screens that were missing and fixed one more latent bug.
+
+### New bug found & fixed
+- **Reviews never appeared on the storefront.** `getProductReviews` filters `isApproved: true`, reviews are created with `isApproved: false`, and there was **no moderation UI** — so no customer review could ever be published. A moderation screen now lets admins approve/hide reviews (2 pending reviews were found in production).
+
+### New backend endpoints (admin module)
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /admin/orders/:id` | Full order detail (no owner scoping) |
+| `PATCH /admin/orders/:id/notes` | Internal (admin-only) order notes |
+| `GET /admin/users/:id` | Customer detail: order history, addresses, lifetime value |
+| `PATCH /admin/users/:id/status` | Activate/deactivate customer (guards self + non-customer accounts) |
+| `GET /admin/reviews` · `PATCH /admin/reviews/:id` · `DELETE /admin/reviews/:id` | Review moderation (approve/hide/reply/delete, pending filter) |
+
+### New frontend pages
+- **`/admin/orders/[id]`** — items with customisation JSON, uploaded artwork + preview links, shipping/billing address, full status timeline, payment, status update, internal notes editor, and Shiprocket "Create shipment".
+- **`/admin/customers/[id]`** — profile, order count / lifetime value / reviews stats, order history (linked), saved addresses, and an activate/deactivate control.
+- **`/admin/reviews`** — moderation queue with pending/approved/all filters, approve/hide, public admin replies, delete, photo reviews.
+- **Analytics CSV export**; orders & customers list rows now deep-link to detail pages; console marks Orders/Customers/Reviews live.
+
+### Round-2 live test results (production)
+| Test | Result |
+|------|--------|
+| `GET /admin/orders/:id` full payload | ✅ items, timeline, payments, address, user, shipment |
+| Internal notes set + clear | ✅ 200 both |
+| `GET /admin/users/:id` (orders + LTV + addresses) | ✅ |
+| Deactivate → login blocked → reactivate → login works | ✅ **401 while deactivated, 200 after** |
+| Self-deactivate guard | ✅ 400 |
+| Reviews list + pending filter | ✅ `pendingCount: 2` |
+| Review approve → revert | ✅ net-zero |
+| New frontend routes (`/admin/reviews`, `/admin/orders/[id]`, `/admin/customers/[id]`) | ✅ 307 guard (routes live) |
+
+### Revised readiness — **95 / 100 · GO**
+Order management rises to **10/10** (detail view, timeline, notes, shipment) and a **Reviews (9/10)** capability is added. Remaining gaps (Templates, Production queue, standalone Shipping dashboard, Support, granular roles) are post-launch operational-maturity work, not blockers.

@@ -13,6 +13,9 @@ import {
   UpdateCouponDto,
   UpdateOrderStatusDto,
   AdjustInventoryDto,
+  UpdateOrderNotesDto,
+  UpdateUserStatusDto,
+  ModerateReviewDto,
 } from './dto/admin.dto';
 
 @ApiTags('admin')
@@ -41,10 +44,34 @@ export class AdminController {
     return this.adminService.getUsersForAdmin(page, limit);
   }
 
+  @Get('users/:id')
+  @ApiOperation({ summary: 'Get customer detail with order history (admin)' })
+  async getUser(@Param('id') id: string) {
+    return this.adminService.getUserByIdForAdmin(id);
+  }
+
+  @Patch('users/:id/status')
+  @ApiOperation({ summary: 'Activate / deactivate a customer account (admin)' })
+  async setUserStatus(@Param('id') id: string, @Body() body: UpdateUserStatusDto, @Req() req?: any) {
+    return this.adminService.setUserActive(id, body.isActive, req?.user?.id);
+  }
+
+  @Get('orders/:id')
+  @ApiOperation({ summary: 'Get full order detail (admin)' })
+  async getOrder(@Param('id') id: string) {
+    return this.adminService.getOrderByIdForAdmin(id);
+  }
+
   @Patch('orders/:id/status')
   @ApiOperation({ summary: 'Update order status (admin)' })
   async updateOrderStatus(@Param('id') id: string, @Body() body: UpdateOrderStatusDto, @Req() req?: any) {
     return this.adminService.updateOrderStatus(id, body.status, body.note, req?.user?.id);
+  }
+
+  @Patch('orders/:id/notes')
+  @ApiOperation({ summary: 'Update internal order notes (admin)' })
+  async updateOrderNotes(@Param('id') id: string, @Body() body: UpdateOrderNotesDto) {
+    return this.adminService.updateOrderNotes(id, body.internalNotes);
   }
 
   // ─── Product CRUD ──────────────────────────────────────────
@@ -154,6 +181,29 @@ export class AdminController {
   @ApiOperation({ summary: 'Delete coupon (admin)' })
   async deleteCoupon(@Param('id') id: string) {
     return this.adminService.deleteCoupon(id);
+  }
+
+  // ─── Reviews Moderation ────────────────────────────────────
+  @Get('reviews')
+  @ApiOperation({ summary: 'List reviews for moderation (admin)' })
+  async getReviews(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('status') status?: 'approved' | 'pending',
+  ) {
+    return this.adminService.getReviewsForAdmin(page, limit, status);
+  }
+
+  @Patch('reviews/:id')
+  @ApiOperation({ summary: 'Approve/hide a review or add an admin reply (admin)' })
+  async moderateReview(@Param('id') id: string, @Body() body: ModerateReviewDto) {
+    return this.adminService.moderateReview(id, body);
+  }
+
+  @Delete('reviews/:id')
+  @ApiOperation({ summary: 'Delete a review (admin)' })
+  async deleteReview(@Param('id') id: string) {
+    return this.adminService.deleteReviewAsAdmin(id);
   }
 
   // ─── Analytics ─────────────────────────────────────────────

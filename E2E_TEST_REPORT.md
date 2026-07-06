@@ -3,7 +3,7 @@
 **Date:** 2026-07-06 · **Tester:** Claude Code (automated E2E suite + targeted probes)
 **Frontend:** https://www.ikonnic.com (Vercel project `ikonnic`)
 **Backend:** https://backend-xi-one-34.vercel.app/api/v1 (Vercel project `backend`, NestJS + Prisma + Azure PostgreSQL, region `bom1`)
-**Fix commits:** `c84ef15`, `f6206f1` (both deployed to production and re-tested)
+**Fix commits:** `c84ef15`, `f6206f1`, plus the connection-exhaustion fix (all deployed to production and re-tested)
 
 ---
 
@@ -40,6 +40,7 @@ A 91-test API suite ran against the **live production backend**, plus 11 targete
 9. **`/shop` redirected to a 404** (`/category/all` doesn't exist). → Redirects to `/`, plus a rescue redirect for clients that cached the old 308.
 10. **`GET /notifications` didn't exist** though the frontend API client references it. → Added JWT-scoped list/mark-read/mark-all-read endpoints (also used to verify email delivery).
 11. **Test hygiene:** broken spec DI wiring and stale expectations fixed — backend suite now 79/79 green.
+12. **Every frontend build knocked the backend over for live traffic (critical, caught post-report).** Production builds prerender every product page (~460 routes across `/product` and `/customise`), fanning hundreds of concurrent requests into the backend. Each auto-scaled serverless instance opened a full Prisma connection pool against Azure PostgreSQL (Burstable tier, low `max_connections`), exhausting the server — real users got `FUNCTION_INVOCATION_FAILED` / `PrismaClientInitializationError` for the duration of the build. The storefront's local-data fallback masked this: builds "succeeded" while the API was down. → Fixed two ways: `PrismaService` now caps each instance at `connection_limit=1&pool_timeout=20` (standard Prisma-on-serverless setting, unless `DATABASE_URL` sets its own), and `/customise/[slug]` no longer prerenders all products (it duplicated the entire `/product/[slug]` fetch fan-out; now on-demand with the same 300s ISR). Frontend build time halved; backend health verified 200 through subsequent build windows.
 
 ## 3. Verified working (evidence-based)
 
@@ -48,9 +49,11 @@ A 91-test API suite ran against the **live production backend**, plus 11 targete
 - Security posture: server-side price recomputation (cart *and* order), COD forced server-side, RBAC enforced, ownership scoping on orders/addresses/notifications, refresh-token rotation + revocation, throttled auth endpoints, no `passwordHash` leakage, strict validation whitelist, security headers, CORS restricted to known origins.
 - Performance (bom1, cold-ish samples): API 0.29–0.50s; SSR pages 0.4–1.2s. Acceptable for launch.
 
-## 4. Remaining blocker (needs an account-owner decision)
+## 4. Remaining blockers (need account-owner decisions)
 
-**Admin-uploaded images are not publicly readable.** Uploads land in Azure Blob (`ikonnicstorage/uploads`) and the API returns direct blob URLs, but the storage **account** has `allowBlobPublicAccess: false` → the URLs return 409 `PublicAccessNotPermitted`. Current catalog images are unaffected (served from `/images/...` in the frontend); this only breaks **newly uploaded** product/customization imagery.
+Two changes were deliberately left to you because they alter production security posture / secrets:
+
+**(a) Blob public access — required before admin-uploaded imagery works.** Uploads land in Azure Blob (`ikonnicstorage/uploads`) and the API returns direct blob URLs, but the storage **account** has `allowBlobPublicAccess: false` → the URLs return 409 `PublicAccessNotPermitted`. Current catalog images are unaffected (served from `/images/...` in the frontend); this only breaks **newly uploaded** product/customization imagery.
 
 Option A — match the app's current design (public read on blobs, no listing):
 ```bash
@@ -59,7 +62,7 @@ az storage container set-permission --name uploads --account-name ikonnicstorage
 ```
 Option B — keep the account private and serve images via SAS URLs / a backend proxy (code change; the upload module already has SAS support).
 
-This change was deliberately left to you (it loosens the storage account's security posture).
+**(b) Optional: mirror the DB pooling params into the Vercel env var.** The `connection_limit=1` cap now lives in code (`PrismaService`). If you'd rather manage it in configuration, update the `backend` project's production `DATABASE_URL` to append `connection_limit=1&pool_timeout=20&connect_timeout=15` — the code detects existing params and defers to them. Purely optional; the code-level fix is already live.
 
 ## 5. Non-blocking observations
 

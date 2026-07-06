@@ -4,6 +4,7 @@
  */
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from '../src/app.module';
 import compression from 'compression';
@@ -55,6 +56,16 @@ async function bootstrap() {
     transform: true,
     transformOptions: { enableImplicitConversion: true },
   }));
+
+  // Swagger — also served on serverless so /docs works in production
+  const config = new DocumentBuilder()
+    .setTitle('Ikonnic E-Commerce API')
+    .setDescription('Complete REST API for Ikonnic personalized gifts e-commerce platform')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(nestApp, config);
+  SwaggerModule.setup('docs', nestApp, document);
 
   await nestApp.init();
   app = nestApp;

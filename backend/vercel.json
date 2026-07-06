@@ -8,6 +8,24 @@
       "maxDuration": 30
     }
   },
+  "crons": [
+    {
+      "path": "/api/v1/cron/cleanup-carts",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/v1/cron/cleanup-expired-otps",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/v1/cron/send-review-requests",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/v1/cron/revoke-expired-tokens",
+      "schedule": "0 2 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/api" }
   ],

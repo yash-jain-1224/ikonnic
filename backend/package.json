@@ -27,12 +27,8 @@
     "docker:down": "docker-compose down"
   },
   "dependencies": {
-    "@azure/communication-email": "^1.1.0",
     "@azure/communication-sms": "^1.2.0-beta.4",
-    "@azure/monitor-opentelemetry": "^1.18.2",
     "@azure/storage-blob": "^12.33.0",
-    "@nestjs/bull": "^10.1.0",
-    "@nestjs/cache-manager": "^2.2.0",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.3.0",
@@ -45,9 +41,6 @@
     "@prisma/client": "^5.8.0",
     "applicationinsights": "^3.15.1",
     "bcrypt": "^5.1.1",
-    "bull": "^4.12.0",
-    "cache-manager": "^5.3.2",
-    "cache-manager-redis-yet": "^4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",

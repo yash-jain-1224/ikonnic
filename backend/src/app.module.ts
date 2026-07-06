@@ -25,6 +25,7 @@ import { SearchModule } from './modules/search/search.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { HealthModule } from './modules/health/health.module';
+import { CronModule } from './modules/cron/cron.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { HealthModule } from './modules/health/health.module';
     AdminModule,
     UploadModule,
     HealthModule,
+    CronModule,
   ],
   providers: [
     // Enforce rate limiting globally; per-endpoint overrides via @Throttle/@SkipThrottle

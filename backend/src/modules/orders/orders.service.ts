@@ -1,17 +1,21 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { normalizePage, normalizeLimit } from '../../common/pagination';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
     private couponsService: CouponsService,
+    private notifications: NotificationsService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto) {
@@ -20,7 +24,10 @@ export class OrdersService {
     }
 
     // Generate order number
-    const orderNumber = `GFT-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    const orderNumber = `IKN-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+
+    // Force COD as the only payment method
+    const paymentMethod = PaymentMethod.COD;
 
     // Load authoritative product data — NEVER trust client-supplied prices.
     const productIds = [...new Set(dto.items.map((i) => i.productId))];
@@ -42,7 +49,7 @@ export class OrdersService {
       }
 
       const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
-      const unitPrice = product.price; // server authority
+      const unitPrice = product.price;
       const optionsPrice = Math.max(0, Number(item.optionsPrice) || 0);
       const lineTotal = (unitPrice + optionsPrice) * quantity;
       const taxRate = product.taxRate ?? 18;
@@ -68,7 +75,7 @@ export class OrdersService {
       };
     });
 
-    // Derive the discount from a server-validated coupon — never trust dto.discount.
+    // Derive the discount from a server-validated coupon
     let discount = 0;
     let appliedCouponCode: string | undefined;
     if (dto.couponCode) {
@@ -78,7 +85,7 @@ export class OrdersService {
     }
 
     const tax = Math.round(taxTotal * 100) / 100;
-    const shippingCost = subtotal >= 999 ? 0 : 99; // Free shipping above 999
+    const shippingCost = subtotal >= 999 ? 0 : 99;
     const total = Math.max(0, Math.round((subtotal + tax + shippingCost - discount) * 100) / 100);
 
     // Create order with items in a transaction
@@ -89,23 +96,24 @@ export class OrdersService {
           userId,
           billingAddressId: dto.billingAddressId,
           shippingAddressId: dto.shippingAddressId,
-          status: OrderStatus.PENDING,
+          status: OrderStatus.PAYMENT_CONFIRMED, // COD confirmed immediately
           subtotal,
           discount,
           tax,
           shippingCost,
           total,
           couponCode: appliedCouponCode,
-          paymentMethod: dto.paymentMethod as any,
+          paymentMethod,
           customerNotes: dto.customerNotes,
+          estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
           items: {
             create: orderItems,
           },
           statusHistory: {
-            create: {
-              status: OrderStatus.PENDING,
-              note: 'Order created',
-            },
+            create: [
+              { status: OrderStatus.PENDING, note: 'Order placed (COD)' },
+              { status: OrderStatus.PAYMENT_CONFIRMED, note: 'COD order auto-confirmed' },
+            ],
           },
         },
         include: {
@@ -113,6 +121,21 @@ export class OrdersService {
           statusHistory: true,
           billingAddress: true,
           shippingAddress: true,
+          user: { select: { email: true, phone: true, firstName: true } },
+        },
+      });
+
+      // Create payment record for COD
+      await tx.payment.create({
+        data: {
+          orderId: createdOrder.id,
+          amount: total,
+          currency: 'INR',
+          status: PaymentStatus.PENDING,
+          method: PaymentMethod.COD,
+          gatewayOrderId: `COD_${orderNumber}`,
+          gatewayResponse: { type: 'cod', note: 'Payment to be collected on delivery' },
+          attempts: 1,
         },
       });
 
@@ -130,19 +153,46 @@ export class OrdersService {
       return createdOrder;
     });
 
-    // Record coupon usage (best-effort; the order already exists).
+    // Record coupon usage (best-effort)
     if (appliedCouponCode) {
       try {
         await this.couponsService.applyCoupon(appliedCouponCode, userId, order.id);
       } catch {
-        // Non-fatal: usage accounting shouldn't roll back a paid order.
+        // Non-fatal
       }
     }
 
     // Invalidate user's orders cache
     await this.redis.del(`user:${userId}:orders`);
 
+    // Send order confirmation email (async, non-blocking)
+    this.sendOrderNotifications(order).catch((err) => {
+      this.logger.error(`Failed to send order notifications: ${err.message}`);
+    });
+
+    this.logger.log(`✅ Order ${orderNumber} created for user ${userId}, total ₹${total} (COD)`);
+
     return order;
+  }
+
+  private async sendOrderNotifications(order: any) {
+    const { user, orderNumber, total, items } = order;
+    if (!user?.email) return;
+
+    const itemsSummary = items?.map((i: any) => ({
+      title: i.title,
+      quantity: i.quantity,
+      total: i.total,
+    }));
+
+    await this.notifications.sendOrderConfirmation(
+      user.email,
+      orderNumber,
+      total,
+      order.userId,
+      user.phone,
+      itemsSummary,
+    );
   }
 
   async findUserOrders(userId: string, page = 1, limit = 10) {
@@ -210,10 +260,12 @@ export class OrdersService {
   }
 
   async updateStatus(orderId: string, status: OrderStatus, note?: string, changedBy?: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: { select: { email: true, phone: true, firstName: true } } },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
-    // Validate state transition
     this.validateStatusTransition(order.status, status);
 
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -227,15 +279,10 @@ export class OrdersService {
       });
 
       await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status,
-          note,
-          changedBy,
-        },
+        data: { orderId, status, note, changedBy },
       });
 
-      // Handle stock on cancellation
+      // Release stock on cancellation
       if (status === OrderStatus.CANCELLED) {
         const items = await tx.orderItem.findMany({ where: { orderId } });
         for (const item of items) {
@@ -249,9 +296,28 @@ export class OrdersService {
         }
       }
 
+      // Mark COD payment as captured on delivery
+      if (status === OrderStatus.DELIVERED) {
+        await tx.payment.updateMany({
+          where: { orderId, method: PaymentMethod.COD },
+          data: { status: PaymentStatus.CAPTURED, paidAt: new Date() },
+        });
+      }
+
       return updatedOrder;
     });
 
+    // Send email notification for status updates (async)
+    if ((order as any).user?.email) {
+      const user = (order as any).user;
+      if (status === OrderStatus.CANCELLED) {
+        this.notifications.sendOrderCancelledEmail(user.email, order.orderNumber, note || 'No reason provided', order.userId).catch(() => {});
+      } else {
+        this.notifications.sendShippingUpdate(user.email, order.orderNumber, status, undefined, order.userId, user.phone).catch(() => {});
+      }
+    }
+
+    this.logger.log(`Order ${order.orderNumber} status: ${order.status} → ${status}`);
     return updated;
   }
 
@@ -276,10 +342,8 @@ export class OrdersService {
   }
 
   async trackOrder(orderNumber: string, identifier?: string) {
-    const where: any = { orderNumber };
-
     const order = await this.prisma.order.findFirst({
-      where,
+      where: { orderNumber },
       include: {
         statusHistory: { orderBy: { createdAt: 'asc' } },
         shipment: { include: { trackingEvents: { orderBy: { timestamp: 'desc' } } } },
@@ -289,7 +353,6 @@ export class OrdersService {
 
     if (!order) throw new NotFoundException('Order not found');
 
-    // Verify access if identifier provided
     if (identifier) {
       const user = await this.prisma.user.findFirst({
         where: {
@@ -303,6 +366,8 @@ export class OrdersService {
     return {
       orderNumber: order.orderNumber,
       status: order.status,
+      paymentMethod: order.paymentMethod,
+      total: order.total,
       createdAt: order.createdAt,
       estimatedDelivery: order.estimatedDelivery,
       trackingEvents: order.statusHistory.map((h) => ({

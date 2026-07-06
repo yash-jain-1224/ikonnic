@@ -82,7 +82,7 @@ export class CreateOrderDto {
   @IsNumber()
   discount?: number;
 
-  @ApiPropertyOptional({ example: 'RAZORPAY' })
+  @ApiPropertyOptional({ example: 'COD', description: 'Payment method — currently only COD is supported' })
   @IsOptional()
   @IsString()
   paymentMethod?: string;

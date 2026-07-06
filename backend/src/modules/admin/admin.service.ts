@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InventoryTransactionType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { OrdersService } from '../orders/orders.service';
 import { normalizePage, normalizeLimit } from '../../common/pagination';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private ordersService: OrdersService,
+  ) {}
 
   async getDashboardMetrics() {
     const now = new Date();
@@ -75,11 +79,8 @@ export class AdminService {
   }
 
   async updateOrderStatus(orderId: string, status: string, note?: string, adminId?: string) {
-    return this.prisma.$transaction(async (tx) => {
-      await tx.order.update({ where: { id: orderId }, data: { status: status as any } });
-      await tx.orderStatusHistory.create({ data: { orderId, status: status as any, note, changedBy: adminId } });
-      return { message: 'Order status updated' };
-    });
+    // Use OrdersService which handles validation, inventory, email notifications
+    return this.ordersService.updateStatus(orderId, status as any, note, adminId);
   }
 
   // ─── Product CRUD ──────────────────────────────────────────

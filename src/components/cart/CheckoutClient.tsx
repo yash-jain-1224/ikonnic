@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { useCartStore } from "@/store/cart";
 import { useOrderStore } from "@/store/orders";
 import { useAuthStore } from "@/store/auth";
-import { ordersAPI, paymentsAPI, shippingAPI, usersAPI } from "@/lib/api";
+import { ordersAPI, shippingAPI, usersAPI } from "@/lib/api";
 import { formatAddress, type SavedAddress } from "@/components/account/AddressBook";
 
 export function CheckoutClient() {
@@ -23,7 +23,7 @@ export function CheckoutClient() {
   const [city, setCity] = useState("");
   const [stateName, setStateName] = useState("");
   const [loadingPin, setLoadingPin] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"PHONEPE" | "COD">("PHONEPE");
+  const [paymentMethod, setPaymentMethod] = useState<"COD">("COD");
   const [processing, setProcessing] = useState(false);
   const [serviceability, setServiceability] = useState<{ serviceable: boolean; estimatedDays?: number; codAvailable?: boolean } | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -102,21 +102,7 @@ export function CheckoutClient() {
 
   const subtotal = items.reduce((sum, item) => sum + (item.finalTotal ?? item.price * item.quantity), 0);
 
-  // Handle PhonePe payment — redirect-based flow
-  const handlePhonePePayment = async (orderId: string, paymentData: any) => {
-    // PhonePe returns a redirect URL — navigate the user to PhonePe's payment page
-    const redirectUrl = paymentData.gatewayData?.redirectUrl;
-    if (redirectUrl) {
-      // Store order info for post-payment verification
-      sessionStorage.setItem("phonepe_payment_id", paymentData.paymentId);
-      sessionStorage.setItem("phonepe_order_id", orderId);
-      sessionStorage.setItem("phonepe_txn_id", paymentData.gatewayData?.merchantTransactionId || paymentData.gatewayOrderId);
-      window.location.href = redirectUrl;
-      return true; // Will redirect
-    }
-    return false;
-  };
-
+  // Handle order submission — COD only
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setProcessing(true);
@@ -169,19 +155,6 @@ export function CheckoutClient() {
         };
 
         const { data: order } = await ordersAPI.create(orderPayload);
-
-        if (paymentMethod === "PHONEPE") {
-          // Initiate PhonePe payment — will redirect to PhonePe
-          const { data: paymentData } = await paymentsAPI.initiate(order.id, "PHONEPE");
-          const redirecting = await handlePhonePePayment(order.id, paymentData);
-          if (redirecting) {
-            // User is being redirected to PhonePe — don't clear cart yet
-            return;
-          }
-          // If redirect failed
-          setProcessing(false);
-          return;
-        }
 
         setPlacedOrderId(order.orderNumber);
         clearCart();
@@ -298,14 +271,11 @@ export function CheckoutClient() {
           <section className="rounded-3xl border border-rosegold-200/60 bg-white p-6 shadow-card">
             <h2 className="text-lg font-black">Payment method</h2>
             <div className="mt-4 space-y-3">
-              <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${paymentMethod === "PHONEPE" ? "border-ikonnic-red bg-red-50" : "border-slate-200"}`}>
-                <input type="radio" name="payment" value="PHONEPE" checked={paymentMethod === "PHONEPE"} onChange={() => setPaymentMethod("PHONEPE")} className="accent-ikonnic-red" />
-                <div><p className="text-sm font-black">Pay Online</p><p className="text-xs text-slate-500">UPI, Cards, Net Banking, Wallets (PhonePe)</p></div>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-ikonnic-red bg-red-50 p-4">
+                <input type="radio" name="payment" value="COD" checked readOnly className="accent-ikonnic-red" />
+                <div><p className="text-sm font-black">Cash on Delivery</p><p className="text-xs text-slate-500">Pay when you receive your order</p></div>
               </label>
-              <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${paymentMethod === "COD" ? "border-ikonnic-red bg-red-50" : "border-slate-200"} ${serviceability?.codAvailable === false ? "opacity-50 pointer-events-none" : ""}`}>
-                <input type="radio" name="payment" value="COD" checked={paymentMethod === "COD"} onChange={() => setPaymentMethod("COD")} disabled={serviceability?.codAvailable === false} className="accent-ikonnic-red" />
-                <div><p className="text-sm font-black">Cash on Delivery</p><p className="text-xs text-slate-500">{serviceability?.codAvailable === false ? "Not available for this pincode" : "Pay when you receive your order"}</p></div>
-              </label>
+              <p className="text-xs text-ikonnic-muted">Online payment options coming soon. Currently only COD is available.</p>
             </div>
           </section>
         </div>
@@ -333,9 +303,9 @@ export function CheckoutClient() {
             className="flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-6 py-4 text-sm font-black text-white hover:bg-red-700 disabled:opacity-60"
           >
             {processing ? <Loader2 size={17} className="animate-spin" /> : <CreditCard size={17} />}
-            {processing ? "Processing..." : paymentMethod === "COD" ? "Place Order (COD)" : "Pay & Place Order"}
+            {processing ? "Placing Order..." : "Place Order (Cash on Delivery)"}
           </button>
-          <p className="text-center text-xs font-semibold text-slate-500">Secure payments powered by PhonePe. 256-bit SSL encryption.</p>
+          <p className="text-center text-xs font-semibold text-slate-500">Your order will be confirmed instantly. Pay when you receive it.</p>
         </div>
       </form>
     </>

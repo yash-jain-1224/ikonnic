@@ -11,6 +11,7 @@ type Order = {
   orderNumber: string;
   status: string;
   total: number;
+  paymentMethod: string;
   createdAt: string;
   user: { firstName: string; lastName: string; email: string };
   items: { title: string; quantity: number; total: number }[];
@@ -118,6 +119,7 @@ export function AdminOrdersClient() {
                 <th className="px-4 py-3 font-black text-slate-600">Customer</th>
                 <th className="px-4 py-3 font-black text-slate-600">Items</th>
                 <th className="px-4 py-3 font-black text-slate-600">Total</th>
+                <th className="px-4 py-3 font-black text-slate-600">Payment</th>
                 <th className="px-4 py-3 font-black text-slate-600">Status</th>
                 <th className="px-4 py-3 font-black text-slate-600">Date</th>
                 <th className="px-4 py-3 font-black text-slate-600">Action</th>
@@ -136,6 +138,11 @@ export function AdminOrdersClient() {
                     {order.items.length > 2 && <span className="text-slate-400">+{order.items.length - 2} more</span>}
                   </td>
                   <td className="px-4 py-3 font-bold">₹{order.total.toLocaleString("en-IN")}</td>
+                  <td className="px-4 py-3">
+                    <span className="inline-block rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700">
+                      {order.paymentMethod === "COD" ? "💰 COD" : order.paymentMethod || "COD"}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold ${statusColor[order.status] || "bg-rosegold-100 text-slate-700"}`}>
                       {order.status.replace(/_/g, " ")}

@@ -35,6 +35,25 @@ const config: Config = {
         card: "0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03)",
         soft: "0 2px 12px rgba(183, 110, 121, 0.08)",
       },
+      keyframes: {
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "slide-in-from-left": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "slide-in-from-top-1": {
+          from: { opacity: "0", transform: "translateY(-4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.15s ease-out",
+        "slide-in-from-left": "slide-in-from-left 0.2s ease-out",
+        "slide-in-from-top-1": "slide-in-from-top-1 0.15s ease-out",
+      },
     },
   },
   plugins: [],

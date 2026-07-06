@@ -22,12 +22,31 @@ export class UploadService {
   private accountName: string;
   private accountKey: string;
   private cdnUrl: string;
+  /**
+   * Whether the storage account/container allows anonymous ("blob") public read.
+   * When false (the safe default for Azure accounts with public access disabled),
+   * uploaded URLs are stamped with a long-lived read SAS token so browsers can
+   * render them without the account-level public-access flag.
+   */
+  private publicRead: boolean;
+  private readSasTtlDays: number;
 
   constructor(private configService: ConfigService) {
     const connectionString = this.configService.get<string>('AZURE_STORAGE_CONNECTION_STRING', '');
     this.containerName = this.configService.get('AZURE_STORAGE_CONTAINER', 'uploads');
     this.accountName = this.configService.get('AZURE_STORAGE_ACCOUNT_NAME', '');
     this.accountKey = this.configService.get('AZURE_STORAGE_ACCOUNT_KEY', '');
+    this.publicRead = this.configService.get('AZURE_BLOB_PUBLIC_READ', 'false') === 'true';
+    this.readSasTtlDays = parseInt(this.configService.get('AZURE_BLOB_READ_SAS_TTL_DAYS', '3650'), 10) || 3650;
+
+    // When only a connection string is provided, derive the account name/key
+    // from it so SAS generation (read + write) works without duplicate env vars.
+    if (connectionString) {
+      const parsed = this.parseConnectionString(connectionString);
+      if (!this.accountName && parsed.accountName) this.accountName = parsed.accountName;
+      if (!this.accountKey && parsed.accountKey) this.accountKey = parsed.accountKey;
+    }
+
     this.cdnUrl = this.configService.get('CDN_URL', `https://${this.accountName}.blob.core.windows.net/${this.containerName}`);
 
     if (connectionString) {
@@ -43,6 +62,47 @@ export class UploadService {
 
     // Ensure container exists (runs once on startup)
     this.ensureContainer();
+  }
+
+  private parseConnectionString(cs: string): { accountName?: string; accountKey?: string } {
+    const out: { accountName?: string; accountKey?: string } = {};
+    for (const part of cs.split(';')) {
+      const idx = part.indexOf('=');
+      if (idx === -1) continue;
+      const key = part.slice(0, idx).trim();
+      const value = part.slice(idx + 1).trim();
+      if (key === 'AccountName') out.accountName = value;
+      if (key === 'AccountKey') out.accountKey = value;
+    }
+    return out;
+  }
+
+  /**
+   * Return a browser-fetchable URL for a blob. If the account allows public
+   * blob read we return the bare URL; otherwise we stamp a long-lived read SAS
+   * so uploaded product/customiser images render on the storefront regardless
+   * of the account's public-access setting.
+   */
+  private toPublicUrl(blobUrl: string, blobName: string): string {
+    if (this.publicRead || !this.accountName || !this.accountKey) return blobUrl;
+    try {
+      const startsOn = new Date(Date.now() - 5 * 60 * 1000); // small backdate for clock skew
+      const expiresOn = new Date(Date.now() + this.readSasTtlDays * 24 * 60 * 60 * 1000);
+      const sasToken = generateBlobSASQueryParameters(
+        {
+          containerName: this.containerName,
+          blobName,
+          permissions: BlobSASPermissions.parse('r'),
+          startsOn,
+          expiresOn,
+        },
+        new StorageSharedKeyCredential(this.accountName, this.accountKey),
+      ).toString();
+      return `${blobUrl}?${sasToken}`;
+    } catch (error) {
+      this.logger.warn(`Could not stamp read SAS for ${blobName}: ${(error as Error).message}`);
+      return blobUrl;
+    }
   }
 
   private async ensureContainer(): Promise<void> {
@@ -97,8 +157,8 @@ export class UploadService {
       },
     });
 
-    const url = blockBlobClient.url;
-    const cdnUrl = `${this.cdnUrl}/${blobName}`;
+    const url = this.toPublicUrl(blockBlobClient.url, blobName);
+    const cdnUrl = this.publicRead ? `${this.cdnUrl}/${blobName}` : url;
 
     this.logger.log(`Uploaded: ${blobName} (${(buffer.length / 1024).toFixed(1)}KB)`);
 
@@ -173,10 +233,11 @@ export class UploadService {
     const containerClient = this.getContainerClient();
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
+    const publicUrl = this.toPublicUrl(blockBlobClient.url, blobName);
     return {
       uploadUrl: `${blockBlobClient.url}?${sasToken}`,
-      blobUrl: blockBlobClient.url,
-      cdnUrl: `${this.cdnUrl}/${blobName}`,
+      blobUrl: publicUrl,
+      cdnUrl: this.publicRead ? `${this.cdnUrl}/${blobName}` : publicUrl,
     };
   }
 

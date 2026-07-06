@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { RazorpayService } from './razorpay.service';
+import { PhonePeService } from './phonepe.service';
 import { StripeService } from './stripe.service';
 import { PaymentStatus, PaymentMethod } from '@prisma/client';
 
@@ -10,7 +10,7 @@ export class PaymentsService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
-    private razorpay: RazorpayService,
+    private phonePe: PhonePeService,
     private stripe: StripeService,
   ) {}
 
@@ -44,8 +44,13 @@ export class PaymentsService {
     let gatewayResponse: any;
 
     switch (method) {
-      case PaymentMethod.RAZORPAY:
-        gatewayResponse = await this.razorpay.createOrder(order.total, order.orderNumber);
+      case PaymentMethod.PHONEPE:
+      case PaymentMethod.RAZORPAY: // legacy value — PhonePe replaced Razorpay
+        gatewayResponse = await this.phonePe.initiatePayment(
+          order.total,
+          `TXN_${order.orderNumber}_${Date.now()}`,
+          userId || 'guest',
+        );
         break;
       case PaymentMethod.STRIPE:
         gatewayResponse = await this.stripe.createPaymentIntent(order.total, 'inr', order.orderNumber);
@@ -65,7 +70,8 @@ export class PaymentsService {
         currency: 'INR',
         status: method === PaymentMethod.COD ? PaymentStatus.CAPTURED : PaymentStatus.INITIATED,
         method,
-        gatewayOrderId: gatewayResponse.id || gatewayResponse.orderId,
+        gatewayOrderId:
+          gatewayResponse.id || gatewayResponse.orderId || gatewayResponse.merchantTransactionId,
         gatewayResponse,
         idempotencyKey,
         attempts: 1,
@@ -82,7 +88,7 @@ export class PaymentsService {
 
     return {
       paymentId: payment.id,
-      gatewayOrderId: gatewayResponse.id || gatewayResponse.orderId,
+      gatewayOrderId: payment.gatewayOrderId,
       gatewayData: gatewayResponse,
     };
   }
@@ -101,13 +107,24 @@ export class PaymentsService {
     let isValid = false;
 
     switch (payment.method) {
-      case PaymentMethod.RAZORPAY:
-        isValid = this.razorpay.verifyPayment(
-          verificationData.razorpay_order_id,
-          verificationData.razorpay_payment_id,
-          verificationData.razorpay_signature,
+      case PaymentMethod.PHONEPE:
+      case PaymentMethod.RAZORPAY: {
+        // PhonePe: verify by checking transaction status server-side.
+        // Only accept the merchantTransactionId this payment was initiated with —
+        // clients cannot verify against someone else's transaction.
+        if (verificationData.merchantTransactionId !== payment.gatewayOrderId) {
+          isValid = false;
+          break;
+        }
+        const statusResult = await this.phonePe.checkStatus(
+          verificationData.merchantTransactionId,
         );
+        isValid = statusResult.success;
+        if (isValid) {
+          verificationData.phonepe_transaction_id = statusResult.transactionId;
+        }
         break;
+      }
       case PaymentMethod.STRIPE:
         isValid = await this.stripe.verifyPaymentIntent(verificationData.paymentIntentId);
         break;
@@ -128,8 +145,8 @@ export class PaymentsService {
       where: { id: paymentId },
       data: {
         status: PaymentStatus.CAPTURED,
-        gatewayPaymentId: verificationData.razorpay_payment_id || verificationData.paymentIntentId,
-        gatewaySignature: verificationData.razorpay_signature,
+        gatewayPaymentId: verificationData.phonepe_transaction_id || verificationData.paymentIntentId,
+        gatewaySignature: verificationData.merchantTransactionId,
         paidAt: new Date(),
       },
     });
@@ -154,8 +171,8 @@ export class PaymentsService {
 
   async handleWebhook(provider: string, payload: any, signature: string) {
     switch (provider) {
-      case 'razorpay':
-        return this.handleRazorpayWebhook(payload, signature);
+      case 'phonepe':
+        return this.handlePhonePeWebhook(payload, signature);
       case 'stripe':
         return this.handleStripeWebhook(payload, signature);
       default:
@@ -179,13 +196,18 @@ export class PaymentsService {
     let gatewayRefundId: string | undefined;
 
     switch (payment.method) {
-      case PaymentMethod.RAZORPAY:
-        const rzpRefund = await this.razorpay.initiateRefund(
-          payment.gatewayPaymentId!,
-          refundAmount,
-        );
-        gatewayRefundId = rzpRefund.id;
+      case PaymentMethod.PHONEPE:
+      case PaymentMethod.RAZORPAY: {
+        // PhonePe refund — originalTransactionId is the merchantTransactionId
+        // the payment was initiated with (stored as gatewayOrderId)
+        const originalTxnId = payment.gatewayOrderId || payment.gatewaySignature;
+        if (!originalTxnId) {
+          throw new BadRequestException('Payment has no gateway transaction reference');
+        }
+        const phonePeRefund = await this.phonePe.initiateRefund(originalTxnId, refundAmount);
+        gatewayRefundId = phonePeRefund.refundTransactionId;
         break;
+      }
       case PaymentMethod.STRIPE:
         const stripeRefund = await this.stripe.initiateRefund(
           payment.gatewayPaymentId!,
@@ -228,19 +250,26 @@ export class PaymentsService {
     });
   }
 
-  private async handleRazorpayWebhook(payload: any, signature: string) {
-    const isValid = this.razorpay.verifyWebhookSignature(JSON.stringify(payload), signature);
+  private async handlePhonePeWebhook(payload: any, signature: string) {
+    // PhonePe sends the response as base64 encoded JSON
+    const base64Response = payload.response;
+    if (!base64Response) throw new BadRequestException('Invalid webhook payload');
+
+    const isValid = this.phonePe.verifyWebhookSignature(base64Response, signature);
     if (!isValid) throw new BadRequestException('Invalid webhook signature');
 
-    const event = payload.event;
-    const paymentEntity = payload.payload?.payment?.entity;
+    const decodedResponse = JSON.parse(
+      Buffer.from(base64Response, 'base64').toString('utf-8'),
+    );
 
-    if (event === 'payment.captured' && paymentEntity) {
+    const { code, data } = decodedResponse;
+
+    if (code === 'PAYMENT_SUCCESS' && data?.merchantTransactionId) {
       await this.prisma.payment.updateMany({
-        where: { gatewayOrderId: paymentEntity.order_id },
+        where: { gatewayOrderId: data.merchantTransactionId },
         data: {
           status: PaymentStatus.CAPTURED,
-          gatewayPaymentId: paymentEntity.id,
+          gatewayPaymentId: data.transactionId,
           paidAt: new Date(),
         },
       });

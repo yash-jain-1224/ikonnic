@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { normalizePage, normalizeLimit } from '../../common/pagination';
 
 @Injectable()
 export class ProductsService {
@@ -25,7 +26,9 @@ export class ProductsService {
       featured,
     } = query;
 
-    const skip = (page - 1) * limit;
+    const safePage = normalizePage(page);
+    const safeLimit = normalizeLimit(limit, 20);
+    const skip = (safePage - 1) * safeLimit;
 
     // Build where clause
     const where: any = { isActive: true };
@@ -70,7 +73,7 @@ export class ProductsService {
         },
         orderBy: { [sortBy]: sortOrder },
         skip,
-        take: limit,
+        take: safeLimit,
       }),
       this.prisma.product.count({ where }),
     ]);
@@ -87,11 +90,11 @@ export class ProductsService {
       data: productsWithRating,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-        hasNext: page * limit < total,
-        hasPrev: page > 1,
+        page: safePage,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+        hasNext: safePage * safeLimit < total,
+        hasPrev: safePage > 1,
       },
     };
   }
@@ -171,7 +174,7 @@ export class ProductsService {
         categoryId: product.categoryId,
         id: { not: product.id },
       },
-      take: limit,
+      take: normalizeLimit(limit, 8),
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -183,7 +186,7 @@ export class ProductsService {
     const products = await this.prisma.product.findMany({
       where: { isActive: true, isFeatured: true },
       include: { category: { select: { slug: true, name: true } } },
-      take: limit,
+      take: normalizeLimit(limit, 12),
       orderBy: { sortOrder: 'asc' },
     });
 
@@ -200,7 +203,7 @@ export class ProductsService {
         _count: { select: { orderItems: true } },
       },
       orderBy: { orderItems: { _count: 'desc' } },
-      take: limit,
+      take: normalizeLimit(limit, 10),
     });
 
     return products;

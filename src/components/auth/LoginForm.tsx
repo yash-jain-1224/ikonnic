@@ -3,17 +3,30 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth";
 import { authAPI } from "@/lib/api";
 
 type AuthMode = "login" | "register" | "forgot";
+
+const SSO_ERRORS: Record<string, string> = {
+  sso_failed: "Microsoft sign-in failed. Please try again or use your password.",
+  sso_cancelled: "Microsoft sign-in was cancelled.",
+  sso_unconfigured: "Microsoft sign-in is not available right now.",
+};
 
 export function LoginForm() {
   const router = useRouter();
   const { login, register, isLoading, error, clearError } = useAuthStore();
   const [mode, setMode] = useState<AuthMode>("login");
   const [success, setSuccess] = useState("");
+  const [ssoError, setSsoError] = useState("");
+
+  // Surface errors returned by the SSO callback redirect (?error=sso_*)
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("error");
+    if (code && SSO_ERRORS[code]) setSsoError(SSO_ERRORS[code]);
+  }, []);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -71,9 +84,9 @@ export function LoginForm() {
         </label>
       )}
 
-      {error && (
+      {(error || ssoError) && (
         <p className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
-          <AlertCircle size={16} />{error}
+          <AlertCircle size={16} />{error || ssoError}
         </p>
       )}
 
@@ -92,6 +105,26 @@ export function LoginForm() {
         {mode === "forgot" ? "Send reset OTP" : mode === "register" ? "Create account" : "Sign in"}
         {!isLoading && <ArrowRight size={16} />}
       </button>
+
+      {mode !== "forgot" && (
+        <>
+          <div className="mt-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.13em] text-slate-400">
+            <span className="h-px flex-1 bg-slate-200" />or<span className="h-px flex-1 bg-slate-200" />
+          </div>
+          <a
+            href="/api/auth/signin/azure-ad"
+            className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 bg-white px-6 py-3.5 text-sm font-black text-slate-800 hover:bg-slate-50"
+          >
+            <svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true">
+              <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+              <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+              <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+              <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+            </svg>
+            Continue with Microsoft
+          </a>
+        </>
+      )}
 
       <div className="mt-4 flex flex-wrap justify-center gap-3 text-xs font-bold">
         <button type="button" onClick={() => { setMode("login"); clearError(); setSuccess(""); }} className={`${mode === "login" ? "text-ikonnic-red" : "text-slate-600"} hover:text-ikonnic-red`}>Login</button>

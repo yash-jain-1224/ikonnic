@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { normalizePage, normalizeLimit } from '../../common/pagination';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 
@@ -145,6 +146,8 @@ export class OrdersService {
   }
 
   async findUserOrders(userId: string, page = 1, limit = 10) {
+    page = normalizePage(page);
+    limit = normalizeLimit(limit, 10);
     const skip = (page - 1) * limit;
 
     const [orders, total] = await Promise.all([

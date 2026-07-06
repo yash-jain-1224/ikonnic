@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MicrosoftSsoService } from './microsoft-sso.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -40,6 +41,10 @@ describe('AuthService', () => {
     sendEmail: jest.fn(),
     sendSms: jest.fn(),
   };
+  const microsoftSsoMock = {
+    isConfigured: jest.fn().mockReturnValue(true),
+    verifyIdToken: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -52,6 +57,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: configMock },
         { provide: RedisService, useValue: redisMock },
         { provide: NotificationsService, useValue: notificationsMock },
+        { provide: MicrosoftSsoService, useValue: microsoftSsoMock },
       ],
     }).compile();
 
@@ -93,6 +99,99 @@ describe('AuthService', () => {
       expect(result.refreshToken).toBe('signed-token');
       expect(result.user).not.toHaveProperty('passwordHash');
       expect(prismaMock.refreshToken.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('token uniqueness (jti)', () => {
+    it('gives every signed token a distinct jti so same-second tokens never collide', async () => {
+      prismaMock.user.findFirst.mockResolvedValue(null);
+      prismaMock.user.create.mockImplementation(async ({ data }: any) => ({ id: 'u1', role: 'CUSTOMER', ...data }));
+      prismaMock.refreshToken.create.mockResolvedValue({});
+
+      await service.register({ email: 'a@example.com', firstName: 'A', password: 'Str0ng@Pass' } as any);
+      await service.register({ email: 'b@example.com', firstName: 'B', password: 'Str0ng@Pass' } as any);
+
+      // Every signAsync payload carries a jti; across all calls they are unique
+      const jtis = jwtMock.signAsync.mock.calls.map((c: any[]) => c[0].jti);
+      expect(jtis.length).toBeGreaterThanOrEqual(4);
+      expect(jtis.every((j: unknown) => typeof j === 'string' && j.length > 0)).toBe(true);
+      expect(new Set(jtis).size).toBe(jtis.length);
+    });
+  });
+
+  describe('loginWithMicrosoft', () => {
+    const identity = {
+      providerId: 'ms-oid-1',
+      email: 'sso@example.com',
+      firstName: 'Sso',
+      lastName: 'User',
+    };
+
+    it('creates a verified MICROSOFT user on first login', async () => {
+      microsoftSsoMock.verifyIdToken.mockResolvedValue(identity);
+      prismaMock.user.findUnique.mockResolvedValue(null);
+      prismaMock.user.create.mockImplementation(async ({ data }: any) => ({
+        id: 'u-sso',
+        role: 'CUSTOMER',
+        ...data,
+      }));
+      prismaMock.refreshToken.create.mockResolvedValue({});
+
+      const result = await service.loginWithMicrosoft('valid-id-token');
+
+      const createdWith = prismaMock.user.create.mock.calls[0][0].data;
+      expect(createdWith.authProvider).toBe('MICROSOFT');
+      expect(createdWith.providerId).toBe('ms-oid-1');
+      expect(createdWith.isVerified).toBe(true);
+      expect(createdWith.passwordHash).toBeUndefined();
+      expect(result.accessToken).toBe('signed-token');
+      expect(result.user).not.toHaveProperty('passwordHash');
+    });
+
+    it('links the identity to an existing account with the same email', async () => {
+      microsoftSsoMock.verifyIdToken.mockResolvedValue(identity);
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'u-existing',
+        email: identity.email,
+        role: 'CUSTOMER',
+        isActive: true,
+        providerId: null,
+      });
+      prismaMock.user.update.mockImplementation(async ({ data }: any) => ({
+        id: 'u-existing',
+        email: identity.email,
+        role: 'CUSTOMER',
+        isActive: true,
+        ...data,
+      }));
+      prismaMock.refreshToken.create.mockResolvedValue({});
+
+      const result = await service.loginWithMicrosoft('valid-id-token');
+
+      expect(prismaMock.user.create).not.toHaveBeenCalled();
+      expect(prismaMock.user.update.mock.calls[0][0].data.providerId).toBe('ms-oid-1');
+      expect(result.accessToken).toBe('signed-token');
+    });
+
+    it('rejects deactivated accounts', async () => {
+      microsoftSsoMock.verifyIdToken.mockResolvedValue(identity);
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'u-existing',
+        email: identity.email,
+        isActive: false,
+      });
+
+      await expect(service.loginWithMicrosoft('valid-id-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('propagates verification failures without touching the database', async () => {
+      microsoftSsoMock.verifyIdToken.mockRejectedValue(new UnauthorizedException());
+
+      await expect(service.loginWithMicrosoft('bad-token')).rejects.toThrow(UnauthorizedException);
+      expect(prismaMock.user.create).not.toHaveBeenCalled();
+      expect(prismaMock.user.update).not.toHaveBeenCalled();
     });
   });
 

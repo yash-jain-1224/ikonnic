@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MicrosoftSsoService } from './microsoft-sso.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -17,6 +18,7 @@ export class AuthService {
     private configService: ConfigService,
     private redis: RedisService,
     private notifications: NotificationsService,
+    private microsoftSso: MicrosoftSsoService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -98,6 +100,54 @@ export class AuthService {
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     // Create session
+    await this.createSession(user.id, tokens.refreshToken);
+
+    return {
+      user: this.sanitizeUser(user),
+      ...tokens,
+    };
+  }
+
+  /**
+   * Login (or auto-register) via Azure Entra ID. The frontend exchanges the
+   * OAuth code for an ID token; we verify it against Microsoft's JWKS and
+   * issue our own platform tokens.
+   */
+  async loginWithMicrosoft(idToken: string) {
+    const identity = await this.microsoftSso.verifyIdToken(idToken);
+
+    let user = await this.prisma.user.findUnique({ where: { email: identity.email } });
+
+    if (user) {
+      if (!user.isActive) {
+        throw new UnauthorizedException('Account has been deactivated');
+      }
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          lastLoginAt: new Date(),
+          // Link the Microsoft identity to an existing account; e-mail
+          // ownership is proven by the verified ID token.
+          providerId: user.providerId ?? identity.providerId,
+          isVerified: true,
+        },
+      });
+    } else {
+      user = await this.prisma.user.create({
+        data: {
+          email: identity.email,
+          firstName: identity.firstName,
+          lastName: identity.lastName,
+          authProvider: 'MICROSOFT',
+          providerId: identity.providerId,
+          isVerified: true,
+          lastLoginAt: new Date(),
+        },
+      });
+      this.sendVerificationEmail(user.email, user.firstName);
+    }
+
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
     await this.createSession(user.id, tokens.refreshToken);
 
     return {
@@ -285,12 +335,18 @@ export class AuthService {
   private async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
 
+    // A unique jti guarantees every issued token is a distinct string. Without
+    // it, two tokens minted for the same user within the same clock second are
+    // byte-identical (same payload + second-precision `iat`), which collides on
+    // the `refresh_tokens.token` unique index — breaking login-right-after-
+    // register and refresh-token rotation intermittently.
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        expiresIn: this.configService.get('JWT_ACCESS_EXPIRATION', '15m'),
-      }),
       this.jwtService.signAsync(
-        { ...payload, type: 'refresh' },
+        { ...payload, jti: uuidv4() },
+        { expiresIn: this.configService.get('JWT_ACCESS_EXPIRATION', '15m') },
+      ),
+      this.jwtService.signAsync(
+        { ...payload, type: 'refresh', jti: uuidv4() },
         { expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION', '7d') },
       ),
     ]);

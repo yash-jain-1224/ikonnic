@@ -77,16 +77,6 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/api/robots"
-    }
-  ],
   "redirects": [
     {
       "source": "/shop",
@@ -107,20 +97,6 @@
       "source": "/account/orders",
       "destination": "/orders-tracking",
       "permanent": false
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/cleanup-expired-carts",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/send-review-requests",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/generate-sitemap",
-      "schedule": "0 0 * * 0"
     }
   ]
 }

@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     siteName: "Ikonnic",
     title: "Ikonnic | Personalised Decor & Gifts",
     description: "Custom acrylic photos, wall décor, clocks, frames, albums, keychains & gifts — designed with your memories, delivered across India.",
-    images: [{ url: `${siteUrl}/images/og-default.jpg`, width: 1200, height: 630, alt: "Ikonnic — Personalised Gifts" }],
+    // Image supplied by the generated app/opengraph-image.tsx route (always available).
   },
   twitter: {
     card: "summary_large_image",
     title: "Ikonnic | Personalised Decor & Gifts",
     description: "Custom acrylic photos, wall décor, clocks, frames, albums, keychains & gifts.",
-    images: [`${siteUrl}/images/og-default.jpg`],
+    // Image supplied by the generated app/twitter-image.tsx route.
   },
   robots: { index: true, follow: true },
   alternates: { canonical: siteUrl },

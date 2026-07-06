@@ -109,7 +109,6 @@ export function AdminAnalyticsClient() {
           >
             <Download size={13} /> Export CSV
           </button>
-          <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
         </div>
       </div>
 

@@ -182,7 +182,6 @@ export function AdminCategoriesClient() {
           <p className="mt-1 text-sm text-slate-500">{categories.length} categories. Create, edit, and manage visibility.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
           {editing === null && (
             <button type="button" onClick={startAdd} className="inline-flex items-center gap-1.5 rounded-full bg-ikonnic-red px-4 py-2.5 text-xs font-black text-white hover:bg-red-700">
               <Plus size={14} /> New Category

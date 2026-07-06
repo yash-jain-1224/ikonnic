@@ -63,7 +63,6 @@ export function AdminCustomersClient() {
           <h1 className="flex items-center gap-2 text-2xl font-black text-slate-950"><Users size={24} /> Customers</h1>
           <p className="mt-1 text-sm text-slate-500">{total} registered users across all roles.</p>
         </div>
-        <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
       </div>
 
       {error && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}

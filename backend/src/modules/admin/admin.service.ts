@@ -28,6 +28,7 @@ export class AdminService {
       recentOrdersList,
       lowStockProducts,
       lowStockCount,
+      failedPayments,
     ] = await Promise.all([
       this.prisma.order.count(),
       this.prisma.order.count({ where: { status: { not: 'CANCELLED' } } }),
@@ -70,6 +71,9 @@ export class AdminService {
           OR: [{ stockStatus: { in: ['low_stock', 'out_of_stock'] } }, { stockCount: { lte: 10 } }],
         },
       }),
+      // Real count of failed payment attempts (COD stays PENDING, so this is
+      // gateway failures — a genuine ops signal, not derived from order status)
+      this.prisma.payment.count({ where: { status: 'FAILED' } }),
     ]);
 
     const revenueSum = totalRevenue._sum.total || 0;
@@ -83,6 +87,7 @@ export class AdminService {
       recentOrdersList,
       lowStockProducts,
       lowStockCount,
+      failedPayments,
       // AOV over fulfilled (non-cancelled) orders, matching the revenue numerator
       aov: nonCancelledCount > 0 ? revenueSum / nonCancelledCount : 0,
     };

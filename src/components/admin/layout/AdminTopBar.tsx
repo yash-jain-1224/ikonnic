@@ -1,50 +1,111 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Bell,
   Plus,
-  Moon,
-  Sun,
   Menu,
   ChevronDown,
   LogOut,
   User,
-  Store,
   Package,
   BadgePercent,
   ShoppingCart,
+  Loader2,
+  CheckCheck,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { notificationsAPI } from "@/lib/api";
 
 interface AdminTopBarProps {
   onMenuClick: () => void;
   sidebarCollapsed: boolean;
 }
 
+type AdminNotification = {
+  id: string;
+  subject?: string | null;
+  channel?: string | null;
+  type?: string | null;
+  readAt?: string | null;
+  createdAt: string;
+};
+
 export function AdminTopBar({ onMenuClick, sidebarCollapsed }: AdminTopBarProps) {
   const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const quickRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const unreadCount = notifications.filter((n) => !n.readAt).length;
+
+  const loadNotifications = useCallback(async () => {
+    setNotifLoading(true);
+    try {
+      const { data } = await notificationsAPI.list();
+      setNotifications(Array.isArray(data) ? data : data?.data || []);
+    } catch {
+      setNotifications([]);
+    } finally {
+      setNotifLoading(false);
+    }
+  }, []);
+
+  // Fetch notifications once on mount so the unread badge reflects reality
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  const markAllRead = async () => {
+    try {
+      await notificationsAPI.markAllRead();
+      const now = new Date().toISOString();
+      setNotifications((prev) => prev.map((n) => ({ ...n, readAt: n.readAt || now })));
+    } catch {
+      /* non-fatal */
+    }
+  };
+
+  const runSearch = () => {
+    const q = searchTerm.trim();
+    if (!q) return;
+    setSearchTerm("");
+    router.push(`/admin/products?q=${encodeURIComponent(q)}`);
+  };
 
   // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-      if (quickRef.current && !quickRef.current.contains(e.target as Node)) {
-        setQuickActionsOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
+      if (quickRef.current && !quickRef.current.contains(e.target as Node)) setQuickActionsOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // ⌘K / Ctrl-K focuses the global search
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, []);
 
   return (
@@ -62,13 +123,17 @@ export function AdminTopBar({ onMenuClick, sidebarCollapsed }: AdminTopBarProps)
         <Menu size={20} />
       </button>
 
-      {/* Search */}
+      {/* Search — routes to the Products list filtered by the term */}
       <div className={`relative flex-1 max-w-md transition-all ${searchFocused ? "max-w-lg" : ""}`}>
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
+          ref={searchRef}
           type="text"
-          placeholder="Search orders, products, customers…"
+          value={searchTerm}
+          placeholder="Search products…"
           className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-colors focus:border-slate-300 focus:bg-white focus:ring-2 focus:ring-slate-900/5"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
         />
@@ -103,29 +168,48 @@ export function AdminTopBar({ onMenuClick, sidebarCollapsed }: AdminTopBarProps)
           )}
         </div>
 
-        {/* Store Switcher (future) */}
-        <button className="hidden items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-slate-600 hover:bg-slate-50 md:flex" disabled>
-          <Store size={15} className="text-slate-400" />
-          <span className="max-w-[80px] truncate">Primary</span>
-        </button>
-
-        {/* Theme Toggle */}
-        <button
-          onClick={() => setIsDark(!isDark)}
-          className="grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"
-          aria-label="Toggle theme"
-        >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-
-        {/* Notifications */}
-        <button
-          className="relative grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"
-          aria-label="Notifications"
-        >
-          <Bell size={16} />
-          <span className="absolute right-1 top-1 size-2 rounded-full bg-ikonnic-red" />
-        </button>
+        {/* Notifications — real data from the notifications API */}
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => { setNotifOpen((o) => !o); if (!notifOpen) loadNotifications(); }}
+            className="relative grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"
+            aria-label="Notifications"
+          >
+            <Bell size={16} />
+            {unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-ikonnic-red px-1 text-[9px] font-bold text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+          {notifOpen && (
+            <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-lg animate-slide-in-from-top-1">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+                <p className="text-sm font-semibold text-slate-900">Notifications</p>
+                {unreadCount > 0 && (
+                  <button onClick={markAllRead} className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-900">
+                    <CheckCheck size={12} /> Mark all read
+                  </button>
+                )}
+              </div>
+              <div className="max-h-80 overflow-y-auto p-1.5">
+                {notifLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-400"><Loader2 size={14} className="animate-spin" /> Loading…</div>
+                ) : notifications.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-slate-400">No notifications.</p>
+                ) : (
+                  notifications.slice(0, 12).map((n) => (
+                    <div key={n.id} className={`rounded-lg px-3 py-2 ${n.readAt ? "" : "bg-slate-50"}`}>
+                      <p className="text-[13px] font-semibold text-slate-900">{n.subject || (n.channel || n.type || "Notification").replace(/_/g, " ")}</p>
+                      {n.channel && n.subject && <p className="text-[12px] text-slate-500 capitalize">{n.channel.replace(/_/g, " ")}</p>}
+                      <p className="mt-0.5 text-[10px] text-slate-400">{new Date(n.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Profile */}
         <div className="relative ml-1" ref={profileRef}>

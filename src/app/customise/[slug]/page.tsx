@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductCustomizerPanel } from "@/components/customizer/ProductCustomizerPanel";
-import { products } from "@/data/products";
 import { getProductBySlug } from "@/lib/server-data";
 import { ProductSchema } from "@/components/seo/ProductSchema";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { ReviewsSection } from "@/components/product/ReviewsSection";
 
-// Pre-render known products at build time; API-backed pages revalidate via ISR
+// Render on demand with ISR instead of prerendering every product at build
+// time — prerendering here duplicated the full product fetch fan-out of
+// /product/[slug] and helped exhaust the backend's DB connections during
+// builds. dynamicParams (default true) serves any slug on first visit.
 export const revalidate = 300;
 
 export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

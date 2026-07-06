@@ -122,7 +122,6 @@ export function AdminReviewsClient() {
           <h1 className="flex items-center gap-2 text-2xl font-black text-slate-950"><MessageSquare size={24} /> Reviews</h1>
           <p className="mt-1 text-sm text-slate-500">Approve, hide, reply to, or remove customer reviews. Only approved reviews appear on the storefront.</p>
         </div>
-        <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
       </div>
 
       <div className="mb-4 flex rounded-full border border-rosegold-200/60 bg-white p-1">

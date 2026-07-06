@@ -77,6 +77,15 @@ export function AdminCouponsClient() {
     if (isAdmin) fetchCoupons();
   }, [isAdmin, fetchCoupons]);
 
+  // Quick-action deep link (?action=new) opens the create form
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("action") === "new") {
+      setForm(emptyForm);
+      setEditing("new");
+    }
+  }, []);
+
   const startAdd = () => {
     setForm(emptyForm);
     setFormError(null);
@@ -176,7 +185,6 @@ export function AdminCouponsClient() {
           <p className="mt-1 text-sm text-slate-500">Create, edit, and track discount codes.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
           {editing === null && (
             <button type="button" onClick={startAdd} className="inline-flex items-center gap-1.5 rounded-full bg-ikonnic-red px-4 py-2.5 text-xs font-black text-white hover:bg-red-700">
               <Plus size={14} /> New Coupon

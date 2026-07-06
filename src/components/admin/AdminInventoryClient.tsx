@@ -139,7 +139,6 @@ export function AdminInventoryClient() {
           <h1 className="flex items-center gap-2 text-2xl font-black text-slate-950"><Boxes size={24} /> Inventory</h1>
           <p className="mt-1 text-sm text-slate-500">Stock levels, reservations, and adjustments with a full audit trail.</p>
         </div>
-        <Link href="/admin" className="text-xs font-black text-ikonnic-red hover:underline">← Admin Console</Link>
       </div>
 
       {/* Filters */}

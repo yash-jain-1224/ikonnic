@@ -100,6 +100,15 @@ export function AdminProductsClient() {
     if (isAdmin) fetchProducts();
   }, [isAdmin, fetchProducts]);
 
+  // Honour top-bar search (?q=) and quick-action (?action=new) on first load
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q) setSearch(q);
+    if (params.get("action") === "new") setEditing("new");
+  }, []);
+
   // Load categories once so the product form offers a proper dropdown
   useEffect(() => {
     if (!isAdmin) return;

@@ -192,3 +192,37 @@ A second pass built the operational screens that were missing and fixed one more
 
 ### Revised readiness — **95 / 100 · GO**
 Order management rises to **10/10** (detail view, timeline, notes, shipment) and a **Reviews (9/10)** capability is added. Remaining gaps (Templates, Production queue, standalone Shipping dashboard, Support, granular roles) are post-launch operational-maturity work, not blockers.
+
+---
+
+## 12. Round 3 — Redesign Audit (sidebar/topbar/dashboard shell)
+
+A subsequent redesign added a persistent sidebar + topbar shell and rebuilt the dashboard. Auditing it surfaced **fabricated and broken data being shown to the business owner** — the most serious class of issue for an admin console.
+
+### Bugs found & fixed
+| # | Severity | Issue | Fix |
+|---|----------|-------|-----|
+| R1 | **High** | Dashboard showed **hardcoded fake trends** — "+12.5%" revenue, "+3.2%" AOV, "vs 2.1% prev" conversion — all static strings, always green/up. | Removed all fabricated trends; each KPI now shows a truthful sublabel only. |
+| R2 | **High** | "Failed Payments" read a non-existent order status (`PAYMENT_FAILED`) → **always 0**. | Backend now returns `failedPayments` from real `Payment.status = FAILED`. |
+| R3 | **High** | "Pending Production" read non-existent statuses (`PROCESSING`/`IN_PRODUCTION`) → **always 0**. | "In Production" now sums the real workflow statuses (IMAGE_PROCESSING…PACKING, REPRINT). |
+| R4 | Medium | "Conversion Rate" was orders÷customers mislabeled as a conversion %, with a fake prior-period comparison. | Replaced with a real **Delivered** count. |
+| R5 | Medium | Order-status color maps used wrong keys (`CONFIRMED`/`PROCESSING`) → most statuses fell to grey. | Corrected to the real `OrderStatus` enum; shared map for grid + badges. |
+| R6 | Medium | Top-bar **theme toggle** did nothing (no dark-mode system). | Removed (dead control). |
+| R7 | Medium | **Notifications bell** showed a permanent fake unread dot, not wired to data. | Wired to the real notifications API — live unread badge, dropdown, mark-all-read. |
+| R8 | Medium | Global **search** was inert (showed ⌘K hint, no handler). | ⌘K focuses it; Enter routes to `/admin/products?q=` and the list honours it. |
+| R9 | Low | Dashboard period `<select>` was a dead control. | Replaced with a link to Analytics. |
+| R10 | Low | Sidebar and mobile drawer **duplicated** the nav list and had **diverged** (Reviews placement, Settings/Audit). | Single shared `ADMIN_NAV` config used by both. |
+| R11 | Low | Quick-action "New" links didn't open create forms; inner pages kept a redundant "← Admin Console" link beside the new sidebar. | `?action=new` opens the form (Products, Coupons); redundant back-links removed. |
+
+### Round-3 live test results (production)
+- `GET /admin/dashboard` → `failedPayments: 0` (real), In Production derives `1` from `IMAGE_PROCESSING`, Delivered `0`, status keys real — ✅
+- Notifications API returns `[]` → bell shows **no fake badge** — ✅
+- Frontend admin routes return the 307 auth-guard redirect — ✅
+- Both projects typecheck + build clean; deployed to production.
+
+### Remaining (cosmetic / low-risk, non-blocking)
+- Inner list pages still carry their own container padding/max-width inside the shell (minor double-padding).
+- The layout shell renders admin chrome for any authenticated user; per-page role checks + backend RBAC still gate all data (no security impact).
+- Sidebar collapse state isn't persisted across reloads.
+
+**Readiness holds at 95/100 · GO** — Round 3 removed misleading data and dead controls, materially improving trust in the console.

@@ -59,10 +59,13 @@ export function SiteFooter() {
         {/* Brand & Contact */}
         <div>
           <Link href="/" aria-label="Ikonnic home" className="inline-flex items-center gap-1.5">
-            <span className="rounded bg-white px-2.5 py-1.5 text-xl font-black tracking-tight text-slate-900">
-              IKONNIC
-              <span className="ml-1 inline-grid size-5 place-items-center rounded bg-ikonnic-red text-[11px] text-white align-middle">◆</span>
-            </span>
+            <Image
+              src="/images/ikonnic.png"
+              alt="Ikonnic"
+              width={160}
+              height={48}
+              className="h-12 w-auto"
+            />
           </Link>
           <p className="mt-5 max-w-xs text-[13px] leading-6 text-slate-400">
             Personalized gifts & print-on-demand products crafted with care and delivered across India. Turn your moments into beautiful creations.
@@ -166,7 +169,7 @@ export function SiteFooter() {
           >
             Powered by
             <Image
-              src="/images/akechi-webcraft-logo.svg"
+              src="/images/akechi-logo.png"
               alt="Akechi Webcraft"
               width={80}
               height={20}

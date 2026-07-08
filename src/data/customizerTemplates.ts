@@ -5194,8 +5194,8 @@ export const customizerTemplates: CustomizerTemplate[] = [
       "Add to cart",
       "Check",
       "Customize Now",
-      "Customised Premium OMGs ® Acrylic Picture",
-      "Customised Premium OMGs ® Acrylic Photo Frame",
+      "Customised Premium Ikonnic ® Acrylic Picture",
+      "Customised Premium Ikonnic ® Acrylic Photo Frame",
       "Select options"
     ]
   },

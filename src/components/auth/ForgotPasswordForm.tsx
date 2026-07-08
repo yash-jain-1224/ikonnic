@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { authAPI } from "@/lib/api";
@@ -29,9 +30,7 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-md rounded-3xl border border-rosegold-200/60 bg-white p-7 shadow-card sm:p-9">
-      <div className="mx-auto inline-flex items-center gap-1 rounded-sm bg-black px-2.5 py-1 text-sm font-black tracking-[0.12em] text-white">
-        IKONNIC<span className="grid size-4 place-items-center rounded-sm bg-ikonnic-red text-[9px]">◆</span>
-      </div>
+      <Image src="/images/ikonnic-wbg.png" alt="Ikonnic" width={150} height={44} className="mx-auto h-11 w-auto" />
       <h1 className="mt-6 text-2xl font-black text-slate-950">Forgot password</h1>
       <p className="mt-2 text-sm leading-6 text-slate-500">
         Enter your registered email address and we&apos;ll send you an OTP to reset your password.

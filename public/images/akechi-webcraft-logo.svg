@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
-  <!-- Triangle logo mark -->
-  <polygon points="10,45 25,10 40,45" fill="#2FB84D"/>
-  <polygon points="20,45 30,25 40,45" fill="#1A8CCC"/>
-  <polygon points="15,45 25,18 35,45" fill="#111111" opacity="0.2"/>
-  <!-- Text -->
-  <text x="48" y="32" font-family="Arial, sans-serif" font-weight="bold" font-size="18" fill="#111111">kechi</text>
-  <text x="48" y="46" font-family="Arial, sans-serif" font-size="8" fill="#555555" letter-spacing="1">WEBCRAFT IT SOLUTIONS</text>
-</svg>

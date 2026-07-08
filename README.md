@@ -2,7 +2,7 @@
 
 Ikonnic is a complete UI-only personalised gifting storefront built with Next.js App Router, TypeScript, Tailwind CSS, Zustand, Lucide React, and subtle Framer Motion transitions.
 
-The project recreates the layout rhythm and UX patterns supplied in the OMGS visual reference while using an original placeholder brand, generated local placeholder artwork, editable data, and original copy.
+The project recreates the layout rhythm and UX patterns supplied in the Ikonnic visual reference while using an original placeholder brand, generated local placeholder artwork, editable data, and original copy.
 
 ## Included
 

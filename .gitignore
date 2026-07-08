@@ -30,3 +30,6 @@ localhost*.log
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Policy source docs (content moved to code)
+docs/

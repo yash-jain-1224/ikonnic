@@ -21,6 +21,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ConfirmAddToCartOverlay } from "@/components/product/ConfirmAddToCartOverlay";
 import { CrossSellPopup } from "@/components/product/CrossSellPopup";
+import { ProductDescriptionContent } from "@/components/product/ProductDescriptionContent";
 import { ThreeDPreview } from "@/components/customizer/ThreeDPreview";
 
 type SizeOption = {
@@ -38,6 +39,23 @@ type PrintDimensions = {
 type ImageSize = {
   width: number;
   height: number;
+};
+
+type AlbumCoverSlotLayout = CSSProperties & {
+  badgeWidth: string;
+  badgeHeight: string;
+  badgeRadius: string;
+  badgeFontSize: string;
+  badgeTranslateX: string;
+  badgeLineHeight: string;
+};
+
+type UploadedPhotoSlot = {
+  url: string;
+  fileName: string;
+  naturalSize: ImageSize | null;
+  position: { x: number; y: number };
+  scale: number;
 };
 
 type ViewOrientationId = "vertical" | "horizontal";
@@ -172,6 +190,38 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function emptyPhotoSlot(): UploadedPhotoSlot {
+  return {
+    url: "",
+    fileName: "",
+    naturalSize: null,
+    position: { x: 0, y: 0 },
+    scale: 1,
+  };
+}
+
+function inferUploadSlotCount(product: Product, templateSlots?: number) {
+  const text = `${product.title} ${product.description} ${product.categoryName}`.toLowerCase();
+  const explicitSlots = Array.from(text.matchAll(/\b([2-8])\s*(?:pic|pics|photo|photos)\b/g))
+    .map((match) => Number(match[1]))
+    .filter((value) => Number.isFinite(value));
+  const albumSlots = product.categorySlug === "photo-albums" || text.includes("album") ? 3 : 1;
+  return clamp(Math.max(templateSlots ?? 1, albumSlots, ...explicitSlots, 1), 1, 8);
+}
+
+function inferTotalUploadCount(product: Product, coverSlotCount: number, templateSlots?: number) {
+  const text = `${product.title} ${product.description} ${product.categoryName}`.toLowerCase();
+  const explicitLargeCount = Array.from(text.matchAll(/\b([1-9]\d{1,2})\s*(?:pic|pics|photo|photos)\b/g))
+    .map((match) => Number(match[1]))
+    .filter((value) => Number.isFinite(value));
+
+  if (product.categorySlug === "photo-albums" || text.includes("album")) {
+    return Math.max(58, templateSlots ?? 1, ...explicitLargeCount);
+  }
+
+  return Math.max(coverSlotCount, templateSlots ?? 1, ...explicitLargeCount);
+}
+
 function dimensionsFromSizeLabel(label: string, viewOrientation: ViewOrientationId): PrintDimensions {
   const match = label.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i);
   const parsedWidth = match ? Number(match[1]) : 9;
@@ -282,16 +332,158 @@ function displayTitle(product: Product) {
   return product.title.replace(/\s+\d+$/, "");
 }
 
+function albumCoverSlotStyle(index: number, count: number): AlbumCoverSlotLayout {
+  if (count <= 1) {
+    return {
+      left: "35.4%",
+      top: "43.2%",
+      width: "28%",
+      height: "32%",
+      zIndex: 20,
+      badgeWidth: "62%",
+      badgeHeight: "58%",
+      badgeRadius: "11%",
+      badgeFontSize: "clamp(14px,3.1vw,22px)",
+      badgeTranslateX: "0",
+      badgeLineHeight: "1.08",
+    };
+  }
+
+  if (count === 2) {
+    return [
+      {
+        left: "23.8%",
+        top: "49.5%",
+        width: "23%",
+        height: "23.8%",
+        zIndex: 10,
+        badgeWidth: "60%",
+        badgeHeight: "50%",
+        badgeRadius: "11%",
+        badgeFontSize: "clamp(5px,0.8vw,7px)",
+        badgeTranslateX: "-8%",
+        badgeLineHeight: "1.02",
+      },
+      {
+        left: "43.8%",
+        top: "42.8%",
+        width: "26.2%",
+        height: "31.5%",
+        zIndex: 10,
+        badgeWidth: "48%",
+        badgeHeight: "46%",
+        badgeRadius: "10%",
+        badgeFontSize: "clamp(8px,1.45vw,13px)",
+        badgeTranslateX: "0",
+        badgeLineHeight: "1.05",
+      },
+    ][index] ?? {
+      left: "35.4%",
+      top: "43.2%",
+      width: "28%",
+      height: "32%",
+      zIndex: 20,
+      badgeWidth: "61%",
+      badgeHeight: "55%",
+      badgeRadius: "10%",
+      badgeFontSize: "clamp(12px,2.7vw,20px)",
+      badgeTranslateX: "0",
+      badgeLineHeight: "1.05",
+    };
+  }
+
+  const primarySlots: AlbumCoverSlotLayout[] = [
+    {
+      left: "19.1%",
+      top: "49.8%",
+      width: "22.3%",
+      height: "23.5%",
+      zIndex: 30,
+      badgeWidth: "60%",
+      badgeHeight: "50%",
+      badgeRadius: "11%",
+      badgeFontSize: "clamp(5px,0.8vw,7px)",
+      badgeTranslateX: "-8%",
+      badgeLineHeight: "1.02",
+    },
+    {
+      left: "34.2%",
+      top: "42.8%",
+      width: "28.6%",
+      height: "32.2%",
+      zIndex: 10,
+      badgeWidth: "56%",
+      badgeHeight: "46%",
+      badgeRadius: "10%",
+      badgeFontSize: "clamp(6px,1.05vw,10px)",
+      badgeTranslateX: "0",
+      badgeLineHeight: "1.05",
+    },
+    {
+      left: "57.5%",
+      top: "45.8%",
+      width: "21.4%",
+      height: "24.2%",
+      zIndex: 30,
+      badgeWidth: "60%",
+      badgeHeight: "50%",
+      badgeRadius: "11%",
+      badgeFontSize: "clamp(5px,0.8vw,7px)",
+      badgeTranslateX: "8%",
+      badgeLineHeight: "1.02",
+    },
+    {
+      left: "34.4%",
+      top: "66.5%",
+      width: "28%",
+      height: "22%",
+      zIndex: 15,
+      badgeWidth: "58%",
+      badgeHeight: "54%",
+      badgeRadius: "10%",
+      badgeFontSize: "clamp(10px,2.2vw,15px)",
+      badgeTranslateX: "0",
+      badgeLineHeight: "1.03",
+    },
+  ];
+
+  return primarySlots[index] ?? {
+    left: `${18 + (index % 4) * 16}%`,
+    top: `${62 + Math.floor(index / 4) * 14}%`,
+    width: "18%",
+    height: "24%",
+    zIndex: 12,
+    badgeWidth: "60%",
+    badgeHeight: "54%",
+    badgeRadius: "10%",
+    badgeFontSize: "clamp(10px,2.1vw,15px)",
+    badgeTranslateX: "0",
+    badgeLineHeight: "1.03",
+  };
+}
+
 export function ProductCustomizerPanel({ product }: { product: Product }) {
   const addItem = useCartStore((state) => state.addItem);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewFrameRef = useRef<HTMLDivElement>(null);
   const dragStateRef = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  const fileSelectionModeRef = useRef<"cover" | "bulk">("cover");
+  const singleUploadStartSlotRef = useRef(0);
   const template =
     customizerTemplateByProductSlug[product.slug] ||
     (product.customizerTemplateId ? customizerTemplateById[product.customizerTemplateId] : undefined);
   const isClockProduct = product.categorySlug === "wall-clocks" || template?.previewType === "clock";
+  const isAlbumProduct = product.categorySlug === "photo-albums" || template?.previewType === "album";
   const isSmallPreviewProduct = smallPreviewCategorySlugs.has(product.categorySlug);
+  const coverSlotCount = useMemo(
+    () => inferUploadSlotCount(product, template?.uploadSlots),
+    [product, template?.uploadSlots],
+  );
+  const totalUploadCount = useMemo(
+    () => inferTotalUploadCount(product, coverSlotCount, template?.uploadSlots),
+    [coverSlotCount, product, template?.uploadSlots],
+  );
+  const hasBulkUpload = totalUploadCount > 1 && !isClockProduct;
 
   const availableSizeOptions = useMemo<SizeOption[]>(() => {
     const source = product.sizeOptions?.length ? product.sizeOptions : template?.sizeOptions;
@@ -319,11 +511,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
   const [selectedColor, setSelectedColor] = useState("black");
   const [selectedViewOrientation, setSelectedViewOrientation] = useState<ViewOrientationId>("vertical");
   const [selectedFont, setSelectedFont] = useState(fontOptions[0].value);
-  const [uploadedImage, setUploadedImage] = useState("");
-  const [uploadedFileName, setUploadedFileName] = useState("");
-  const [uploadedImageSize, setUploadedImageSize] = useState<ImageSize | null>(null);
-  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
-  const [imageScale, setImageScale] = useState(1);
+  const [activePhotoSlot, setActivePhotoSlot] = useState(0);
+  const [uploadedPhotoSlots, setUploadedPhotoSlots] = useState<UploadedPhotoSlot[]>([]);
   const [rotation] = useState(0);
   const [textToolOpen, setTextToolOpen] = useState(false);
   const [textLayer, setTextLayer] = useState("");
@@ -346,46 +535,102 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     }
   }, [availableThicknessOptions, selectedThickness]);
 
+  useEffect(() => {
+    if (activePhotoSlot >= coverSlotCount) {
+      setActivePhotoSlot(coverSlotCount - 1);
+    }
+  }, [activePhotoSlot, coverSlotCount]);
+
   const sizePrice = availableSizeOptions.find((option) => option.label === selectedSize)?.price ?? product.price;
   const thicknessExtra = thicknessExtras[selectedThickness] ?? 0;
   const unitPrice = sizePrice + thicknessExtra;
   const compareAtPrice = product.oldPrice && product.oldPrice > unitPrice ? product.oldPrice : unitPrice + 600;
   const activeColor = colorSwatches.find((swatch) => swatch.id === selectedColor) ?? colorSwatches[0];
   const productName = displayTitle(product);
-  const previewImageSrc = uploadedImage || (isSmallPreviewProduct ? "" : product.image);
-  const showPreviewSelectCta = !uploadedImage && !isSmallPreviewProduct;
+  const activeUpload = uploadedPhotoSlots[activePhotoSlot] ?? emptyPhotoSlot();
+  const uploadedImage = activeUpload.url;
+  const uploadedFileName = activeUpload.fileName;
+  const uploadedImageSize = activeUpload.naturalSize;
+  const imagePosition = activeUpload.position;
+  const imageScale = activeUpload.scale;
+  const uploadedImageEntries = useMemo(() => uploadedPhotoSlots.flatMap((slot, index) => {
+    if (!slot?.url) return [];
+    return [{
+      originalUrl: slot.url,
+      croppedUrl: slot.url,
+      backgroundRemovedUrl: "",
+      position: slot.position,
+      scale: slot.scale,
+      rotation,
+      crop: { x: 0, y: 0, width: 100, height: 100 },
+      qualityScore: "local-preview-unverified",
+      slot: index + 1,
+    }];
+  }), [rotation, uploadedPhotoSlots]);
+  const uploadedPhotoCount = uploadedImageEntries.length;
+  const firstUploadedImage = uploadedImageEntries[0]?.originalUrl ?? "";
+  const productPreviewImageSrc = product.image || product.thumbnail || product.gallery?.[0] || "";
+  const previewImageSrc = uploadedImage || productPreviewImageSrc;
+  const showPreviewSelectCta = !uploadedImage && Boolean(productPreviewImageSrc);
   const renderedImageScale = uploadedImage ? imageScale * previewImageOverscan : imageScale;
+  const multiPhotoPreview = coverSlotCount > 1 && !isClockProduct;
+  const slotGridClass = coverSlotCount <= 2 ? "grid-cols-2" : coverSlotCount <= 4 ? "grid-cols-3" : "grid-cols-3";
+  const slotPanelClass = isAlbumProduct
+    ? "absolute left-1/2 top-1/2 w-[74%] max-w-[390px] -translate-x-1/2 -translate-y-1/2"
+    : "absolute inset-x-3 bottom-3 sm:inset-x-5 sm:bottom-5";
   const previewShape = useMemo(() => inferPreviewShape(product, template?.shape), [product, template?.shape]);
   const selectedDimensions = useMemo(() => dimensionsFromSizeLabel(selectedSize, selectedViewOrientation), [selectedSize, selectedViewOrientation]);
   const previewOrientation = selectedDimensions.orientation === "landscape" ? "landscape" : selectedDimensions.orientation === "square" ? "square" : "portrait";
   const previewFrameStyle = useMemo<CSSProperties>(() => ({
-    aspectRatio: `${selectedDimensions.width} / ${selectedDimensions.height}`,
-    maxWidth: previewMaxWidth(product.categorySlug, selectedDimensions, previewShape),
+    aspectRatio: isAlbumProduct ? "16 / 10" : `${selectedDimensions.width} / ${selectedDimensions.height}`,
+    maxWidth: isAlbumProduct ? "560px" : previewMaxWidth(product.categorySlug, selectedDimensions, previewShape),
     ...previewShapeStyle(previewShape),
-  }), [previewShape, product.categorySlug, selectedDimensions]);
+  }), [isAlbumProduct, previewShape, product.categorySlug, selectedDimensions]);
 
   const mountingText = selectedThickness === "3mm" ? "Ikonnic Adhesive Hooks" : "Premium Steel Studs";
 
   useEffect(() => {
     if (!uploadedImage) return;
-    setImagePosition((position) => clampImagePosition(position, renderedImageScale, previewFrameRef.current, uploadedImageSize));
+    setActiveSlotPosition((position) => clampImagePosition(position, renderedImageScale, previewFrameRef.current, uploadedImageSize));
   }, [renderedImageScale, selectedDimensions, uploadedImage, uploadedImageSize]);
+
+  const updateActivePhotoSlot = (updates: Partial<UploadedPhotoSlot>) => {
+    setUploadedPhotoSlots((slots) => {
+      const next = [...slots];
+      next[activePhotoSlot] = { ...(next[activePhotoSlot] ?? emptyPhotoSlot()), ...updates };
+      return next;
+    });
+  };
+
+  const setActiveSlotPosition = (
+    nextPosition: { x: number; y: number } | ((position: { x: number; y: number }) => { x: number; y: number }),
+  ) => {
+    setUploadedPhotoSlots((slots) => {
+      const next = [...slots];
+      const current = next[activePhotoSlot] ?? emptyPhotoSlot();
+      const position = typeof nextPosition === "function" ? nextPosition(current.position) : nextPosition;
+      next[activePhotoSlot] = { ...current, position };
+      return next;
+    });
+  };
+
+  const setActiveSlotScale = (scale: number) => {
+    updateActivePhotoSlot({ scale });
+  };
 
   const customisationJson = useMemo<ProductCustomisation>(() => ({
     productId: product.id,
     templateId: template?.id || product.customizerTemplateId || "generic-custom-product",
-    uploadedImages: [
-      {
-        originalUrl: uploadedImage,
-        croppedUrl: uploadedImage,
-        backgroundRemovedUrl: "",
-        position: imagePosition,
-        scale: imageScale,
-        rotation,
-        crop: { x: 0, y: 0, width: 100, height: 100 },
-        qualityScore: uploadedImage ? "local-preview-unverified" : "awaiting-upload",
-      },
-    ],
+    uploadedImages: uploadedImageEntries.length ? uploadedImageEntries : [{
+      originalUrl: "",
+      croppedUrl: "",
+      backgroundRemovedUrl: "",
+      position: { x: 0, y: 0 },
+      scale: 1,
+      rotation,
+      crop: { x: 0, y: 0, width: 100, height: 100 },
+      qualityScore: "awaiting-upload",
+    }],
     texts: textLayer
       ? [
           {
@@ -410,7 +655,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
       dimensions: `${selectedDimensions.width}x${selectedDimensions.height}`,
       shape: previewShape,
     },
-    previewImage: uploadedImage,
+    previewImage: firstUploadedImage,
     printFile: "",
     priceSnapshot: {
       basePrice: sizePrice,
@@ -418,33 +663,81 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
       discount: 0,
       finalPrice: unitPrice,
     },
-  }), [imagePosition, imageScale, product.customizerTemplateId, product.id, rotation, selectedColor, selectedDimensions.height, selectedDimensions.width, selectedSize, selectedThickness, selectedFont, selectedViewOrientation, sizePrice, template?.id, textLayer, thicknessExtra, unitPrice, uploadedImage, activeColor, previewShape]);
+  }), [activeColor, firstUploadedImage, product.customizerTemplateId, product.id, rotation, selectedColor, selectedDimensions.height, selectedDimensions.width, selectedSize, selectedThickness, selectedFont, selectedViewOrientation, sizePrice, template?.id, textLayer, thicknessExtra, unitPrice, uploadedImageEntries, previewShape]);
 
-  const selectFile = (file?: File) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const previewUrl = String(reader.result);
-      setUploadedImage(previewUrl);
-      setUploadedFileName(file.name);
-      setUploadedImageSize(null);
-      setImagePosition({ x: 0, y: 0 });
-      setImageScale(1);
-      setAddToCartError("");
+  const selectFiles = (files?: FileList | null) => {
+    const imageFiles = Array.from(files ?? []).filter((file) => file.type.startsWith("image/"));
+    if (!imageFiles.length) return;
+    const isBulkUpload = fileSelectionModeRef.current === "bulk";
+    const targetCount = isBulkUpload ? totalUploadCount : coverSlotCount;
+    const bulkSlotIndexes = Array.from({ length: targetCount }, (_, index) => index);
+    const availableBulkSlots = bulkSlotIndexes.filter((index) => !uploadedPhotoSlots[index]?.url);
+    const fallbackBulkSlots = bulkSlotIndexes.filter((index) => uploadedPhotoSlots[index]?.url);
+    const bulkTargets = [...availableBulkSlots, ...fallbackBulkSlots];
+    const coverStartSlot = clamp(singleUploadStartSlotRef.current, 0, Math.max(coverSlotCount - 1, 0));
+    const coverTargets = Array.from(
+      { length: Math.max(0, coverSlotCount - coverStartSlot) },
+      (_, index) => coverStartSlot + index,
+    );
+    const slotTargets = isBulkUpload ? bulkTargets : coverTargets;
 
-      const image = new Image();
-      image.onload = () => {
-        setUploadedImageSize({ width: image.naturalWidth, height: image.naturalHeight });
+    imageFiles.slice(0, slotTargets.length).forEach((file, offset) => {
+      const slotIndex = slotTargets[offset];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const previewUrl = String(reader.result);
+        setUploadedPhotoSlots((slots) => {
+          const next = [...slots];
+          next[slotIndex] = {
+            ...(next[slotIndex] ?? emptyPhotoSlot()),
+            url: previewUrl,
+            fileName: file.name,
+            naturalSize: null,
+            position: { x: 0, y: 0 },
+            scale: 1,
+          };
+          return next;
+        });
+        setActivePhotoSlot(Math.min(slotIndex, coverSlotCount - 1));
+        setAddToCartError("");
+
+        const image = new Image();
+        image.onload = () => {
+          setUploadedPhotoSlots((slots) => {
+            const next = [...slots];
+            const current = next[slotIndex] ?? emptyPhotoSlot();
+            next[slotIndex] = { ...current, naturalSize: { width: image.naturalWidth, height: image.naturalHeight } };
+            return next;
+          });
+        };
+        image.src = previewUrl;
       };
-      image.src = previewUrl;
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const openActivePhotoUpload = () => {
+    fileSelectionModeRef.current = "cover";
+    singleUploadStartSlotRef.current = activePhotoSlot;
+    window.setTimeout(() => fileInputRef.current?.click(), 0);
+  };
+
+  const openPhotoSlot = (index: number) => {
+    fileSelectionModeRef.current = "cover";
+    singleUploadStartSlotRef.current = index;
+    setActivePhotoSlot(index);
+    window.setTimeout(() => fileInputRef.current?.click(), 0);
+  };
+
+  const openBulkUpload = () => {
+    fileSelectionModeRef.current = "bulk";
+    window.setTimeout(() => fileInputRef.current?.click(), 0);
   };
 
   const updateImageScale = (nextScale: number) => {
     const scale = clamp(nextScale, 1, 3);
-    setImageScale(scale);
-    setImagePosition((position) => clampImagePosition(position, scale * previewImageOverscan, previewFrameRef.current, uploadedImageSize));
+    setActiveSlotScale(scale);
+    setActiveSlotPosition((position) => clampImagePosition(position, scale * previewImageOverscan, previewFrameRef.current, uploadedImageSize));
   };
 
   const stopPhotoDrag = (event?: PointerEvent<HTMLDivElement>) => {
@@ -460,6 +753,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
   };
 
   const handlePhotoPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (multiPhotoPreview) return;
     if (!uploadedImage) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -473,7 +767,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     const deltaY = event.clientY - dragStateRef.current.y;
     dragStateRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
 
-    setImagePosition((position) => clampImagePosition(
+    setActiveSlotPosition((position) => clampImagePosition(
       { x: position.x + deltaX, y: position.y + deltaY },
       renderedImageScale,
       previewFrameRef.current,
@@ -482,19 +776,19 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
   };
 
   const clearUploadedPhoto = () => {
-    setUploadedImage("");
-    setUploadedFileName("");
-    setUploadedImageSize(null);
-    setImagePosition({ x: 0, y: 0 });
-    setImageScale(1);
+    setUploadedPhotoSlots((slots) => {
+      const next = [...slots];
+      next[activePhotoSlot] = emptyPhotoSlot();
+      return next;
+    });
     setTextLayer("");
     setDragging(false);
     dragStateRef.current = null;
   };
 
   const handlePreAddToCart = () => {
-    if (!uploadedImage) {
-      setAddToCartError("Please select a photo before adding this custom product to cart.");
+    if (uploadedPhotoCount < totalUploadCount) {
+      setAddToCartError(`Please upload ${totalUploadCount} photo${totalUploadCount > 1 ? "s" : ""} before adding this custom product to cart.`);
       return;
     }
     setAddToCartError("");
@@ -503,6 +797,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
 
   const confirmAddToCart = () => {
     const id = `ikonnic-custom-${Date.now()}`;
+    const cartPreviewImage = firstUploadedImage || product.image;
     addItem({
       id,
       productId: product.id,
@@ -512,8 +807,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
       title: productName,
       categorySlug: product.categorySlug,
       category: product.categoryName,
-      image: uploadedImage,
-      thumbnail: uploadedImage,
+      image: cartPreviewImage,
+      thumbnail: cartPreviewImage,
       price: unitPrice,
       unitPrice,
       finalTotal: unitPrice,
@@ -530,23 +825,21 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
         frameColor: selectedColor,
         border: selectedColor,
         background: selectedColor,
-        photos: "1 photo",
+        photos: `${uploadedPhotoCount} photo${uploadedPhotoCount === 1 ? "" : "s"}`,
         quantity: 1,
         orientation: selectedViewOrientation,
       },
-      uploadedImagePreview: uploadedImage,
-      uploadedImageReference: uploadedFileName || "local-browser-preview",
-      previewImage: uploadedImage,
+      uploadedImagePreview: cartPreviewImage,
+      uploadedImageReference: uploadedPhotoSlots.map((slot) => slot?.fileName).filter(Boolean).join(", ") || "local-browser-preview",
+      previewImage: cartPreviewImage,
       customisation: {
-        uploadedImages: [
-          {
-            originalPreviewUrl: uploadedImage,
-            position: imagePosition,
-            scale: imageScale,
-            rotation,
-            crop: { x: 0, y: 0, width: 100, height: 100 },
-          },
-        ],
+        uploadedImages: uploadedImageEntries.map((slot) => ({
+          originalPreviewUrl: slot.originalUrl,
+          position: slot.position,
+          scale: slot.scale,
+          rotation,
+          crop: slot.crop,
+        })),
         selectedOptions: {
           size: selectedSize,
           dimensions: `${selectedDimensions.width}x${selectedDimensions.height}`,
@@ -555,6 +848,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           quantity: 1,
           orientation: selectedViewOrientation,
           shape: previewShape,
+          coverSlots: coverSlotCount,
+          totalPhotos: totalUploadCount,
         },
         priceSnapshot: {
           basePrice: sizePrice,
@@ -572,7 +867,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
       <button
         type="button"
         onClick={() => setShowWhyIkonnic(true)}
-        className="fixed left-2 top-[38vh] z-40 hidden rounded-full border border-[#ffb4b4] bg-white px-2.5 py-3 text-[12px] font-extrabold text-[#d90000] shadow-[0_8px_22px_rgba(15,23,42,0.14)] transition hover:bg-red-50 xl:flex"
+        className="fixed left-2 top-[38vh] z-40 hidden rounded-full border border-rosegold-300 bg-white px-2.5 py-3 text-[12px] font-extrabold text-ikonnic-red shadow-[0_8px_22px_rgba(15,23,42,0.14)] transition hover:bg-rosegold-50 xl:flex"
         style={{ writingMode: "vertical-rl" }}
       >
         <CircleHelp className="mb-1" size={14} />
@@ -593,11 +888,11 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
             {!isClockProduct ? (
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="inline-flex h-12 items-center gap-2 rounded-[12px] bg-[#d90000] px-5 text-[17px] font-black text-white shadow-sm transition hover:bg-[#c90000] active:scale-[0.99]"
+                onClick={() => openPhotoSlot(activePhotoSlot)}
+                className="inline-flex h-12 items-center gap-2 rounded-[12px] bg-ikonnic-red px-5 text-[17px] font-black text-white shadow-sm transition hover:bg-rosegold-600 active:scale-[0.99]"
               >
                 <Upload size={23} />
-                Select Photo
+                {hasBulkUpload ? "Select Photo" : coverSlotCount > 1 ? `Select Photos (${uploadedPhotoCount}/${totalUploadCount})` : "Select Photo"}
               </button>
             ) : null}
             <button
@@ -660,6 +955,48 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
             )}
           </div>
 
+          {hasBulkUpload ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={openBulkUpload}
+                className="inline-flex h-10 w-fit items-center justify-center rounded-[5px] bg-emerald-600 px-6 text-[17px] font-black text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.99]"
+              >
+                Upload {totalUploadCount} photos
+              </button>
+              <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700">
+                {uploadedPhotoCount}/{totalUploadCount} uploaded
+              </span>
+            </div>
+          ) : null}
+
+          {multiPhotoPreview ? (
+            <div className="flex gap-2 overflow-x-auto rounded-[14px] border border-rosegold-200/70 bg-white p-2 shadow-sm">
+              {Array.from({ length: coverSlotCount }).map((_, index) => {
+                const slot = uploadedPhotoSlots[index];
+                const selected = activePhotoSlot === index;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => openPhotoSlot(index)}
+                    className={`flex min-w-[112px] items-center gap-2 rounded-[10px] border px-2 py-2 text-left transition ${
+                      selected ? "border-ikonnic-red bg-rosegold-50" : "border-[#dfe4ec] bg-white hover:border-rosegold-300"
+                    }`}
+                  >
+                    <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-[7px] bg-rosegold-100 text-[11px] font-black text-ikonnic-red">
+                      {slot?.url ? <img src={slot.url} alt="" className="h-full w-full object-cover" /> : index + 1}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[11px] font-black uppercase text-[#07142f]">Photo {index + 1}</span>
+                      <span className="block truncate text-[11px] font-semibold text-slate-500">{slot?.fileName || "Add image"}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
           {textToolOpen ? (
             <div className="rounded-[14px] border border-[#dfe4ec] bg-white p-3 shadow-sm space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -702,7 +1039,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={() => setEditorMode("threeD")}
-                className={`flex h-11 items-center justify-center gap-2 rounded-[10px] text-sm font-black transition ${editorMode === "threeD" ? "bg-[#d90000] text-white" : "text-slate-500 hover:bg-red-50 hover:text-[#d90000]"}`}
+                className={`flex h-11 items-center justify-center gap-2 rounded-[10px] text-sm font-black transition ${editorMode === "threeD" ? "bg-ikonnic-red text-white" : "text-slate-500 hover:bg-rosegold-50 hover:text-ikonnic-red"}`}
               >
                 <Box size={16} />
                 3D Preview
@@ -712,6 +1049,10 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
 
           {editorMode === "edit" || !isClockProduct ? (
           <div className={`${editorMode === "threeD" && !isClockProduct ? "grid lg:hidden" : "grid"} min-h-[420px] w-full place-items-center border border-[#edf0f4] bg-[#f7f7f8] px-4 py-7 sm:min-h-[520px] sm:px-8 lg:min-h-[600px]`}>
+            <div className="grid w-full place-items-center gap-3">
+            {multiPhotoPreview ? (
+              <h2 className="text-center text-2xl font-black text-[#07142f]">Front Cover</h2>
+            ) : null}
             <div
               ref={previewFrameRef}
               className={`relative w-[calc(100vw-66px)] touch-none select-none overflow-hidden bg-[#eeeeef] shadow-[0_3px_12px_rgba(15,23,42,0.28)] ${uploadedImage ? (dragging ? "cursor-grabbing" : "cursor-grab") : ""} ${uploadedImage || !previewImageSrc ? `border ${activeColor.frame}` : ""}`}
@@ -727,7 +1068,118 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                 updateImageScale(imageScale + (event.deltaY < 0 ? 0.08 : -0.08));
               }}
             >
-              {previewImageSrc ? (
+              {multiPhotoPreview ? (
+                <div className="absolute inset-0 bg-white">
+                  {isAlbumProduct ? (
+                    <div className="absolute inset-0 grid place-items-center">
+                      <div className="relative aspect-square h-full max-h-full max-w-full overflow-hidden">
+                        {productPreviewImageSrc ? (
+                          <img
+                            src={productPreviewImageSrc}
+                            alt={`${productName} product preview`}
+                            draggable={false}
+                            className="h-full w-full select-none object-contain"
+                          />
+                        ) : null}
+                        <div className="absolute inset-0">
+                          {Array.from({ length: coverSlotCount }).map((_, index) => {
+                            const slot = uploadedPhotoSlots[index];
+                            const selected = activePhotoSlot === index;
+                            const {
+                              badgeWidth,
+                              badgeHeight,
+                              badgeRadius,
+                              badgeFontSize,
+                              badgeTranslateX,
+                              badgeLineHeight,
+                              ...slotStyle
+                            } = albumCoverSlotStyle(index, coverSlotCount);
+                            return (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => openPhotoSlot(index)}
+                                onPointerDown={(event) => event.stopPropagation()}
+                                className={`absolute overflow-hidden border-[clamp(4px,1.1vw,7px)] bg-[#cfcfcf] shadow-[0_6px_14px_rgba(15,23,42,0.26)] transition ${
+                                  selected ? "border-white ring-2 ring-ikonnic-red" : "border-white hover:ring-2 hover:ring-rosegold-300"
+                                }`}
+                                style={slotStyle}
+                                aria-label={`Select photo ${index + 1}`}
+                              >
+                                {slot?.url ? (
+                                  <img src={slot.url} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                  <span className="absolute inset-0 grid place-items-center bg-[#cfcfcf]">
+                                    <span
+                                      className="flex flex-col items-center justify-center overflow-hidden bg-ikonnic-red text-center font-black uppercase text-white shadow-sm"
+                                      style={{
+                                        width: badgeWidth,
+                                        height: badgeHeight,
+                                        borderRadius: badgeRadius,
+                                        fontSize: badgeFontSize,
+                                        transform: `translateX(${badgeTranslateX})`,
+                                        lineHeight: badgeLineHeight,
+                                      }}
+                                    >
+                                      <span className="block max-w-full overflow-hidden">Select</span>
+                                      <span className="block max-w-full overflow-hidden">Photo</span>
+                                    </span>
+                                  </span>
+                                )}
+                                <span className="absolute left-1 top-1 grid size-5 place-items-center rounded-full bg-white text-[10px] font-black text-[#07142f] shadow-sm">
+                                  {index + 1}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                    {productPreviewImageSrc ? (
+                      <img
+                        src={productPreviewImageSrc}
+                        alt={`${productName} product preview`}
+                        draggable={false}
+                        className="h-full w-full select-none object-contain"
+                      />
+                    ) : null}
+                    <div className={`${slotPanelClass} grid ${slotGridClass} gap-2 rounded-[14px] bg-white/90 p-2 shadow-[0_10px_28px_rgba(15,23,42,0.18)] backdrop-blur-sm`}>
+                      {Array.from({ length: coverSlotCount }).map((_, index) => {
+                        const slot = uploadedPhotoSlots[index];
+                        const selected = activePhotoSlot === index;
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => openPhotoSlot(index)}
+                            onPointerDown={(event) => event.stopPropagation()}
+                            className={`relative min-h-[58px] overflow-hidden rounded-[10px] border-2 bg-white shadow-sm transition ${
+                              selected ? "border-ikonnic-red ring-2 ring-rosegold-300" : "border-rosegold-200 hover:border-rosegold-400"
+                            }`}
+                            aria-label={`Select photo ${index + 1}`}
+                          >
+                            {slot?.url ? (
+                              <img src={slot.url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="absolute inset-0 grid place-items-center bg-[#3b3b3f]">
+                                <span className="rounded-[8px] bg-ikonnic-red px-2 py-1.5 text-center text-[10px] font-black uppercase leading-tight text-white shadow-sm sm:text-[12px]">
+                                  Select<br />Photo
+                                </span>
+                              </span>
+                            )}
+                            <span className="absolute left-1.5 top-1.5 grid size-5 place-items-center rounded-full bg-white text-[10px] font-black text-[#07142f] shadow-sm">
+                              {index + 1}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    </>
+                  )}
+                </div>
+              ) : previewImageSrc ? (
                 <img
                   src={previewImageSrc}
                   alt={`${productName} preview`}
@@ -738,34 +1190,34 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
               ) : isSmallPreviewProduct ? (
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={openActivePhotoUpload}
                   className="absolute inset-0 z-10 grid cursor-pointer place-items-center"
                   aria-label="Select photo"
                 >
-                  <span className="rounded-[10px] bg-[#d90000] px-4 py-2.5 text-[13px] font-black uppercase tracking-normal text-white shadow-[0_8px_18px_rgba(217,0,0,0.16)] transition hover:bg-[#c90000] sm:text-[14px]">
+                  <span className="rounded-[10px] bg-ikonnic-red px-4 py-2.5 text-[13px] font-black uppercase tracking-normal text-white shadow-[0_8px_18px_rgba(183,110,121,0.16)] transition hover:bg-rosegold-600 sm:text-[14px]">
                     Upload Photo
                   </span>
                 </button>
               ) : (
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute left-1/2 top-1/2 grid h-[112px] w-[112px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[18px] bg-[#d90000] text-left text-[23px] font-black leading-[1.12] text-white transition hover:bg-[#c90000]"
+                  onClick={openActivePhotoUpload}
+                  className="absolute left-1/2 top-1/2 grid h-[112px] w-[112px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[18px] bg-ikonnic-red text-left text-[23px] font-black leading-[1.12] text-white transition hover:bg-rosegold-600"
                 >
                   <span>SELECT<br />PHOTO</span>
                 </button>
               )}
-              {showPreviewSelectCta && previewImageSrc ? (
+              {showPreviewSelectCta && previewImageSrc && !multiPhotoPreview ? (
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute left-1/2 top-1/2 z-20 grid h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[14px] bg-[#d90000] text-left text-[16px] font-black leading-[1.1] text-white shadow-[0_8px_18px_rgba(217,0,0,0.16)] transition hover:bg-[#c90000] sm:h-[86px] sm:w-[86px] sm:text-[18px]"
+                  onClick={openActivePhotoUpload}
+                  className="absolute left-1/2 top-1/2 z-20 grid h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[14px] bg-ikonnic-red text-left text-[16px] font-black leading-[1.1] text-white shadow-[0_8px_18px_rgba(183,110,121,0.16)] transition hover:bg-rosegold-600 sm:h-[86px] sm:w-[86px] sm:text-[18px]"
                 >
                   <span>SELECT<br />PHOTO</span>
                 </button>
               ) : null}
-              {!uploadedImage && previewImageSrc ? (
-                <span className="absolute bottom-[14%] left-1/2 z-30 -translate-x-1/2 rounded-[2px] bg-white px-1.5 py-0.5 text-[6px] font-black uppercase tracking-tight text-[#d90000] shadow-sm">
+              {!uploadedImage && previewImageSrc && !multiPhotoPreview ? (
+                <span className="absolute bottom-[14%] left-1/2 z-30 -translate-x-1/2 rounded-[2px] bg-white px-1.5 py-0.5 text-[6px] font-black uppercase tracking-tight text-ikonnic-red shadow-sm">
                   IKONNIC
                 </span>
               ) : null}
@@ -777,7 +1229,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                   {textLayer}
                 </div>
               ) : null}
-              <span className="absolute bottom-1.5 right-2 z-30 text-[7px] font-black uppercase tracking-tight text-[#d90000] opacity-55">IKONNIC</span>
+              <span className="absolute bottom-1.5 right-2 z-30 text-[7px] font-black uppercase tracking-tight text-ikonnic-red opacity-55">IKONNIC</span>
+            </div>
             </div>
           </div>
           ) : null}
@@ -785,7 +1238,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           {(!isClockProduct && editorMode === "edit") || editorMode === "threeD" ? (
             <div className={`${!isClockProduct && editorMode === "edit" ? "block lg:hidden" : "block"} w-full border border-[#edf0f4] bg-[#10131b] p-2 sm:p-3`}>
               <ThreeDPreview
-                photoUrl={previewImageSrc}
+                photoUrl={multiPhotoPreview ? productPreviewImageSrc : previewImageSrc}
                 thicknessMm={parseInt(selectedThickness, 10) || 3}
                 borderColor={selectedColor}
                 textOverlay={textLayer || undefined}
@@ -801,7 +1254,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
             <button
               type="button"
               onClick={() => setEditorMode((mode) => mode === "threeD" ? "edit" : "threeD")}
-              className="flex h-14 w-full items-center justify-center gap-3 rounded-[10px] border border-[#dfe4ec] bg-white text-[17px] font-black text-[#07142f] shadow-sm transition hover:border-red-200 hover:text-[#d90000]"
+              className="flex h-14 w-full items-center justify-center gap-3 rounded-[10px] border border-[#dfe4ec] bg-white text-[17px] font-black text-[#07142f] shadow-sm transition hover:border-rosegold-300 hover:text-ikonnic-red"
             >
               <Box size={18} />
               {editorMode === "threeD" ? "Back to 2D Edit" : "Show 3D Preview"}
@@ -815,17 +1268,27 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                 <p className="mt-1 text-xs font-bold text-slate-500">{selectedDimensions.width} x {selectedDimensions.height} inch print area</p>
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-xl border border-[#dfe4ec] bg-white px-4 py-2 text-xs font-black text-[#07142f] hover:border-red-200 hover:bg-red-50">
+                <button type="button" onClick={openActivePhotoUpload} className="rounded-xl border border-[#dfe4ec] bg-white px-4 py-2 text-xs font-black text-[#07142f] hover:border-rosegold-300 hover:bg-rosegold-50">
                   Replace Photo
                 </button>
-                <button type="button" onClick={clearUploadedPhoto} className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-black text-[#d90000] hover:bg-red-100">
+                <button type="button" onClick={clearUploadedPhoto} className="rounded-xl border border-rosegold-200 bg-rosegold-50 px-4 py-2 text-xs font-black text-ikonnic-red hover:bg-rosegold-100">
                   Remove Photo
                 </button>
               </div>
             </div>
           ) : null}
 
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => selectFile(event.target.files?.[0])} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple={totalUploadCount > 1}
+            className="hidden"
+            onChange={(event) => {
+              selectFiles(event.target.files);
+              event.currentTarget.value = "";
+            }}
+          />
         </section>
 
         <aside className="min-w-0 pt-0 lg:pt-1">
@@ -839,7 +1302,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           ) : null}
 
           <div className="mt-7 flex items-baseline gap-3">
-            <strong className="text-[30px] font-black leading-none text-[#d90000]">{"\u20B9"}{unitPrice.toLocaleString("en-IN")}</strong>
+            <strong className="text-[30px] font-black leading-none text-ikonnic-red">{"\u20B9"}{unitPrice.toLocaleString("en-IN")}</strong>
             <del className="text-[17px] font-bold text-slate-500">{"\u20B9"}{compareAtPrice.toLocaleString("en-IN")}</del>
           </div>
 
@@ -858,8 +1321,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                     option.disabled
                       ? "cursor-not-allowed bg-white/70 text-slate-300 line-through"
                       : selectedSize === option.label
-                        ? "bg-[#d90000] text-white shadow-sm"
-                        : "border border-[#dfe4ec] bg-white text-[#07142f] hover:border-red-200"
+                        ? "bg-ikonnic-red text-white shadow-sm"
+                        : "border border-[#dfe4ec] bg-white text-[#07142f] hover:border-rosegold-300"
                   }`}
                 >
                   {option.label}
@@ -879,8 +1342,8 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                   onClick={() => setSelectedThickness(option)}
                   className={`h-[42px] rounded-[9px] px-4 text-[17px] font-extrabold transition ${
                     selectedThickness === option
-                      ? "bg-[#d90000] text-white shadow-sm"
-                      : "border border-[#dfe4ec] bg-white text-[#07142f] hover:border-red-200"
+                      ? "bg-ikonnic-red text-white shadow-sm"
+                      : "border border-[#dfe4ec] bg-white text-[#07142f] hover:border-rosegold-300"
                   }`}
                 >
                   {option}
@@ -907,14 +1370,14 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           <button
             type="button"
             onClick={handlePreAddToCart}
-            className="mt-5 flex h-[74px] w-full items-center justify-center gap-3 rounded-[16px] bg-[#d90000] text-[22px] font-black text-white shadow-[0_12px_22px_rgba(217,0,0,0.18)] transition hover:bg-[#c90000] active:scale-[0.99]"
+            className="mt-5 flex h-[74px] w-full items-center justify-center gap-3 rounded-[16px] bg-ikonnic-red text-[22px] font-black text-white shadow-[0_12px_22px_rgba(183,110,121,0.18)] transition hover:bg-rosegold-600 active:scale-[0.99]"
           >
             <ShoppingCart size={28} />
             Add to Cart
           </button>
 
           {addToCartError ? (
-            <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-[#d90000]">{addToCartError}</p>
+            <p className="mt-3 rounded-xl border border-rosegold-200 bg-rosegold-50 px-4 py-3 text-sm font-bold text-ikonnic-red">{addToCartError}</p>
           ) : null}
 
           <TrustCards />
@@ -922,6 +1385,10 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           <PincodeChecker />
         </aside>
       </div>
+
+      <section className="mx-auto max-w-[1240px] px-4 pb-10 sm:px-6">
+        <ProductDescriptionContent product={product} />
+      </section>
 
       <ConfirmAddToCartOverlay
         isOpen={showConfirmOverlay}

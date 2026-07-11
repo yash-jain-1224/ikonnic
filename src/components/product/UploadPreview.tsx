@@ -24,13 +24,13 @@ export function UploadPreview({ value, onChange }: { value?: string; onChange: (
         onDragOver={(event) => event.preventDefault()}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => { event.preventDefault(); setDragging(false); readFile(event.dataTransfer.files?.[0]); }}
-        className={`relative flex min-h-80 w-full items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed bg-white transition ${dragging ? "border-ikonnic-red bg-red-50" : "border-slate-300 hover:border-red-300"}`}
+        className={`relative flex min-h-80 w-full items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed bg-white transition ${dragging ? "border-ikonnic-red bg-rosegold-50" : "border-slate-300 hover:border-rosegold-300"}`}
       >
         {value ? (
           <img src={value} alt="Uploaded preview" className="absolute inset-0 h-full w-full object-contain bg-rosegold-100 p-4" />
         ) : (
           <div className="px-6 text-center">
-            <div className="mx-auto grid size-16 place-items-center rounded-full bg-red-50 text-ikonnic-red"><ImagePlus size={28} /></div>
+            <div className="mx-auto grid size-16 place-items-center rounded-full bg-rosegold-50 text-ikonnic-red"><ImagePlus size={28} /></div>
             <p className="mt-4 font-black text-slate-900">Drop a photo here</p>
             <p className="mt-1 text-sm text-slate-500">or click to choose JPG, PNG, or WEBP</p>
           </div>
@@ -42,7 +42,7 @@ export function UploadPreview({ value, onChange }: { value?: string; onChange: (
             const ControlIcon = Icon as typeof Move;
             return <button key={label as string} type="button" className="inline-flex items-center gap-1.5 rounded-full border border-rosegold-200/60 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-rosegold-100"><ControlIcon size={14} />{label as string}</button>;
           })}
-          <button type="button" onClick={() => onChange(undefined)} className="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-ikonnic-red">Remove</button>
+          <button type="button" onClick={() => onChange(undefined)} className="rounded-full border border-rosegold-200 bg-rosegold-50 px-3 py-2 text-xs font-semibold text-ikonnic-red">Remove</button>
         </div>
       ) : null}
     </div>

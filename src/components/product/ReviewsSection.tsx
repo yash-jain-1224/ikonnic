@@ -57,7 +57,7 @@ function ReviewCard({ review }: { review: Review }) {
             className="size-10 rounded-full object-cover"
           />
         ) : (
-          <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-[#d90000] to-[#ff6b6b] text-[13px] font-black text-white">
+          <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-rosegold-500 to-rosegold-300 text-[13px] font-black text-white">
             {initials}
           </div>
         )}
@@ -104,7 +104,7 @@ function ReviewCard({ review }: { review: Review }) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-xl bg-rosegold-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-rosegold-100"
           >
-            <Play size={14} className="text-[#d90000]" />
+            <Play size={14} className="text-ikonnic-red" />
             Watch Video Review
           </a>
         </div>
@@ -156,7 +156,7 @@ function WriteReviewForm({ productId, onDone }: { productId: string; onDone: () 
         <p className="text-sm font-bold text-slate-700">Sign in to write a review</p>
         <Link
           href="/login"
-          className="mt-3 inline-block rounded-xl bg-[#d90000] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#b50000]"
+          className="mt-3 inline-block rounded-xl bg-ikonnic-red px-5 py-2.5 text-sm font-black text-white transition hover:bg-rosegold-600"
         >
           Log In
         </Link>
@@ -228,13 +228,13 @@ function WriteReviewForm({ productId, onDone }: { productId: string; onDone: () 
         onChange={(e) => setText(e.target.value)}
         rows={4}
         placeholder="Share your experience with this product..."
-        className="mt-4 w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#d90000]"
+        className="mt-4 w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-ikonnic-red"
       />
-      {error && <p className="mt-2 text-[12px] font-bold text-[#d90000]">{error}</p>}
+      {error && <p className="mt-2 text-[12px] font-bold text-ikonnic-red">{error}</p>}
       <button
         type="submit"
         disabled={submitting}
-        className="mt-4 rounded-xl bg-[#d90000] px-6 py-3 text-sm font-black text-white transition hover:bg-[#b50000] disabled:opacity-60"
+        className="mt-4 rounded-xl bg-ikonnic-red px-6 py-3 text-sm font-black text-white transition hover:bg-rosegold-600 disabled:opacity-60"
       >
         {submitting ? "Submitting..." : "Submit Review"}
       </button>
@@ -270,7 +270,7 @@ export function ReviewsSection({
     <button
       type="button"
       onClick={() => setShowForm(true)}
-      className="inline-flex items-center gap-2 rounded-xl border border-rosegold-200/60 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-[#d90000] hover:text-[#d90000]"
+      className="inline-flex items-center gap-2 rounded-xl border border-rosegold-200/60 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:border-ikonnic-red hover:text-ikonnic-red"
     >
       <PenLine size={14} />
       Write a Review

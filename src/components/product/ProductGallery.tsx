@@ -69,7 +69,7 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
               onClick={() => setCurrentIndex(index)}
               className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl border-2 transition ${
                 currentIndex === index
-                  ? "border-[#d90000] opacity-100"
+                  ? "border-ikonnic-red opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
               }`}
             >

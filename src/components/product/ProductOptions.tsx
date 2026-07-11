@@ -31,7 +31,7 @@ export function ProductOptions({ onChange }: { onChange?: (options: SelectedOpti
           <legend className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{key === "photos" ? "Number of photos" : key}</legend>
           <div className="mt-2 flex flex-wrap gap-2">
             {values.map((value) => (
-              <button key={value} type="button" onClick={() => update(key as keyof SelectedOptions, value)} className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${options[key as keyof SelectedOptions] === value ? "border-ikonnic-red bg-red-50 text-ikonnic-red" : "border-rosegold-200/60 bg-white text-slate-700 hover:border-slate-300"}`}>
+              <button key={value} type="button" onClick={() => update(key as keyof SelectedOptions, value)} className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${options[key as keyof SelectedOptions] === value ? "border-ikonnic-red bg-rosegold-50 text-ikonnic-red" : "border-rosegold-200/60 bg-white text-slate-700 hover:border-slate-300"}`}>
                 {value}
               </button>
             ))}

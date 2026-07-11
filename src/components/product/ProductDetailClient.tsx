@@ -3,6 +3,7 @@
 import { Pencil, RefreshCw, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ProductDescriptionContent } from "@/components/product/ProductDescriptionContent";
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -123,7 +124,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   {productName}
                 </h1>
                 <div className="mt-5 flex flex-wrap items-end gap-3">
-                  <span className="text-[31px] font-black leading-none text-[#d90000]">
+                  <span className="text-[31px] font-black leading-none text-ikonnic-red">
                     {formatPrice(displayedPrice)}
                   </span>
                   {compareAtPrice ? (
@@ -149,8 +150,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
                         onClick={() => setSelectedSize(option.label)}
                         className={`h-11 rounded-[10px] border px-4 text-[16px] font-black transition ${
                           selectedSize === option.label
-                            ? "border-[#d90000] bg-[#d90000] text-white"
-                            : "border-[#dfe4ec] bg-white text-[#07142f] hover:border-red-200 hover:bg-red-50"
+                            ? "border-ikonnic-red bg-ikonnic-red text-white"
+                            : "border-[#dfe4ec] bg-white text-[#07142f] hover:border-rosegold-300 hover:bg-rosegold-50"
                         } ${option.disabled ? "cursor-not-allowed opacity-45" : ""}`}
                       >
                         {option.label}
@@ -171,8 +172,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
                         onClick={() => setSelectedThickness(option)}
                         className={`h-11 rounded-[10px] border px-4 text-[16px] font-black uppercase transition ${
                           selectedThickness === option
-                            ? "border-[#d90000] bg-[#d90000] text-white"
-                            : "border-[#dfe4ec] bg-white text-[#07142f] hover:border-red-200 hover:bg-red-50"
+                            ? "border-ikonnic-red bg-ikonnic-red text-white"
+                            : "border-[#dfe4ec] bg-white text-[#07142f] hover:border-rosegold-300 hover:bg-rosegold-50"
                         }`}
                       >
                         {option}
@@ -184,7 +185,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
               <Link
                 href={`/customise/${product.slug}`}
-                className="flex h-[76px] w-full items-center justify-center gap-3 rounded-[17px] bg-[#d90000] px-6 text-[22px] font-black text-white shadow-[0_10px_18px_rgba(217,0,0,0.18)] transition hover:bg-[#c90000] active:scale-[0.99]"
+                className="flex h-[76px] w-full items-center justify-center gap-3 rounded-[17px] bg-ikonnic-red px-6 text-[22px] font-black text-white shadow-[0_10px_18px_rgba(183,110,121,0.18)] transition hover:bg-rosegold-600 active:scale-[0.99]"
                 aria-label={`Customize and buy ${productName}`}
               >
                 <Pencil size={25} />
@@ -225,6 +226,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
             </div>
           </aside>
         </div>
+
+        <section className="mt-8">
+          <ProductDescriptionContent product={product} />
+        </section>
       </section>
     </main>
   );

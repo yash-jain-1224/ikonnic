@@ -6,7 +6,7 @@ export function ProductSchema({ product }: { product: Product }) {
     "@type": "Product",
     name: product.title,
     image: product.image,
-    description: product.description,
+    description: product.detailedDescription || product.description,
     sku: product.slug,
     brand: {
       "@type": "Brand",

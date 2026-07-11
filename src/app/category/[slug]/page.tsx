@@ -35,7 +35,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   const [category, visibleProducts] = await Promise.all([
     getCategoryBySlug(slug),
-    getProductsForCategory(slug, 8),
+    getProductsForCategory(slug, 80),
   ]);
   if (!category) notFound();
 

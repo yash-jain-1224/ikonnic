@@ -17,6 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const product = await getProductBySlug(slug);
   return {
     title: product?.slug === "acrylic-wall-photo-2" ? "Portrait Acrylic Wall Photo" : product?.title ?? "Product",
+    description: product?.seoDescription ?? product?.description,
   };
 }
 

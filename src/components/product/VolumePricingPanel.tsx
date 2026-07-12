@@ -21,7 +21,7 @@ export function VolumePricingPanel({ baseLabel, tiers }: { baseLabel: string; ti
           <h2 className="mt-2 text-2xl font-black text-slate-950">{baseLabel}</h2>
           <p className="mt-2 text-sm text-slate-500">Move the slider to compare pack savings. Your current tier updates instantly.</p>
 
-          <div className="mt-6 rounded-2xl border-2 border-ikonnic-red bg-red-50 p-4">
+          <div className="mt-6 rounded-2xl border-2 border-ikonnic-red bg-rosegold-50 p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="grid size-11 place-items-center rounded-xl bg-white text-ikonnic-red"><PackageOpen size={22} /></div>
@@ -51,8 +51,8 @@ export function VolumePricingPanel({ baseLabel, tiers }: { baseLabel: string; ti
             {tiers.map((tier) => {
               const selected = tier.quantity === activeTier.quantity;
               return (
-                <button key={tier.quantity} type="button" onClick={() => setQuantity(tier.quantity)} className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left text-sm transition ${selected ? "border-red-500 bg-red-500/15" : "border-slate-800 bg-slate-900 hover:border-slate-700"}`}>
-                  <span className="flex items-center gap-2 font-bold">{selected ? <Check size={15} className="text-red-400" /> : <span className="size-[15px]" />}{tier.label}</span>
+                <button key={tier.quantity} type="button" onClick={() => setQuantity(tier.quantity)} className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left text-sm transition ${selected ? "border-rosegold-400 bg-rosegold-500/15" : "border-slate-800 bg-slate-900 hover:border-slate-700"}`}>
+                  <span className="flex items-center gap-2 font-bold">{selected ? <Check size={15} className="text-rosegold-400" /> : <span className="size-[15px]" />}{tier.label}</span>
                   <span className="text-slate-300">₹{tier.pricePerPiece} / piece</span>
                 </button>
               );
@@ -61,7 +61,7 @@ export function VolumePricingPanel({ baseLabel, tiers }: { baseLabel: string; ti
           <div className="mt-5 flex items-end justify-between border-t border-slate-800 pt-4">
             <span className="text-xs text-slate-400">Estimated pack total</span><strong className="text-xl">₹{total.toLocaleString("en-IN")}</strong>
           </div>
-          <button type="button" onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white transition hover:bg-red-700">
+          <button type="button" onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-5 py-3 text-sm font-black text-white transition hover:bg-rosegold-600">
             Next: choose shapes <ArrowRight size={16} />
           </button>
         </div>

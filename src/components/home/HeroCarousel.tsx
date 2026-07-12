@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { heroSlides } from "@/data/heroSlides";
@@ -43,40 +43,31 @@ export function HeroCarousel() {
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col justify-center px-6 sm:px-12 lg:px-20">
         <div className="mx-auto w-full max-w-[1240px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="max-w-2xl"
-            >
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-rosegold-300 sm:text-sm">
-                {slide.eyebrow}
-              </p>
-              <h1 className="mt-4 text-4xl font-black leading-[1.1] text-white sm:text-5xl lg:text-6xl">
-                {slide.title}
-              </h1>
-              <p className="mt-5 max-w-lg text-base leading-7 text-white/80 sm:text-lg">
-                {slide.description}
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link
-                  href={`/category/${slide.categorySlug}`}
-                  className="inline-flex rounded-full bg-white px-7 py-3.5 text-sm font-bold text-rosegold-900 shadow-lg transition hover:bg-rosegold-100 hover:shadow-xl"
-                >
-                  Explore Collection
-                </Link>
-                <Link
-                  href="/category/all"
-                  className="inline-flex rounded-full border border-white/30 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/10"
-                >
-                  View All Products
-                </Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={slide.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="max-w-2xl"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-rosegold-300 sm:text-sm">
+              {slide.eyebrow}
+            </p>
+            <h1 className="mt-4 text-4xl font-black leading-[1.1] text-white sm:text-5xl lg:text-6xl">
+              {slide.title}
+            </h1>
+            <p className="mt-5 max-w-lg text-base leading-7 text-white/80 sm:text-lg">
+              {slide.description}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link
+                href={`/category/${slide.categorySlug}`}
+                className="inline-flex rounded-full bg-white px-7 py-3.5 text-sm font-bold text-rosegold-900 shadow-lg transition hover:bg-rosegold-100 hover:shadow-xl"
+              >
+                Explore Collection
+              </Link>
+            </div>
+          </motion.div>
 
           {/* Stats Bar */}
           <div className="mt-12 flex gap-8 sm:gap-12">

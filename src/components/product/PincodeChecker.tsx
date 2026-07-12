@@ -71,7 +71,7 @@ export function PincodeChecker() {
   return (
     <div className="mt-5 rounded-[14px] border border-[#dfe4ec] bg-white p-4 shadow-sm">
       <label className="flex items-center gap-2 text-[13px] font-black uppercase tracking-[0.1em] text-slate-700">
-        <MapPin size={14} className="text-[#d90000]" />
+        <MapPin size={14} className="text-ikonnic-red" />
         Check Delivery
       </label>
       <div className="mt-3 flex gap-2">
@@ -85,18 +85,18 @@ export function PincodeChecker() {
           }}
           placeholder="Enter pincode"
           maxLength={6}
-          className="min-w-0 flex-1 rounded-xl border border-rosegold-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-[#d90000] focus:ring-1 focus:ring-[#d90000]"
+          className="min-w-0 flex-1 rounded-xl border border-rosegold-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-ikonnic-red focus:ring-1 focus:ring-ikonnic-red"
         />
         <button
           type="button"
           onClick={handleCheck}
-          className="rounded-xl bg-[#d90000] px-5 py-3 text-sm font-black text-white transition hover:bg-[#c90000] active:scale-[0.98]"
+          className="rounded-xl bg-ikonnic-red px-5 py-3 text-sm font-black text-white transition hover:bg-rosegold-600 active:scale-[0.98]"
         >
           Check
         </button>
       </div>
       {error && (
-        <p className="mt-2 text-[13px] font-bold text-red-500">{error}</p>
+        <p className="mt-2 text-[13px] font-bold text-ikonnic-red">{error}</p>
       )}
       {result && checked && (
         <div className="mt-3 flex items-start gap-3 rounded-xl bg-emerald-50 p-3">

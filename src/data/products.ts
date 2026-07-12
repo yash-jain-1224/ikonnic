@@ -30306,11 +30306,431 @@ const generatedProducts = generateRawProducts().map((product) => ({
   categorySlug: routeSlug(product.categorySlug),
 }));
 
+const htmlEntityMap: Record<string, string> = {
+  "&amp;": "&",
+  "&nbsp;": " ",
+  "&quot;": "\"",
+  "&#039;": "'",
+  "&rsquo;": "'",
+  "&lsquo;": "'",
+  "&ldquo;": "\"",
+  "&rdquo;": "\"",
+  "&times;": "x",
+  "&#8211;": "-",
+  "&#8212;": "-",
+  "&#8230;": "...",
+};
+
+const cleanDescriptionText = (value?: string) => {
+  if (!value) return "";
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&(?:amp|nbsp|quot|rsquo|lsquo|ldquo|rdquo|times);|&#(?:039|8211|8212|8230);/g, (entity) => htmlEntityMap[entity] ?? " ")
+    .replace(/\[[^\]]*8230[^\]]*\]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const productSchemaDescription = (schemaData?: string[]) => {
+  for (const schema of schemaData ?? []) {
+    try {
+      const parsed = JSON.parse(schema) as { "@type"?: string; description?: string };
+      if (parsed["@type"] === "Product" && parsed.description) {
+        return cleanDescriptionText(parsed.description);
+      }
+    } catch {
+      // Some imported schema snippets are partial or escaped differently; fall back to longDescription.
+    }
+  }
+  return "";
+};
+
+const productLongDescriptionDetails = (value?: string) => {
+  const text = cleanDescriptionText(value);
+  if (!text) return "";
+  const marker = "Product Details Ikonnic";
+  const markerIndex = text.indexOf(marker);
+  const details = markerIndex >= 0 ? text.slice(markerIndex + marker.length) : text;
+  return details
+    .replace(/^No description available\./i, "")
+    .replace(/\bDescription Reviews \(\d+\)\s*/i, "")
+    .trim();
+};
+
+const displayDescription = (product: Product) => {
+  const importedDescription = cleanDescriptionText(product.description);
+  const isPlaceholder =
+    !importedDescription ||
+    /^Buy .+ at Ikonnic\.?$/i.test(importedDescription) ||
+    /^No description available\.?$/i.test(importedDescription);
+  const description =
+    productSchemaDescription(product.schemaData) ||
+    productLongDescriptionDetails(product.longDescription) ||
+    (isPlaceholder ? "" : importedDescription) ||
+    `Personalize ${product.title} with your favorite photos, size, and finish.`;
+
+  return description.length > 900 ? `${description.slice(0, 897).trim()}...` : description;
+};
+
+type ProductMarketingContent = Pick<
+  Product,
+  "description" | "detailedDescription" | "productHighlights" | "personalisationDetails" | "idealFor" | "careInstructions" | "seoDescription"
+>;
+
+type ProductKind =
+  | "album"
+  | "clock"
+  | "nameplate"
+  | "keychain"
+  | "luggage-tag"
+  | "fridge-magnet"
+  | "photo-stand"
+  | "coaster"
+  | "phone-case"
+  | "mug"
+  | "name-pencil"
+  | "car-photo"
+  | "canvas"
+  | "poster"
+  | "jewellery"
+  | "acrylic-photo";
+
+const titleCase = (value: string) =>
+  value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
+    .join(" ");
+
+const displayProductTitle = (product: Product) => product.title.replace(/\s+\d+$/, "").trim();
+
+const lowerProductText = (product: Product) =>
+  `${product.title} ${product.categoryName} ${product.categorySlug} ${product.filterTags.join(" ")}`.toLowerCase();
+
+const includesAny = (value: string, words: string[]) => words.some((word) => value.includes(word));
+
+const includesWord = (value: string, words: string[]) =>
+  words.some((word) => new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(value));
+
+const uniqueList = (items: string[]) => Array.from(new Set(items.filter(Boolean)));
+
+const sentenceList = (items: string[]) => {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+};
+
+const articleFor = (value: string) => (/^[aeiou]/i.test(value) ? "an" : "a");
+
+const inferProductKind = (product: Product): ProductKind => {
+  const text = lowerProductText(product);
+  if (includesAny(text, ["album", "photo book", "photobook"])) return "album";
+  if (includesAny(text, ["clock"])) return "clock";
+  if (includesAny(text, ["nameplate", "name plate", "monogram"])) return "nameplate";
+  if (includesAny(text, ["keychain", "key chain"])) return "keychain";
+  if (includesAny(text, ["luggage tag", "luggage-tags"])) return "luggage-tag";
+  if (includesAny(text, ["fridge magnet", "magnet"])) return "fridge-magnet";
+  if (includesAny(text, ["photo stand", "desk stand", "dashboard", "phone holder", "stand"])) return "photo-stand";
+  if (includesAny(text, ["coaster"])) return "coaster";
+  if (includesAny(text, ["iphone", "phone case", "designer case", "case"])) return "phone-case";
+  if (includesAny(text, ["mug"])) return "mug";
+  if (includesAny(text, ["pencil"])) return "name-pencil";
+  if (includesAny(text, ["car hanging", "car acrylic", "car dashboard"])) return "car-photo";
+  if (includesAny(text, ["canvas"])) return "canvas";
+  if (includesAny(text, ["poster"])) return "poster";
+  if (includesAny(text, ["jewellery", "jewelry"])) return "jewellery";
+  return "acrylic-photo";
+};
+
+const kindProfile: Record<ProductKind, {
+  noun: string;
+  use: string;
+  display: string;
+  value: string;
+  baseIdeal: string[];
+  care: string[];
+}> = {
+  album: {
+    noun: "photo album",
+    use: "keeping a set of memories neatly together",
+    display: "on a coffee table, shelf, or gifting table",
+    value: "memory book",
+    baseIdeal: ["family gifting", "birthdays", "anniversaries"],
+    care: ["Keep the album away from excessive moisture.", "Handle the cover and pages with clean, dry hands.", "Store flat or upright in a dry place."],
+  },
+  clock: {
+    noun: "personalised wall clock",
+    use: "turning a favourite photo into useful wall decor",
+    display: "in a living room, bedroom, study, or office",
+    value: "timekeeping decor piece",
+    baseIdeal: ["home decor", "housewarming", "family gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully while cleaning."],
+  },
+  nameplate: {
+    noun: "nameplate",
+    use: "creating a warm and personal entrance detail",
+    display: "outside a home, apartment door, office cabin, or studio",
+    value: "welcome piece",
+    baseIdeal: ["new home", "housewarming", "office decor"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Keep away from prolonged exposure to excessive moisture."],
+  },
+  keychain: {
+    noun: "personalised keychain",
+    use: "carrying a small memory every day",
+    display: "with keys, bags, backpacks, or gift hampers",
+    value: "keepsake",
+    baseIdeal: ["couple gifting", "birthday gifting", "everyday memory display"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully."],
+  },
+  "luggage-tag": {
+    noun: "luggage tag",
+    use: "making bags easier to identify with a personal touch",
+    display: "on suitcases, backpacks, school bags, or travel bags",
+    value: "travel accessory",
+    baseIdeal: ["travel gifting", "family trips", "student travel"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Keep away from prolonged exposure to excessive moisture."],
+  },
+  "fridge-magnet": {
+    noun: "acrylic fridge magnet",
+    use: "keeping a favourite photo visible in everyday spaces",
+    display: "on a refrigerator or other suitable magnetic surface",
+    value: "compact memory display",
+    baseIdeal: ["kitchen decor", "family gifting", "festive gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully."],
+  },
+  "photo-stand": {
+    noun: "acrylic photo stand",
+    use: "displaying a memory on a tabletop without needing wall space",
+    display: "on a desk, bedside table, shelf, dashboard, or reception counter",
+    value: "tabletop display",
+    baseIdeal: ["office decor", "desk decor", "family gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully."],
+  },
+  coaster: {
+    noun: "personalised acrylic coaster",
+    use: "adding a personal detail to everyday table settings",
+    display: "on dining tables, work desks, coffee tables, or office counters",
+    value: "table accessory",
+    baseIdeal: ["housewarming", "office gifting", "festive gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Do not scrub the printed surface."],
+  },
+  "phone-case": {
+    noun: "phone case",
+    use: "giving a phone a personal visual identity",
+    display: "as an everyday phone accessory",
+    value: "daily-use accessory",
+    baseIdeal: ["birthday gifting", "college gifting", "everyday use"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully."],
+  },
+  mug: {
+    noun: "personalised mug",
+    use: "turning a daily drinkware item into a personal gift",
+    display: "at home, office desks, or gifting hampers",
+    value: "everyday gift",
+    baseIdeal: ["birthday gifting", "office gifting", "festive gifting"],
+    care: ["Wash gently with mild soap.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully."],
+  },
+  "name-pencil": {
+    noun: "name pencil",
+    use: "adding a personal mark to school or desk stationery",
+    display: "in study kits, school sets, or return-gift packs",
+    value: "stationery gift",
+    baseIdeal: ["kids gifting", "school use", "return gifts"],
+    care: ["Keep in a dry place.", "Avoid soaking or abrasive cleaning.", "Store away from excessive moisture."],
+  },
+  "car-photo": {
+    noun: "car photo accessory",
+    use: "bringing a personal memory into the car",
+    display: "inside a car or on suitable dashboard areas",
+    value: "travel memory display",
+    baseIdeal: ["car decor", "travel gifting", "family gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Keep away from prolonged exposure to excessive moisture."],
+  },
+  canvas: {
+    noun: "personalised canvas print",
+    use: "turning a photograph into soft wall decor",
+    display: "in living rooms, bedrooms, hallways, or workspaces",
+    value: "wall decor piece",
+    baseIdeal: ["home decor", "anniversary gifting", "family gifting"],
+    care: ["Dust gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Keep away from prolonged exposure to excessive moisture."],
+  },
+  poster: {
+    noun: "photo poster",
+    use: "displaying a favourite image in a simple wall format",
+    display: "in bedrooms, study areas, creative corners, or gifting setups",
+    value: "wall display",
+    baseIdeal: ["birthday gifting", "room decor", "everyday memory display"],
+    care: ["Handle the printed surface carefully.", "Avoid abrasive cleaning materials.", "Keep away from prolonged exposure to excessive moisture."],
+  },
+  jewellery: {
+    noun: "personalised jewellery piece",
+    use: "keeping a small personal detail close",
+    display: "as a personal accessory or thoughtful gift",
+    value: "keepsake",
+    baseIdeal: ["anniversary gifting", "couple gifting", "birthday gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Keep away from prolonged exposure to excessive moisture."],
+  },
+  "acrylic-photo": {
+    noun: "acrylic photo print",
+    use: "turning a favourite photograph into clean wall decor",
+    display: "in homes, offices, studios, or gifting spaces",
+    value: "decor piece",
+    baseIdeal: ["home decor", "anniversary gifting", "family gifting"],
+    care: ["Wipe gently with a soft, dry cloth.", "Avoid abrasive cleaning materials.", "Handle the printed surface carefully."],
+  },
+};
+
+const designInsight = (product: Product) => {
+  const text = lowerProductText(product);
+  const title = displayProductTitle(product);
+  if (includesAny(text, ["ganesa", "ganesha"])) return "The Ganesa-inspired design gives the piece a traditional, welcoming visual without feeling heavy.";
+  if (text.includes("owl")) return "The owl shape adds a playful, characterful touch that stands out in a gift or home setting.";
+  if (text.includes("marble")) return "The marble styling keeps the look clean, calm, and contemporary.";
+  if (includesAny(text, ["floral", "flower"])) return "The floral theme brings a softer, more decorative mood to the design.";
+  if (text.includes("sunset")) return "The sunset theme adds warm colour and a scenic feel to the finished piece.";
+  if (text.includes("beach")) return "The beach theme keeps the design relaxed and travel-friendly.";
+  if (text.includes("snow")) return "The snow theme gives the design a cool, quiet travel character.";
+  if (text.includes("mountain")) return "The mountain theme suits memories from trips, treks, and open landscapes.";
+  if (text.includes("wildlife")) return "The wildlife theme gives the album an adventurous, outdoors-inspired identity.";
+  if (text.includes("heart")) return "The heart shape keeps the focus on affection and close relationships.";
+  if (includesAny(text, ["circle", "round"])) return "The round format gives the photo a neat, balanced look.";
+  if (text.includes("square")) return "The square format keeps the layout simple, balanced, and easy to place.";
+  if (includesAny(text, ["hex", "hexa", "octa", "triangle", "penta", "diamond"])) return "The geometric shape gives the product a crisp, modern profile.";
+  if (text.includes("leaf")) return "The leaf shape adds an organic, gentle outline to the personalised design.";
+  if (text.includes("dual border")) return "The dual-border treatment frames the photo with a more defined visual edge.";
+  if (text.includes("collage")) return "The collage layout is made for bringing more than one memory into a single design.";
+  if (text.includes("wedding")) return "The wedding theme keeps the mood celebratory and suited to couple memories.";
+  if (text.includes("birthday")) return "The birthday theme makes the product feel cheerful, personal, and gift-ready.";
+  if (includesWord(text, ["family", "mom", "dad", "mother", "father"])) return "The family-led theme keeps the emotion close and easy to connect with.";
+  if (includesAny(text, ["travel", "wanderlust", "world explorer"])) return "The travel theme works well for trips, holidays, and collected memories.";
+  if ((inferProductKind(product) === "nameplate" || product.categorySlug === "house-warming") && includesWord(text, ["house", "home"])) return "The home-inspired theme feels especially suitable for new beginnings and housewarming gifts.";
+  if (includesAny(text, ["moments", "stories", "memory", "memories"])) return "The memory-led wording keeps the design personal without tying it to only one occasion.";
+  return `${title} keeps the design focus clear, personal, and easy to match with Indian home and gifting occasions.`;
+};
+
+const extractVariants = (product: Product) => {
+  const sizeLabels = product.sizeOptions?.map((option) => option.label).filter(Boolean) ?? [];
+  const thicknessLabels = product.thicknessOptions?.map((option) => option.label).filter(Boolean) ?? [];
+  return {
+    sizes: uniqueList(sizeLabels),
+    thicknesses: uniqueList(thicknessLabels),
+  };
+};
+
+const inferredPhotoCount = (product: Product) => {
+  const match = lowerProductText(product).match(/\b([2-9]|[1-9]\d{1,2})\s*(?:pic|pics|photo|photos)\b/);
+  return match ? Number(match[1]) : null;
+};
+
+const personalisationFor = (product: Product, kind: ProductKind) => {
+  const text = lowerProductText(product);
+  const variants = extractVariants(product);
+  const details: string[] = [];
+  const photoCount = inferredPhotoCount(product);
+  const photoBased = kind !== "name-pencil" && (includesAny(text, ["photo", "picture", "album", "clock", "keychain", "magnet", "stand", "canvas", "poster", "case", "mug"]) || kind === "jewellery");
+
+  if (kind === "album") {
+    details.push("Upload the requested album photos in the customisation flow");
+  } else if (photoBased) {
+    details.push(photoCount && photoCount > 1 ? `Upload ${photoCount} photos where the editor asks for multiple images` : "Upload your selected photograph");
+  }
+  if (kind === "nameplate") details.push("Add name or text details required for the nameplate design");
+  if (kind === "name-pencil") details.push("Add the name text required for the pencil design");
+  if (includesAny(text, ["monogram", "initial"])) details.push("Add initials or monogram text where shown in the design");
+  if (variants.sizes.length > 1) details.push("Choose from the available size options");
+  if (variants.thicknesses.length > 1) details.push("Choose from the available thickness options");
+  if (includesAny(text, ["collage", "dual", "grid", "combo"]) || (photoCount && photoCount > 1)) details.push("Use the shown layout or photo slots in the preview");
+
+  return uniqueList(details);
+};
+
+const idealFor = (product: Product, kind: ProductKind) => {
+  const text = lowerProductText(product);
+  const ideas = [...kindProfile[kind].baseIdeal];
+  if (includesAny(text, ["wedding", "anniversary", "couple", "love"])) ideas.unshift("anniversary gifting", "couple gifting");
+  if (includesAny(text, ["birthday", "baby", "kids"])) ideas.unshift("birthday gifting");
+  if (includesWord(text, ["family", "mom", "dad", "mother", "father"])) ideas.unshift("family gifting");
+  if (kind === "nameplate" || ((kind === "album" || product.categorySlug === "house-warming") && includesWord(text, ["house", "home"]))) ideas.unshift("housewarming", "new home");
+  if (includesAny(text, ["travel", "luggage", "beach", "snow", "mountain", "wildlife"])) ideas.unshift("travel gifting");
+  if (includesAny(text, ["office", "desk", "stand"])) ideas.unshift("office decor");
+  return uniqueList(ideas).slice(0, 5);
+};
+
+const highlightFor = (product: Product, kind: ProductKind) => {
+  const profile = kindProfile[kind];
+  const variants = extractVariants(product);
+  const personalisation = personalisationFor(product, kind);
+  const text = lowerProductText(product);
+  const highlights = [
+    personalisation.some((item) => item.toLowerCase().includes("photo")) ? (kind === "album" ? "Personalised with your selected photos" : "Personalised with your selected photo") : "",
+    personalisation.some((item) => item.toLowerCase().includes("name")) ? "Personalised with name or text details" : "",
+    variants.sizes.length > 1 ? "Multiple size options available" : "",
+    variants.thicknesses.length > 1 ? "Thickness options available" : "",
+    kind === "clock" ? "Wall clock format with personalised visual design" : "",
+    kind === "album" ? "Album format for organised memory preservation" : "",
+    kind === "fridge-magnet" ? "Designed for magnetic placement" : "",
+    kind === "luggage-tag" ? "Made for personal travel identification" : "",
+    kind === "photo-stand" ? "Designed for tabletop display" : "",
+    includesAny(text, ["wall", "canvas", "poster", "nameplate"]) || kind === "acrylic-photo" ? "Designed for wall display" : "",
+    includesAny(text, ["acrylic", "photo", "magnet", "stand", "coaster"]) ? "Acrylic-style finish suited to gifting and decor" : "",
+    "Live preview available before ordering",
+  ];
+  return uniqueList(highlights).slice(0, 6).filter((item) => item !== profile.noun);
+};
+
+const trimMeta = (value: string) => {
+  if (value.length <= 160) return value;
+  const trimmed = value.slice(0, 157);
+  return `${trimmed.slice(0, trimmed.lastIndexOf(" "))}...`;
+};
+
+const buildProductMarketingContent = (product: Product): ProductMarketingContent => {
+  const kind = inferProductKind(product);
+  const profile = kindProfile[kind];
+  const title = displayProductTitle(product);
+  const design = designInsight(product);
+  const variants = extractVariants(product);
+  const personalisationDetails = personalisationFor(product, kind);
+  const idealForList = idealFor(product, kind);
+  const highlights = highlightFor(product, kind);
+
+  const personalisePhrase = personalisationDetails.length
+    ? personalisationDetails[0].replace(/^Upload /, "upload ").replace(/^Add /, "add ").replace(/^Choose /, "choose ")
+    : "personalise it in the editor";
+  const variantPhrase = [
+    variants.sizes.length > 1 ? "size" : "",
+    variants.thicknesses.length > 1 ? "thickness" : "",
+  ].filter(Boolean);
+  const variantSentence = variantPhrase.length
+    ? `Available ${sentenceList(variantPhrase)} choices help you match the product to the space or occasion.`
+    : "The format keeps the order process focused and easy to understand.";
+
+  const shortDescription =
+    `${title} is ${articleFor(profile.noun)} ${profile.noun} made for ${profile.use}. ${design} You can ${personalisePhrase} to create a meaningful ${profile.value} for ${idealForList[0] ?? "gifting"}.`;
+
+  const focusPhrase = kind === "album" ? "photo set" : kind === "nameplate" || kind === "name-pencil" ? "text detail" : "selected memory";
+  const detailedDescription =
+    `${title} is ${articleFor(`custom ${profile.noun}`)} custom ${profile.noun} from Ikonnic, made for ${profile.use}. ${design} The product can be personalised through the customisation flow: ${sentenceList(personalisationDetails).toLowerCase()}. ${variantSentence} It can be used ${profile.display}, making it suitable for ${sentenceList(idealForList.slice(0, 3))}. The finished piece keeps the attention on your ${focusPhrase} while giving it a clean, gift-ready presentation for Indian homes, workspaces, and celebrations.`;
+
+  const seoDescription = trimMeta(
+    `${title} by Ikonnic is a personalised ${profile.noun} for ${idealForList[0] ?? "gifting"}, with customisation options for a meaningful ${product.categoryName.toLowerCase()}.`,
+  );
+
+  return {
+    description: sanitizeBrandText(shortDescription),
+    detailedDescription: sanitizeBrandText(detailedDescription),
+    productHighlights: highlights.map(sanitizeBrandText),
+    personalisationDetails: personalisationDetails.map(sanitizeBrandText),
+    idealFor: idealForList.map(titleCase),
+    careInstructions: profile.care,
+    seoDescription: sanitizeBrandText(seoDescription),
+  };
+};
+
 const sanitizeProduct = (product: Product): Product => ({
   ...product,
   title: sanitizeBrandText(product.title),
   categoryName: sanitizeBrandText(product.categoryName),
-  description: sanitizeBrandText(product.description),
   longDescription: sanitizeOptionalBrandText(product.longDescription),
   alt: sanitizeOptionalBrandText(product.alt),
   filterTags: product.filterTags.map(sanitizeBrandText),
@@ -30320,7 +30740,15 @@ const sanitizeProduct = (product: Product): Product => ({
     text: sanitizeBrandText(review.text),
   })),
   schemaData: product.schemaData?.map(sanitizeBrandText),
+  ...buildProductMarketingContent({
+    ...product,
+    title: sanitizeBrandText(product.title),
+    categoryName: sanitizeBrandText(product.categoryName),
+    description: sanitizeBrandText(displayDescription(product)),
+    filterTags: product.filterTags.map(sanitizeBrandText),
+  }),
 });
+
 
 export const generateProducts = (): Product[] =>
   generateRawProducts().map((product) =>

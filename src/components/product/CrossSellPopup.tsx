@@ -71,7 +71,7 @@ export function CrossSellPopup({
                 <div className="flex-1">
                   <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{recommendedProduct.title}</h3>
                   <p className="mt-0.5 text-[11px] text-slate-500">{recommendedProduct.categoryName}</p>
-                  <div className="mt-2 text-sm font-black text-[#d90000]">
+                  <div className="mt-2 text-sm font-black text-ikonnic-red">
                     ₹{recommendedProduct.price}
                   </div>
                 </div>
@@ -101,7 +101,7 @@ export function CrossSellPopup({
               <Link
                 href={`/customise/${recommendedProduct.slug}`}
                 onClick={onClose}
-                className="text-sm font-bold text-[#d90000] hover:underline"
+                className="text-sm font-bold text-ikonnic-red hover:underline"
               >
                 View this product
               </Link>

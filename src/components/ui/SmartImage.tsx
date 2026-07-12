@@ -1,7 +1,7 @@
 "use client";
 
 import NextImage from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type SmartImageProps = {
   src: string;
@@ -32,6 +32,11 @@ export function SmartImage({
 }: SmartImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [activeSrc, setActiveSrc] = useState(src);
+
+  useEffect(() => {
+    setActiveSrc(src);
+    setLoaded(false);
+  }, [src]);
 
   // Determine if it's an external URL or local
   const isExternal = activeSrc.startsWith("http://") || activeSrc.startsWith("https://");

@@ -6,13 +6,30 @@ import type { Category, Product } from "@/types";
 import { FilterPills } from "@/components/ui/FilterPills";
 import { ProductGrid } from "@/components/product/ProductGrid";
 
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function productMatchesFilter(product: Product, filter: string) {
+  const selected = normalize(filter);
+  if (!selected || selected === "all") return true;
+
+  const exactTagMatch = product.filterTags.some((tag) => normalize(tag) === selected);
+  if (exactTagMatch) return true;
+
+  return [product.title, product.categoryName, product.description, ...product.filterTags]
+    .filter(Boolean)
+    .some((value) => normalize(value).includes(selected));
+}
+
 function CategoryPageClientInner({ category, products }: { category: Category; products: Product[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
   const filters = category.filters ?? [];
-  const selected = searchParams.get("filter") || "All";
+  const requestedFilter = searchParams.get("filter") || "All";
+  const selected = filters.some((filter) => normalize(filter) === normalize(requestedFilter)) ? requestedFilter : "All";
 
   const setSelected = (filter: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -21,14 +38,12 @@ function CategoryPageClientInner({ category, products }: { category: Category; p
     } else {
       params.set("filter", filter);
     }
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
   const visibleProducts = useMemo(() => {
-    if (selected === "All") return products;
-    return products.filter((product) =>
-      product.filterTags.some((tag) => tag.toLowerCase() === selected.toLowerCase())
-    );
+    return products.filter((product) => productMatchesFilter(product, selected));
   }, [products, selected]);
 
   const cappedProducts = useMemo(() => visibleProducts.slice(0, 8), [visibleProducts]);

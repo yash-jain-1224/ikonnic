@@ -62,7 +62,7 @@ export function ConfirmAddToCartOverlay({
 
           <div className="mt-5 flex items-end justify-between border-t border-rosegold-200/40 pt-5">
             <span className="text-sm font-semibold text-slate-500">Total Price</span>
-            <span className="text-2xl font-black text-[#d90000]">₹{price}</span>
+            <span className="text-2xl font-black text-ikonnic-red">₹{price}</span>
           </div>
         </div>
 

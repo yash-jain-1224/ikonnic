@@ -118,7 +118,7 @@ function SelectPhotoMarker({ z }: { z: number }) {
     <group position={[0, 0, z]}>
       <mesh rotation={[0, 0, 0.06]}>
         <boxGeometry args={[0.58, 0.5, 0.035]} />
-        <meshStandardMaterial color="#d90000" roughness={0.34} />
+        <meshStandardMaterial color="#b76e79" roughness={0.34} />
       </mesh>
       <Text position={[0, 0.01, 0.03]} rotation={[0, 0, 0.06]} fontSize={0.11} lineHeight={0.86} anchorX="center" anchorY="middle" color="#ffffff">
         SELECT{"\n"}PHOTO
@@ -348,7 +348,7 @@ function AcrylicSlab({
             </mesh>
             <mesh rotation={[0, 0, 1.15]}>
               <boxGeometry args={[0.026, height * 0.27, 0.012]} />
-              <meshStandardMaterial color="#d90000" />
+              <meshStandardMaterial color="#b76e79" />
             </mesh>
             <mesh>
               <sphereGeometry args={[0.055, 24, 24]} />
@@ -489,7 +489,7 @@ export function ThreeDPreview({
           mode === "inline" ? "px-3 pt-3 sm:px-5 sm:pt-4" : "border-b border-rosegold-200/60 bg-white px-4 py-3"
         }`}>
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="h-3 w-3 rounded-full bg-[#d90000] shadow-[0_0_8px_rgba(217,0,0,0.5)]" />
+            <div className="h-3 w-3 rounded-full bg-ikonnic-red shadow-[0_0_8px_rgba(183,110,121,0.5)]" />
             <h2 className={`text-lg font-black ${mode === "inline" ? "text-white" : "text-[#07142f]"}`}>3D Preview</h2>
             <span className={`hidden rounded-full px-2.5 py-0.5 text-[11px] font-bold sm:inline-flex ${
               mode === "inline" ? "bg-white/10 text-white/70" : "bg-rosegold-100 text-slate-600"

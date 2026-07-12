@@ -81,6 +81,12 @@ export type Product = {
   alt?: string;
   filterTags: string[];
   description: string;
+  detailedDescription?: string;
+  productHighlights?: string[];
+  personalisationDetails?: string[];
+  idealFor?: string[];
+  careInstructions?: string[];
+  seoDescription?: string;
   longDescription?: string;
   stockStatus?: string;
   stockCount?: number | null;

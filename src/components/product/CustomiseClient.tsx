@@ -292,10 +292,10 @@ export function CustomiseClient({ product }: { product: Product }) {
           <div className="flex justify-between"><dt className="text-slate-500">Discount</dt><dd className="font-bold">Rs {discount.toLocaleString("en-IN")}</dd></div>
           <div className="flex justify-between text-base"><dt className="font-black">Total</dt><dd className="font-black">Rs {finalPrice.toLocaleString("en-IN")}</dd></div>
         </dl>
-        <button type="button" onClick={addToCart} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-6 py-4 text-sm font-black text-white transition hover:bg-red-700">
+        <button type="button" onClick={addToCart} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ikonnic-red px-6 py-4 text-sm font-black text-white transition hover:bg-rosegold-600">
           <ShoppingCart size={17} /> Add to Cart
         </button>
-        <Link href="/checkout" onClick={addToCart} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-ikonnic-red px-6 py-4 text-sm font-black text-ikonnic-red transition hover:bg-red-50">
+        <Link href="/checkout" onClick={addToCart} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-ikonnic-red px-6 py-4 text-sm font-black text-ikonnic-red transition hover:bg-rosegold-50">
           Buy Now <ArrowRight size={17} />
         </Link>
         {added ? (
@@ -315,7 +315,7 @@ function OptionGroup({ label, values, value, onChange }: { label: string; values
       <legend className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</legend>
       <div className="mt-2 flex flex-wrap gap-2">
         {values.map((item) => (
-          <button key={item} type="button" onClick={() => onChange(item)} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${value === item ? "border-ikonnic-red bg-red-50 text-ikonnic-red" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}>
+          <button key={item} type="button" onClick={() => onChange(item)} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${value === item ? "border-ikonnic-red bg-rosegold-50 text-ikonnic-red" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}>
             {item}
           </button>
         ))}

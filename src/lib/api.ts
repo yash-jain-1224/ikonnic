@@ -6,7 +6,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
 // ─── Constants ─────────────────────────────────────────────
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 const ACCESS_TOKEN_KEY = "ikonnic_access_token";
 const REFRESH_TOKEN_KEY = "ikonnic_refresh_token";
 
@@ -26,9 +27,18 @@ export const tokenStorage = {
     // sameSite=lax (not strict): cookies must survive top-level redirects back
     // from external sites (PhonePe payment page, Microsoft login) or the
     // middleware bounces returning users to /login mid-flow.
-    const secure = typeof window !== "undefined" && window.location.protocol === "https:";
-    Cookies.set(ACCESS_TOKEN_KEY, accessToken, { expires: 1 / 96, sameSite: "lax", secure }); // ~15 min
-    Cookies.set(REFRESH_TOKEN_KEY, refreshToken, { expires: 7, sameSite: "lax", secure });
+    const secure =
+      typeof window !== "undefined" && window.location.protocol === "https:";
+    Cookies.set(ACCESS_TOKEN_KEY, accessToken, {
+      expires: 1 / 96,
+      sameSite: "lax",
+      secure,
+    }); // ~15 min
+    Cookies.set(REFRESH_TOKEN_KEY, refreshToken, {
+      expires: 7,
+      sameSite: "lax",
+      secure,
+    });
   },
   clearTokens: () => {
     Cookies.remove(ACCESS_TOKEN_KEY);
@@ -45,12 +55,15 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // ─── Response Interceptor: Handle 401 + Token Refresh ──────
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason?: unknown) => void }> = [];
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
 
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -63,7 +76,9 @@ const processQueue = (error: unknown, token: string | null = null) => {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     // If 401 and not a refresh request itself
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -115,21 +130,25 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // ─── Typed API Methods ─────────────────────────────────────
 
 // Auth
 export const authAPI = {
-  register: (data: { email: string; phone?: string; firstName: string; lastName?: string; password: string }) =>
-    api.post("/auth/register", data),
+  register: (data: {
+    email: string;
+    phone?: string;
+    firstName: string;
+    lastName?: string;
+    password: string;
+  }) => api.post("/auth/register", data),
   login: (data: { identifier: string; password: string }) =>
     api.post("/auth/login", data),
   refresh: (refreshToken: string) =>
     api.post("/auth/refresh", { refreshToken }),
-  logout: (refreshToken?: string) =>
-    api.post("/auth/logout", { refreshToken }),
+  logout: (refreshToken?: string) => api.post("/auth/logout", { refreshToken }),
   forgotPassword: (email: string) =>
     api.post("/auth/forgot-password", { email }),
   resetPassword: (email: string, otp: string, newPassword: string) =>
@@ -143,10 +162,13 @@ export const authAPI = {
 // Users
 export const usersAPI = {
   getProfile: () => api.get("/users/profile"),
-  updateProfile: (data: Record<string, unknown>) => api.put("/users/profile", data),
+  updateProfile: (data: Record<string, unknown>) =>
+    api.put("/users/profile", data),
   getAddresses: () => api.get("/users/addresses"),
-  addAddress: (data: Record<string, unknown>) => api.post("/users/addresses", data),
-  updateAddress: (id: string, data: Record<string, unknown>) => api.put(`/users/addresses/${id}`, data),
+  addAddress: (data: Record<string, unknown>) =>
+    api.post("/users/addresses", data),
+  updateAddress: (id: string, data: Record<string, unknown>) =>
+    api.put(`/users/addresses/${id}`, data),
   deleteAddress: (id: string) => api.delete(`/users/addresses/${id}`),
 };
 
@@ -154,43 +176,60 @@ export const usersAPI = {
 export const productsAPI = {
   list: (params?: Record<string, unknown>) => api.get("/products", { params }),
   getBySlug: (slug: string) => api.get(`/products/${slug}`),
-  getFeatured: (limit = 8) => api.get("/products/featured", { params: { limit } }),
-  getTrending: (limit = 8) => api.get("/products/trending", { params: { limit } }),
-  getRelated: (slug: string, limit = 4) => api.get(`/products/${slug}/related`, { params: { limit } }),
-  checkStock: (id: string, quantity = 1) => api.get(`/products/${id}/stock`, { params: { quantity } }),
+  getFeatured: (limit = 8) =>
+    api.get("/products/featured", { params: { limit } }),
+  getTrending: (limit = 8) =>
+    api.get("/products/trending", { params: { limit } }),
+  getRelated: (slug: string, limit = 4) =>
+    api.get(`/products/${slug}/related`, { params: { limit } }),
+  checkStock: (id: string, quantity = 1) =>
+    api.get(`/products/${id}/stock`, { params: { quantity } }),
 };
 
 // Categories
 export const categoriesAPI = {
-  list: (featured?: boolean) => api.get("/categories", { params: { featured } }),
+  list: (featured?: boolean) =>
+    api.get("/categories", { params: { featured } }),
   getBySlug: (slug: string) => api.get(`/categories/${slug}`),
 };
 
 // Cart
 export const cartAPI = {
-  get: (guestSessionId?: string) => api.get("/cart", { params: { guestSessionId } }),
+  get: (guestSessionId?: string) =>
+    api.get("/cart", { params: { guestSessionId } }),
   addItem: (data: Record<string, unknown>, guestSessionId?: string) =>
     api.post("/cart/items", data, { params: { guestSessionId } }),
-  updateItem: (id: string, data: Record<string, unknown>) => api.put(`/cart/items/${id}`, data),
+  updateItem: (id: string, data: Record<string, unknown>) =>
+    api.put(`/cart/items/${id}`, data),
   removeItem: (id: string) => api.delete(`/cart/items/${id}`),
-  clear: (guestSessionId?: string) => api.delete("/cart", { params: { guestSessionId } }),
-  merge: (guestSessionId: string) => api.post("/cart/merge", { guestSessionId }),
+  clear: (guestSessionId?: string) =>
+    api.delete("/cart", { params: { guestSessionId } }),
+  merge: (guestSessionId: string) =>
+    api.post("/cart/merge", { guestSessionId }),
 };
 
 // Orders
 export const ordersAPI = {
   create: (data: Record<string, unknown>) => api.post("/orders", data),
-  list: (page = 1, limit = 10) => api.get("/orders", { params: { page, limit } }),
+  list: (page = 1, limit = 10) =>
+    api.get("/orders", { params: { page, limit } }),
   getById: (id: string) => api.get(`/orders/${id}`),
   track: (orderNumber: string, identifier?: string) =>
     api.get(`/orders/track/${orderNumber}`, { params: { identifier } }),
-  cancel: (id: string, reason: string) => api.patch(`/orders/${id}/cancel`, { reason }),
+  cancel: (id: string, reason: string) =>
+    api.patch(`/orders/${id}/cancel`, { reason }),
 };
 
 // Payments
 export const paymentsAPI = {
   initiate: (orderId: string, method: string, idempotencyKey?: string) =>
-    api.post("/payments/initiate", { orderId, method }, { headers: idempotencyKey ? { "x-idempotency-key": idempotencyKey } : {} }),
+    api.post(
+      "/payments/initiate",
+      { orderId, method },
+      {
+        headers: idempotencyKey ? { "x-idempotency-key": idempotencyKey } : {},
+      },
+    ),
   verify: (paymentId: string, verificationData: Record<string, unknown>) =>
     api.post("/payments/verify", { paymentId, verificationData }),
   refund: (orderId: string, amount?: number, reason?: string) =>
@@ -209,29 +248,40 @@ export const wishlistAPI = {
 
 // Coupons
 export const couponsAPI = {
-  validate: (code: string, cartTotal: number) => api.post("/coupons/validate", { code, cartTotal }),
+  validate: (code: string, cartTotal: number) =>
+    api.post("/coupons/validate", { code, cartTotal }),
 };
 
 // Reviews
 export const reviewsAPI = {
   getForProduct: (productId: string, page = 1) =>
     api.get(`/reviews/product/${productId}`, { params: { page } }),
-  create: (data: { productId: string; rating: number; title?: string; text: string; photos?: string[] }) =>
-    api.post("/reviews", data),
-  update: (id: string, data: Record<string, unknown>) => api.put(`/reviews/${id}`, data),
+  create: (data: {
+    productId: string;
+    rating: number;
+    title?: string;
+    text: string;
+    photos?: string[];
+  }) => api.post("/reviews", data),
+  update: (id: string, data: Record<string, unknown>) =>
+    api.put(`/reviews/${id}`, data),
   delete: (id: string) => api.delete(`/reviews/${id}`),
 };
 
 // Shipping
 export const shippingAPI = {
-  checkServiceability: (pincode: string) => api.get(`/shipping/check/${pincode}`),
-  track: (trackingNumber: string) => api.get(`/shipping/track/${trackingNumber}`),
+  checkServiceability: (pincode: string) =>
+    api.get(`/shipping/check/${pincode}`),
+  track: (trackingNumber: string) =>
+    api.get(`/shipping/track/${trackingNumber}`),
 };
 
 // Search
 export const searchAPI = {
-  query: (q: string, limit = 20) => api.get("/search", { params: { q, limit } }),
-  autocomplete: (q: string) => api.get("/search/autocomplete", { params: { q } }),
+  query: (q: string, limit = 20) =>
+    api.get("/search", { params: { q, limit } }),
+  autocomplete: (q: string) =>
+    api.get("/search/autocomplete", { params: { q } }),
 };
 
 // Notifications
@@ -249,7 +299,8 @@ export const adminAPI = {
   getOrder: (id: string) => api.get(`/admin/orders/${id}`),
   updateOrderNotes: (id: string, internalNotes: string) =>
     api.patch(`/admin/orders/${id}/notes`, { internalNotes }),
-  getUsers: (page = 1, limit = 20) => api.get("/admin/users", { params: { page, limit } }),
+  getUsers: (page = 1, limit = 20) =>
+    api.get("/admin/users", { params: { page, limit } }),
   getUser: (id: string) => api.get(`/admin/users/${id}`),
   setUserStatus: (id: string, isActive: boolean) =>
     api.patch(`/admin/users/${id}/status`, { isActive }),
@@ -258,34 +309,47 @@ export const adminAPI = {
   // Reviews moderation
   getReviews: (page = 1, limit = 20, status?: "approved" | "pending") =>
     api.get("/admin/reviews", { params: { page, limit, status } }),
-  moderateReview: (id: string, data: { isApproved?: boolean; adminReply?: string }) =>
-    api.patch(`/admin/reviews/${id}`, data),
+  moderateReview: (
+    id: string,
+    data: { isApproved?: boolean; adminReply?: string },
+  ) => api.patch(`/admin/reviews/${id}`, data),
   deleteReview: (id: string) => api.delete(`/admin/reviews/${id}`),
   // Shipping (admin actions)
-  createShipment: (orderId: string) => api.post(`/shipping/create-shipment/${orderId}`),
+  createShipment: (orderId: string) =>
+    api.post(`/shipping/create-shipment/${orderId}`),
   // Products CRUD
   getProducts: (page = 1, limit = 20, search?: string) =>
     api.get("/admin/products", { params: { page, limit, search } }),
   getProduct: (id: string) => api.get(`/admin/products/${id}`),
-  createProduct: (data: Record<string, unknown>) => api.post("/admin/products", data),
-  updateProduct: (id: string, data: Record<string, unknown>) => api.put(`/admin/products/${id}`, data),
+  createProduct: (data: Record<string, unknown>) =>
+    api.post("/admin/products", data),
+  updateProduct: (id: string, data: Record<string, unknown>) =>
+    api.put(`/admin/products/${id}`, data),
   deleteProduct: (id: string) => api.delete(`/admin/products/${id}`),
   // Categories CRUD
   getCategories: () => api.get("/admin/categories"),
-  createCategory: (data: Record<string, unknown>) => api.post("/admin/categories", data),
-  updateCategory: (id: string, data: Record<string, unknown>) => api.put(`/admin/categories/${id}`, data),
+  createCategory: (data: Record<string, unknown>) =>
+    api.post("/admin/categories", data),
+  updateCategory: (id: string, data: Record<string, unknown>) =>
+    api.put(`/admin/categories/${id}`, data),
   deleteCategory: (id: string) => api.delete(`/admin/categories/${id}`),
   // Inventory
   getInventory: (page = 1, limit = 20, search?: string, lowStock?: boolean) =>
     api.get("/admin/inventory", { params: { page, limit, search, lowStock } }),
-  adjustInventory: (productId: string, data: { stockCount?: number; delta?: number; note?: string }) =>
-    api.patch(`/admin/inventory/${productId}`, data),
+  adjustInventory: (
+    productId: string,
+    data: { stockCount?: number; delta?: number; note?: string },
+  ) => api.patch(`/admin/inventory/${productId}`, data),
   getInventoryTransactions: (productId: string, limit = 20) =>
-    api.get(`/admin/inventory/${productId}/transactions`, { params: { limit } }),
+    api.get(`/admin/inventory/${productId}/transactions`, {
+      params: { limit },
+    }),
   // Coupons CRUD
   getCoupons: () => api.get("/admin/coupons"),
-  createCoupon: (data: Record<string, unknown>) => api.post("/admin/coupons", data),
-  updateCoupon: (id: string, data: Record<string, unknown>) => api.put(`/admin/coupons/${id}`, data),
+  createCoupon: (data: Record<string, unknown>) =>
+    api.post("/admin/coupons", data),
+  updateCoupon: (id: string, data: Record<string, unknown>) =>
+    api.put(`/admin/coupons/${id}`, data),
   deleteCoupon: (id: string) => api.delete(`/admin/coupons/${id}`),
   // Analytics
   analytics: (days = 30) => api.get("/admin/analytics", { params: { days } }),
@@ -293,6 +357,21 @@ export const adminAPI = {
 
 // Upload (Azure Blob Storage)
 export const uploadAPI = {
+  createCustomiserSession: (data: {
+    productId: string;
+    files: Array<{
+      name: string;
+      contentType: string;
+      size: number;
+      role: "original" | "preview";
+    }>;
+  }) => api.post("/upload/customiser/session", data),
+  finalizeCustomiserSession: (sessionToken: string) =>
+    api.post(
+      "/upload/customiser/finalize",
+      { sessionToken },
+      { timeout: 120_000 },
+    ),
   uploadImage: (file: File, folder = "products") => {
     const formData = new FormData();
     formData.append("file", file);

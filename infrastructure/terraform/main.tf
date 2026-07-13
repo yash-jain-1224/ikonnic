@@ -153,6 +153,29 @@ resource "azurerm_storage_account" "main" {
   }
 }
 
+resource "azurerm_storage_management_policy" "customiser_pending_cleanup" {
+  storage_account_id = azurerm_storage_account.main.id
+
+  rule {
+    name    = "delete-abandoned-customiser-uploads"
+    enabled = true
+
+    filters {
+      blob_types = ["blockBlob"]
+      prefix_match = [
+        "customisation-uploads/pending-customisations/",
+        "uploads/pending-customisations/",
+      ]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 1
+      }
+    }
+  }
+}
+
 # Storage Containers
 resource "azurerm_storage_container" "product_images" {
   name                  = "product-images"

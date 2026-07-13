@@ -47,9 +47,25 @@ export type CustomizerTemplate = {
   id: string;
   productSlug?: string;
   productType: string;
-  previewType: "acrylic-slab" | "clock" | "nameplate" | "monogram" | "album" | "stand" | "keychain" | "tag" | "generic";
+  previewType:
+    | "acrylic-slab"
+    | "clock"
+    | "nameplate"
+    | "monogram"
+    | "album"
+    | "stand"
+    | "keychain"
+    | "tag"
+    | "generic";
   orientation?: "portrait" | "landscape" | "square" | "auto";
-  shape?: "rectangle" | "rounded-rectangle" | "circle" | "heart" | "leaf" | "cutout" | "custom";
+  shape?:
+    | "rectangle"
+    | "rounded-rectangle"
+    | "circle"
+    | "heart"
+    | "leaf"
+    | "cutout"
+    | "custom";
   uploadSlots: number;
   requiresPhotoUpload: boolean;
   requiresTextInput: boolean;
@@ -137,6 +153,9 @@ export type UploadedCustomImage = {
   rotation: number;
   crop: Record<string, number>;
   qualityScore: string;
+  slot?: number;
+  storageKey?: string;
+  originalFileName?: string;
 };
 
 export type CustomTextOverlay = {

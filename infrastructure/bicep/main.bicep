@@ -151,6 +151,38 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01'
   }
 }
 
+resource customiserPendingCleanup 'Microsoft.Storage/storageAccounts/managementPolicies@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+  properties: {
+    policy: {
+      rules: [
+        {
+          enabled: true
+          name: 'delete-abandoned-customiser-uploads'
+          type: 'Lifecycle'
+          definition: {
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 1
+                }
+              }
+            }
+            filters: {
+              blobTypes: ['blockBlob']
+              prefixMatch: [
+                'customisation-uploads/pending-customisations/'
+                'uploads/pending-customisations/'
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
 // Storage Containers
 var containerNames = [
   'product-images'

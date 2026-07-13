@@ -77,10 +77,10 @@ if [ -n "$STORAGE_CONN" ]; then
     echo "  ✅ AZURE_STORAGE_ACCOUNT_KEY synced"
   fi
 
-  echo "uploads" | vercel env add "AZURE_STORAGE_CONTAINER" "production" --force 2>/dev/null || true
-  echo "  ✅ AZURE_STORAGE_CONTAINER = uploads"
+  echo "customisation-uploads" | vercel env add "AZURE_STORAGE_CONTAINER" "production" --force 2>/dev/null || true
+  echo "  ✅ AZURE_STORAGE_CONTAINER = customisation-uploads"
 
-  CDN_URL="https://${ACCOUNT_NAME}.blob.core.windows.net/uploads"
+  CDN_URL="https://${ACCOUNT_NAME}.blob.core.windows.net/customisation-uploads"
   echo "$CDN_URL" | vercel env add "CDN_URL" "production" --force 2>/dev/null || true
   echo "  ✅ CDN_URL = ${CDN_URL}"
 else

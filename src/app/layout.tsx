@@ -7,7 +7,21 @@ import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
+const getSiteUrl = () => {
+  let url = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
+  url = url.trim().replace(/\/+$/, "");
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = `https://${url}`;
+  }
+  try {
+    new URL(url);
+    return url;
+  } catch {
+    return "https://www.ikonnic.com";
+  }
+};
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: {

@@ -2,7 +2,21 @@ import type { MetadataRoute } from "next";
 import { products } from "@/data/products";
 import { WHITELISTED_CATEGORY_SLUGS } from "@/config/whitelist";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
+const getBaseUrl = () => {
+  let url = process.env.NEXT_PUBLIC_APP_URL || "https://www.ikonnic.com";
+  url = url.trim().replace(/\/+$/, "");
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = `https://${url}`;
+  }
+  try {
+    new URL(url);
+    return url;
+  } catch {
+    return "https://www.ikonnic.com";
+  }
+};
+
+const BASE_URL = getBaseUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();

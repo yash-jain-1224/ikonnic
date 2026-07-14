@@ -7,6 +7,7 @@ import { ProductDescriptionContent } from "@/components/product/ProductDescripti
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { getAlbumGalleryViews, getAlbumTemplate } from "@/data/albumTemplates";
 import { customizerTemplateById, customizerTemplateByProductSlug } from "@/data/customizerTemplates";
 import type { Product } from "@/types";
 
@@ -70,10 +71,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const template =
     customizerTemplateByProductSlug[product.slug] ||
     (product.customizerTemplateId ? customizerTemplateById[product.customizerTemplateId] : undefined);
+  const albumTemplate = getAlbumTemplate(product);
   const isClockProduct = product.categorySlug === "wall-clocks" || template?.previewType === "clock";
 
   const sizeOptions = useMemo<SizeOption[]>(() => {
     const source = product.sizeOptions?.length ? product.sizeOptions : template?.sizeOptions;
+    if (albumTemplate && !source?.length) {
+      return [{ label: "Standard album", price: product.price }];
+    }
     if (!source?.length) return categorySizeFallbacks[product.categorySlug] ?? defaultSizeOptions;
     return source.map((option) => {
       const fallback = defaultSizeOptions.find((item) => item.label.toLowerCase() === option.label.toLowerCase());
@@ -84,23 +89,40 @@ export function ProductDetailClient({ product }: { product: Product }) {
         disabled: option.disabled,
       };
     });
-  }, [product.categorySlug, product.price, product.sizeOptions, template?.sizeOptions]);
+  }, [albumTemplate, product.categorySlug, product.price, product.sizeOptions, template?.sizeOptions]);
 
   const thicknessOptions = useMemo(() => {
     const source = product.thicknessOptions?.length ? product.thicknessOptions : template?.thicknessOptions;
+    if (albumTemplate && !source?.length) return [];
     if ((!source || source.length === 0) && isClockProduct) return clockThicknessOptions;
     const labels = source?.length ? source.map((option) => option.label) : defaultThicknessOptions;
     return labels.filter(Boolean);
-  }, [isClockProduct, product.thicknessOptions, template?.thicknessOptions]);
+  }, [albumTemplate, isClockProduct, product.thicknessOptions, template?.thicknessOptions]);
 
   const [selectedSize, setSelectedSize] = useState(sizeOptions[0]?.label ?? "9x12");
-  const [selectedThickness, setSelectedThickness] = useState(thicknessOptions[0] ?? "3mm");
+  const [selectedThickness, setSelectedThickness] = useState(
+    thicknessOptions[0] ?? (albumTemplate ? "" : "3mm"),
+  );
 
   const selectedSizePrice = sizeOptions.find((option) => option.label === selectedSize)?.price ?? product.price;
-  const displayedPrice = selectedSizePrice + (thicknessExtras[selectedThickness] ?? 0);
+  const albumThicknessPrice = useMemo(() => {
+    if (!albumTemplate) return 0;
+    const source = product.thicknessOptions?.length
+      ? product.thicknessOptions
+      : template?.thicknessOptions;
+    return source?.find((option) => option.label === selectedThickness)?.priceDelta ?? 0;
+  }, [albumTemplate, product.thicknessOptions, selectedThickness, template?.thicknessOptions]);
+  const displayedPrice = selectedSizePrice + (albumTemplate ? albumThicknessPrice : thicknessExtras[selectedThickness] ?? 0);
   const compareAtPrice = product.oldPrice && product.oldPrice > displayedPrice ? product.oldPrice : undefined;
   const galleryImages = useMemo(() => uniqueImages(product), [product]);
   const productName = displayTitle(product);
+  const albumGalleryViews = albumTemplate ? getAlbumGalleryViews(product) : [];
+  const editorHref = albumTemplate
+    ? `/customise/${product.slug}?${new URLSearchParams({
+        size: selectedSize,
+        ...(selectedThickness ? { thickness: selectedThickness } : {}),
+      }).toString()}`
+    : `/customise/${product.slug}`;
 
   return (
     <main className="bg-[#f6f6f7] pb-14 pt-6">
@@ -114,7 +136,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
         <div className="mt-7 grid gap-10 lg:grid-cols-[minmax(0,600px)_minmax(360px,1fr)] lg:items-start">
           <div className="min-w-0">
-            <ProductGallery images={galleryImages} altText={productName} />
+            <ProductGallery
+              images={galleryImages}
+              galleryViews={albumGalleryViews.length ? albumGalleryViews : undefined}
+              editHref={albumTemplate ? editorHref : undefined}
+              altText={productName}
+            />
           </div>
 
           <aside className="min-w-0 lg:sticky lg:top-24">
@@ -184,12 +211,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
               ) : null}
 
               <Link
-                href={`/customise/${product.slug}`}
+                href={editorHref}
                 className="flex h-[76px] w-full items-center justify-center gap-3 rounded-[17px] bg-ikonnic-red px-6 text-[22px] font-black text-white shadow-[0_10px_18px_rgba(183,110,121,0.18)] transition hover:bg-rosegold-600 active:scale-[0.99]"
-                aria-label={`Customize and buy ${productName}`}
+                aria-label={albumTemplate ? `Edit and customize ${productName}` : `Customize and buy ${productName}`}
               >
                 <Pencil size={25} />
-                Customize & Buy
+                {albumTemplate ? "Edit / Customize Album" : "Customize & Buy"}
               </Link>
 
               <PincodeChecker />

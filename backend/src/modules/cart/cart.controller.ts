@@ -59,6 +59,7 @@ export class CartController {
   }
 
   @Delete()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Clear entire cart' })
   async clearCart(
     @Query('guestSessionId') guestSessionId?: string,

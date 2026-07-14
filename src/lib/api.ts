@@ -199,9 +199,10 @@ export const cartAPI = {
     api.get("/cart", { params: { guestSessionId } }),
   addItem: (data: Record<string, unknown>, guestSessionId?: string) =>
     api.post("/cart/items", data, { params: { guestSessionId } }),
-  updateItem: (id: string, data: Record<string, unknown>) =>
-    api.put(`/cart/items/${id}`, data),
-  removeItem: (id: string) => api.delete(`/cart/items/${id}`),
+  updateItem: (id: string, data: Record<string, unknown>, guestSessionId?: string) =>
+    api.put(`/cart/items/${id}`, data, { params: { guestSessionId } }),
+  removeItem: (id: string, guestSessionId?: string) =>
+    api.delete(`/cart/items/${id}`, { params: { guestSessionId } }),
   clear: (guestSessionId?: string) =>
     api.delete("/cart", { params: { guestSessionId } }),
   merge: (guestSessionId: string) =>

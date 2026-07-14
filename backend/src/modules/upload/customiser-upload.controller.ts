@@ -17,7 +17,9 @@ export class CustomiserUploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post("session")
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  // A 55-photo album is securely signed in 14 bounded upload batches. Keep
+  // the throttle above that legitimate workflow while retaining rate limits.
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @ApiOperation({
     summary: "Create a scoped multi-photo customiser upload session",
   })
@@ -29,7 +31,7 @@ export class CustomiserUploadController {
   }
 
   @Post("finalize")
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @ApiOperation({
     summary: "Validate and finalize a customiser upload session",
   })

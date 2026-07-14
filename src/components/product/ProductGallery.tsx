@@ -1,22 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, X, ZoomIn } from "lucide-react";
+import Link from "next/link";
 import { SmartImage } from "@/components/ui/SmartImage";
 
-export function ProductGallery({ images, altText }: { images: string[]; altText: string }) {
+export type ProductGalleryView = {
+  id: string;
+  label: string;
+  image: string;
+  type?: "front-cover" | "back-cover" | "inside-spread" | "preview";
+};
+
+type ProductGalleryProps = {
+  images?: string[];
+  altText: string;
+  galleryViews?: ProductGalleryView[];
+  editHref?: string;
+};
+
+export function ProductGallery({ images, altText, galleryViews, editHref }: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  
-  if (!images || images.length === 0) return null;
+  const hasSemanticViews = Boolean(galleryViews?.length);
+  const galleryItems = hasSemanticViews
+    ? galleryViews!
+    : (images ?? []).map((image, index) => ({
+        id: `image-${index}`,
+        label: `Image ${index + 1}`,
+        image,
+      }));
+
+  if (galleryItems.length === 0) return null;
+
+  const imageCount = galleryItems.length;
+  const activeIndex = Math.min(currentIndex, imageCount - 1);
+  const currentView = galleryItems[activeIndex];
 
   const nextImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    setCurrentIndex((prev) => (Math.min(prev, imageCount - 1) + 1) % imageCount);
   };
   const prevImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (Math.min(prev, imageCount - 1) - 1 + imageCount) % imageCount);
   };
 
   return (
@@ -27,12 +54,21 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
         onClick={() => setIsLightboxOpen(true)}
       >
         <SmartImage
-          src={images[currentIndex]}
-          alt={`${altText} - Image ${currentIndex + 1}`}
+          src={currentView.image}
+          alt={`${altText} - ${currentView.label}`}
           priority
           wrapperClassName="h-full w-full"
-          imageClassName="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          imageClassName={`h-full w-full transition duration-300 ${
+            hasSemanticViews
+              ? "object-contain"
+              : "object-cover group-hover:scale-105"
+          }`}
         />
+        {hasSemanticViews ? (
+          <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1.5 text-xs font-black text-[#07142f] shadow-sm backdrop-blur-sm">
+            {currentView.label}
+          </div>
+        ) : null}
         <div className="absolute inset-0 grid place-items-center bg-black/0 transition duration-300 group-hover:bg-black/5">
           <div className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 opacity-0 shadow-sm backdrop-blur-sm transition duration-300 group-hover:opacity-100">
             <ZoomIn size={14} className="text-slate-700" />
@@ -40,7 +76,7 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
           </div>
         </div>
 
-        {images.length > 1 && (
+        {imageCount > 1 && (
           <>
             <button
               onClick={prevImage}
@@ -61,23 +97,36 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
       </div>
 
       {/* Thumbnails */}
-      {images.length > 1 && (
+      {imageCount > 1 || editHref ? (
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-          {images.map((image, index) => (
+          {galleryItems.map((view, index) => (
             <button
-              key={index}
+              key={view.id}
+              type="button"
               onClick={() => setCurrentIndex(index)}
+              aria-label={`View ${view.label}`}
               className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl border-2 transition ${
-                currentIndex === index
+                activeIndex === index
                   ? "border-ikonnic-red opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
               }`}
             >
-              <SmartImage src={image} alt="" wrapperClassName="h-full w-full" imageClassName="h-full w-full object-cover" />
+              <SmartImage src={view.image} alt="" wrapperClassName="h-full w-full" imageClassName="h-full w-full object-cover" />
             </button>
           ))}
+          {editHref ? (
+            <Link
+              href={editHref}
+              className="flex aspect-square w-20 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-rosegold-200 bg-white px-1 text-center text-[#07142f] transition hover:border-ikonnic-red hover:bg-rosegold-50"
+              aria-label={`Edit and customize ${altText}`}
+            >
+              <Pencil size={18} className="text-ikonnic-red" />
+              <span className="mt-1 text-[10px] font-black leading-tight">Edit</span>
+              <span className="text-[10px] font-bold leading-tight text-slate-500">Customize</span>
+            </Link>
+          ) : null}
         </div>
-      )}
+      ) : null}
 
       {/* Lightbox */}
       {isLightboxOpen && (
@@ -95,14 +144,14 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
           </button>
           
           <SmartImage
-            src={images[currentIndex]}
-            alt={`${altText} - Fullscreen`}
+            src={currentView.image}
+            alt={`${altText} - ${currentView.label} fullscreen`}
             priority
             wrapperClassName="max-h-[85vh] max-w-[90vw] bg-transparent"
             imageClassName="max-h-[85vh] max-w-[90vw] object-contain"
           />
 
-          {images.length > 1 && (
+          {imageCount > 1 && (
             <>
               <button
                 onClick={prevImage}
@@ -117,7 +166,7 @@ export function ProductGallery({ images, altText }: { images: string[]; altText:
                 <ChevronRight size={32} />
               </button>
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white">
-                {currentIndex + 1} / {images.length}
+                {activeIndex + 1} / {imageCount}
               </div>
             </>
           )}

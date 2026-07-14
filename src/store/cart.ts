@@ -48,6 +48,7 @@ export const useCartStore = create<CartState>()(
         const lineId = `${item.productId}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
         const newItem: CartItem = {
           ...item,
+          id: undefined,
           productName: item.productName ?? item.title,
           category: item.category ?? "Personalised Gifts",
           thumbnail: item.thumbnail ?? item.image,
@@ -79,7 +80,18 @@ export const useCartStore = create<CartState>()(
             uploadedImageRef: newItem.uploadedImageReference || newItem.uploadedImagePreview,
             previewImage: newItem.previewImage,
             customisationJson: newItem.customisationJson,
-          }, guestSessionId).catch(() => { /* Offline fallback: localStorage holds state */ });
+          }, guestSessionId)
+            .then(({ data }) => {
+              if (!data?.id) return;
+              set((state) => ({
+                items: state.items.map((currentItem) =>
+                  currentItem.lineId === lineId
+                    ? { ...currentItem, id: data.id }
+                    : currentItem,
+                ),
+              }));
+            })
+            .catch(() => { /* Offline fallback: localStorage holds state */ });
         }
       },
 
@@ -88,7 +100,8 @@ export const useCartStore = create<CartState>()(
         set((state) => ({ items: state.items.filter((i) => i.lineId !== lineId) }));
         // Sync delete to backend
         if (item?.id) {
-          cartAPI.removeItem(item.id).catch(() => {});
+          const guestSessionId = isAuthenticated() ? undefined : getGuestSessionId();
+          cartAPI.removeItem(item.id, guestSessionId).catch(() => {});
         }
       },
 
@@ -109,7 +122,8 @@ export const useCartStore = create<CartState>()(
         }));
         // Sync to backend
         if (backendId) {
-          cartAPI.updateItem(backendId, { quantity: nextQuantity }).catch(() => {});
+          const guestSessionId = isAuthenticated() ? undefined : getGuestSessionId();
+          cartAPI.updateItem(backendId, { quantity: nextQuantity }, guestSessionId).catch(() => {});
         }
       },
 

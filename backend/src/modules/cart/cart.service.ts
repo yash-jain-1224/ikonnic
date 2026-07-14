@@ -68,13 +68,16 @@ export class CartService {
     // Get or create cart
     let cart = await this.getOrCreateCart(userId, guestSessionId);
 
-    // Check if item with same product + options already exists
-    const existingItem = await this.prisma.cartItem.findFirst({
-      where: {
-        cartId: cart.id,
-        productId: dto.productId,
-      },
-    });
+    // A customized album is a unique production job. Never collapse it into
+    // another copy of the same product or its page/photo assignments are lost.
+    const existingItem = this.hasCustomisation(dto.customisationJson)
+      ? null
+      : await this.prisma.cartItem.findFirst({
+          where: {
+            cartId: cart.id,
+            productId: dto.productId,
+          },
+        });
 
     if (existingItem) {
       // Update quantity and refresh the price to the current server value
@@ -176,12 +179,14 @@ export class CartService {
 
     // Merge items
     for (const item of guestCart.items) {
-      const existing = await this.prisma.cartItem.findFirst({
-        where: {
-          cartId: userCart.id,
-          productId: item.productId,
-        },
-      });
+      const existing = this.hasCustomisation(item.customisationJson)
+        ? null
+        : await this.prisma.cartItem.findFirst({
+            where: {
+              cartId: userCart.id,
+              productId: item.productId,
+            },
+          });
 
       if (existing) {
         await this.prisma.cartItem.update({
@@ -212,6 +217,10 @@ export class CartService {
   }
 
   private async getOrCreateCart(userId?: string, guestSessionId?: string) {
+    if (!userId && !guestSessionId) {
+      throw new BadRequestException('User ID or guest session required');
+    }
+
     const where: any = {};
     if (userId) where.userId = userId;
     else if (guestSessionId) where.guestSessionId = guestSessionId;
@@ -221,5 +230,14 @@ export class CartService {
       cart = await this.prisma.cart.create({ data: { userId, guestSessionId } });
     }
     return cart;
+  }
+
+  private hasCustomisation(value: unknown) {
+    return (
+      Boolean(value) &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value as object).length > 0
+    );
   }
 }

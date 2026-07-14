@@ -46,6 +46,7 @@ export type ProductOption = {
 export type CustomizerTemplate = {
   id: string;
   productSlug?: string;
+  albumTemplateId?: string;
   productType: string;
   previewType:
     | "acrylic-slab"
@@ -112,6 +113,7 @@ export type Product = {
   reviews?: ProductReview[];
   schemaData?: string[];
   customizerTemplateId?: string;
+  albumTemplateId?: string;
 };
 
 export type HeroSlide = {
@@ -168,6 +170,90 @@ export type CustomTextOverlay = {
   rotation: number;
 };
 
+export type AlbumGalleryView = {
+  id: string;
+  label: string;
+  image: string;
+  type: "front-cover" | "back-cover" | "inside-spread" | "preview";
+};
+
+export type AlbumPhotoSlot = {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  borderRadius?: number | string;
+  clipPath?: string;
+  shape?: "rectangle" | "circle" | "custom";
+  required: boolean;
+};
+
+export type AlbumTextField = {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  width?: number;
+  maxLength?: number;
+  defaultValue?: string;
+  fontSize?: number;
+  color?: string;
+  align?: "left" | "center" | "right";
+};
+
+export type AlbumPageTemplate = {
+  id: string;
+  order: number;
+  label: string;
+  type: "front-cover" | "inside-page" | "inside-spread" | "back-cover";
+  backgroundImage?: string;
+  backgroundColor?: string;
+  slots: AlbumPhotoSlot[];
+  textFields?: AlbumTextField[];
+};
+
+export type AlbumTemplate = {
+  id: string;
+  version: string;
+  productId: string;
+  pageCount: number;
+  requiredPhotoCount: number;
+  galleryViews: AlbumGalleryView[];
+  pages: AlbumPageTemplate[];
+};
+
+export type AlbumTemplateSnapshot = Pick<
+  AlbumTemplate,
+  "id" | "version" | "productId" | "pageCount" | "requiredPhotoCount" | "galleryViews" | "pages"
+>;
+
+export type UploadedAlbumPhoto = {
+  id: string;
+  fileName: string;
+  localUrl?: string;
+  remoteUrl?: string;
+  storageKey?: string;
+};
+
+export type AlbumSlotAssignment = {
+  photoId: string;
+  position?: { x: number; y: number };
+  scale?: number;
+};
+
+export type AlbumEditorState = {
+  templateId: string;
+  templateVersion?: string;
+  templateSnapshot?: AlbumTemplateSnapshot;
+  activePageIndex: number;
+  uploadedPhotos: UploadedAlbumPhoto[];
+  slotAssignments: Record<string, AlbumSlotAssignment>;
+  textValues: Record<string, string>;
+  coverPreview?: string;
+};
+
 export type ProductCustomisation = {
   productId: string;
   templateId: string;
@@ -192,6 +278,7 @@ export type ProductCustomisation = {
     discount: number;
     finalPrice: number;
   };
+  album?: AlbumEditorState;
 };
 
 export type CartItem = {

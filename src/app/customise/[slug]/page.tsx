@@ -32,15 +32,21 @@ const faqs = [
   { question: "Can I return a personalized item?", answer: "Since products are custom made for you, we don't accept returns. However, if the item arrives damaged or has a defect, we will replace it free of charge." },
 ];
 
-export default async function CustomisePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function CustomisePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ size?: string; thickness?: string }>;
+}) {
+  const [{ slug }, initialAlbumOptions] = await Promise.all([params, searchParams]);
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   return (
     <>
       <ProductSchema product={product} />
-      <ProductCustomizerPanel product={product} />
+      <ProductCustomizerPanel product={product} initialAlbumOptions={initialAlbumOptions} />
 
       <div className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6">
         <ReviewsSection reviews={product.reviews} productName={product.title} productId={product.id} />

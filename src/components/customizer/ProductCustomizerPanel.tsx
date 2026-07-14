@@ -14,7 +14,11 @@ import {
 } from "lucide-react";
 import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Product, ProductCustomisation } from "@/types";
+import type {
+  CustomizerTemplate,
+  Product,
+  ProductCustomisation,
+} from "@/types";
 import { useCartStore } from "@/store/cart";
 import { uploadAPI } from "@/lib/api";
 import {
@@ -26,12 +30,18 @@ import {
   getAlbumCoverSlotCount,
 } from "@/data/albumCoverLayouts";
 import type { AlbumCoverLayout } from "@/data/albumCoverLayouts";
+import {
+  getFramePhotoLayout,
+  type FramePhotoLayout,
+} from "@/data/framePhotoLayouts";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ConfirmAddToCartOverlay } from "@/components/product/ConfirmAddToCartOverlay";
 import { CrossSellPopup } from "@/components/product/CrossSellPopup";
 import { ProductDescriptionContent } from "@/components/product/ProductDescriptionContent";
 import { ThreeDPreview } from "@/components/customizer/ThreeDPreview";
+import { AlbumCustomizerPanel } from "@/components/customizer/AlbumCustomizerPanel";
+import { isAlbumProduct } from "@/data/albumTemplates";
 
 type SizeOption = {
   label: string;
@@ -134,6 +144,10 @@ const smallPreviewCategorySlugs = new Set([
   "personalised-keychains",
   "acrylic-photo-fridge-magnets",
   "luggage-tags",
+]);
+const framePreviewOrientationCategorySlugs = new Set([
+  "aluminium-framed-acrylic-photo",
+  "acrylic-wall-photo",
 ]);
 
 const categorySizeFallbacks: Record<string, SizeOption[]> = {
@@ -361,6 +375,7 @@ function inferUploadSlotCount(
   product: Product,
   templateSlots?: number,
   albumProduct = false,
+  configuredSlots?: number,
 ) {
   const text =
     `${product.title} ${product.description} ${product.categoryName}`.toLowerCase();
@@ -378,7 +393,9 @@ function inferUploadSlotCount(
     ? getAlbumCoverSlotCount(product.slug)
     : undefined;
   return clamp(
-    artworkSlots ?? Math.max(templateSlots ?? 1, ...explicitSlots, 1),
+    artworkSlots ??
+      configuredSlots ??
+      Math.max(templateSlots ?? 1, ...explicitSlots, 1),
     1,
     maxVisibleSlots,
   );
@@ -423,6 +440,32 @@ function dimensionsFromSizeLabel(
   const orientation =
     width === height ? "square" : width > height ? "landscape" : "portrait";
   return { width, height, orientation };
+}
+
+function defaultFramePreviewOrientation(
+  product: Product,
+  templateOrientation?: CustomizerTemplate["orientation"],
+): ViewOrientationId {
+  if (!framePreviewOrientationCategorySlugs.has(product.categorySlug)) {
+    return "vertical";
+  }
+
+  if (templateOrientation === "landscape") return "horizontal";
+  if (templateOrientation === "portrait" || templateOrientation === "square") {
+    return "vertical";
+  }
+
+  const orientationTags = new Set(
+    product.filterTags.map((tag) => tag.trim().toLowerCase()),
+  );
+  if (orientationTags.has("landscape")) return "horizontal";
+  if (orientationTags.has("portrait") || orientationTags.has("square")) {
+    return "vertical";
+  }
+
+  return /\blandscape\b/i.test(`${product.slug} ${product.title}`)
+    ? "horizontal"
+    : "vertical";
 }
 
 function inferPreviewShape(
@@ -910,6 +953,91 @@ async function createAlbumCoverPreview(
   });
 }
 
+async function createFramePhotoPreview(
+  backgroundUrl: string,
+  slots: UploadedPhotoSlot[],
+  layout: FramePhotoLayout,
+) {
+  const width = 900;
+  const height = Math.round(
+    width / Math.max(layout.artworkAspectRatio, 0.1),
+  );
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Could not prepare frame preview");
+
+  const [background, photos] = await Promise.all([
+    loadCanvasImage(backgroundUrl).catch(() => null),
+    Promise.all(
+      layout.slots.map((_, index) => loadCanvasImage(slots[index].url)),
+    ),
+  ]);
+
+  if (background) {
+    drawCanvasImageCover(
+      context,
+      background,
+      0,
+      0,
+      width,
+      height,
+      { x: 0, y: 0 },
+      1,
+    );
+  } else {
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+  }
+
+  layout.slots.forEach((geometry, index) => {
+    const slot = slots[index];
+    const photo = photos[index];
+    const x = (geometry.left / 100) * width;
+    const y = (geometry.top / 100) * height;
+    const slotWidth = (geometry.width / 100) * width;
+    const slotHeight = (geometry.height / 100) * height;
+    const radiusPercent = clamp(
+      Number.parseFloat(geometry.borderRadius ?? "0") || 0,
+      0,
+      50,
+    );
+    const radius = Math.min(slotWidth, slotHeight) * (radiusPercent / 100);
+
+    context.save();
+    context.beginPath();
+    context.roundRect(x, y, slotWidth, slotHeight, radius);
+    context.clip();
+    drawCanvasImageCover(
+      context,
+      photo,
+      x,
+      y,
+      slotWidth,
+      slotHeight,
+      slot.position,
+      slot.scale,
+    );
+    context.restore();
+  });
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (result) =>
+        result
+          ? resolve(result)
+          : reject(new Error("Could not export frame preview")),
+      "image/webp",
+      0.86,
+    );
+  });
+  const extension = blob.type === "image/webp" ? "webp" : "png";
+  return new File([blob], `frame-collage-preview.${extension}`, {
+    type: blob.type || "image/png",
+  });
+}
+
 async function uploadCustomiserFiles(
   productId: string,
   originalFiles: File[],
@@ -1122,7 +1250,21 @@ function FourPhotoClockFace({
   );
 }
 
-export function ProductCustomizerPanel({ product }: { product: Product }) {
+export function ProductCustomizerPanel({
+  product,
+  initialAlbumOptions,
+}: {
+  product: Product;
+  initialAlbumOptions?: { size?: string; thickness?: string };
+}) {
+  if (isAlbumProduct(product)) {
+    return <AlbumCustomizerPanel product={product} initialOptions={initialAlbumOptions} />;
+  }
+
+  return <StandardProductCustomizerPanel product={product} />;
+}
+
+function StandardProductCustomizerPanel({ product }: { product: Product }) {
   const addItem = useCartStore((state) => state.addItem);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bulkFileInputRef = useRef<HTMLInputElement>(null);
@@ -1139,6 +1281,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     (product.customizerTemplateId
       ? customizerTemplateById[product.customizerTemplateId]
       : undefined);
+  const framePhotoLayout = getFramePhotoLayout(product.slug);
   const isClockProduct =
     product.categorySlug === "wall-clocks" || template?.previewType === "clock";
   const knownAlbumSlotCount = getAlbumCoverSlotCount(product.slug);
@@ -1153,8 +1296,14 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     product.categorySlug,
   );
   const coverSlotCount = useMemo(
-    () => inferUploadSlotCount(product, template?.uploadSlots, isAlbumProduct),
-    [isAlbumProduct, product, template?.uploadSlots],
+    () =>
+      inferUploadSlotCount(
+        product,
+        template?.uploadSlots,
+        isAlbumProduct,
+        framePhotoLayout?.slots.length,
+      ),
+    [framePhotoLayout?.slots.length, isAlbumProduct, product, template?.uploadSlots],
   );
   const totalUploadCount = useMemo(
     () =>
@@ -1212,6 +1361,17 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     return labels.filter(Boolean);
   }, [isClockProduct, product.thicknessOptions, template?.thicknessOptions]);
 
+  const initialViewOrientation = useMemo(
+    () => defaultFramePreviewOrientation(product, template?.orientation),
+    [
+      product.categorySlug,
+      product.filterTags,
+      product.slug,
+      product.title,
+      template?.orientation,
+    ],
+  );
+
   const [selectedSize, setSelectedSize] = useState(
     availableSizeOptions[0]?.label ?? "9x12",
   );
@@ -1220,7 +1380,7 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
   );
   const [selectedColor, setSelectedColor] = useState("black");
   const [selectedViewOrientation, setSelectedViewOrientation] =
-    useState<ViewOrientationId>("vertical");
+    useState<ViewOrientationId>(initialViewOrientation);
   const [selectedFont, setSelectedFont] = useState(fontOptions[0].value);
   const [activePhotoSlot, setActivePhotoSlot] = useState(0);
   const [uploadedPhotoSlots, setUploadedPhotoSlots] = useState<
@@ -1257,6 +1417,10 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
       setSelectedThickness(availableThicknessOptions[0] ?? "3mm");
     }
   }, [availableThicknessOptions, selectedThickness]);
+
+  useEffect(() => {
+    setSelectedViewOrientation(initialViewOrientation);
+  }, [initialViewOrientation, product.slug]);
 
   useEffect(() => {
     if (activePhotoSlot >= coverSlotCount) {
@@ -1335,7 +1499,9 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     isClockProduct &&
     coverSlotCount === 4 &&
     (previewShape === "rectangle" || previewShape === "rounded-rectangle");
-  const usesDirectImageUpload = isFourPhotoClock || isAlbumProduct;
+  const hasFramePhotoLayout = Boolean(framePhotoLayout);
+  const usesDirectImageUpload =
+    isFourPhotoClock || isAlbumProduct || hasFramePhotoLayout;
   const clockPreviewPhotoUrls = useMemo(
     () =>
       Array.from(
@@ -1370,6 +1536,25 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
     () => dimensionsFromSizeLabel(selectedSize, selectedViewOrientation),
     [selectedSize, selectedViewOrientation],
   );
+  const frameArtworkStageStyle = useMemo<CSSProperties | undefined>(() => {
+    if (!framePhotoLayout) return undefined;
+
+    const artworkAspectRatio = framePhotoLayout.artworkAspectRatio;
+    const previewAspectRatio =
+      selectedDimensions.width / Math.max(selectedDimensions.height, 1);
+
+    if (previewAspectRatio >= artworkAspectRatio) {
+      return {
+        height: "100%",
+        width: `${(artworkAspectRatio / previewAspectRatio) * 100}%`,
+      };
+    }
+
+    return {
+      width: "100%",
+      height: `${(previewAspectRatio / artworkAspectRatio) * 100}%`,
+    };
+  }, [framePhotoLayout, selectedDimensions.height, selectedDimensions.width]);
   const previewOrientation =
     selectedDimensions.orientation === "landscape"
       ? "landscape"
@@ -1881,6 +2066,58 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
           position: slot.position,
           scale: slot.scale,
           rotation,
+          crop: { x: 0, y: 0, width: 100, height: 100 },
+          qualityScore: "original-upload",
+          slot: index + 1,
+          storageKey: slot.storageKey,
+          originalFileName: slot.fileName,
+        }));
+        preparedStorageKeys = originalResults.map((result) => result.key);
+        cartPreviewImage = previewResult.cdnUrl || previewResult.url;
+      } else if (framePhotoLayout) {
+        const frameSlots = uploadedPhotoSlots.slice(
+          0,
+          framePhotoLayout.slots.length,
+        );
+        const originalFiles = frameSlots
+          .map((slot) => slot.file)
+          .filter((file): file is File => Boolean(file));
+        if (originalFiles.length !== framePhotoLayout.slots.length) {
+          throw new Error("Every frame photo is required");
+        }
+        if (!productPreviewImageSrc) {
+          throw new Error("The frame artwork is unavailable");
+        }
+        const previewFile = await createFramePhotoPreview(
+          productPreviewImageSrc,
+          frameSlots,
+          framePhotoLayout,
+        );
+        const { originalResults, previewResult } = await uploadCustomiserFiles(
+          product.id,
+          originalFiles,
+          previewFile,
+        );
+        const preparedSlots = frameSlots.map((slot, index) => ({
+          ...slot,
+          remoteUrl:
+            originalResults[index].cdnUrl || originalResults[index].url,
+          storageKey: originalResults[index].key,
+        }));
+        setUploadedPhotoSlots((slots) => {
+          const next = [...slots];
+          preparedSlots.forEach((slot, index) => {
+            next[index] = slot;
+          });
+          return next;
+        });
+        preparedImageEntries = preparedSlots.map((slot, index) => ({
+          originalUrl: slot.remoteUrl,
+          croppedUrl: slot.remoteUrl,
+          backgroundRemovedUrl: "",
+          position: slot.position,
+          scale: slot.scale,
+          rotation: 0,
           crop: { x: 0, y: 0, width: 100, height: 100 },
           qualityScore: "original-upload",
           slot: index + 1,
@@ -2440,6 +2677,101 @@ export function ProductCustomizerPanel({ product }: { product: Product }) {
                             })}
                           </div>
                         </div>
+                      ) : framePhotoLayout ? (
+                        <>
+                          {productPreviewImageSrc ? (
+                            <img
+                              src={productPreviewImageSrc}
+                              alt={`${productName} product preview`}
+                              draggable={false}
+                              className="h-full w-full select-none object-contain"
+                            />
+                          ) : null}
+                          <div
+                            className="pointer-events-none absolute inset-0 z-10 grid place-items-center"
+                            data-frame-photo-layout={framePhotoLayout.id}
+                          >
+                            <div
+                              className="pointer-events-auto relative"
+                              style={frameArtworkStageStyle}
+                            >
+                              {framePhotoLayout.slots.map((geometry, index) => {
+                                const slot = uploadedPhotoSlots[index];
+                                const selected = activePhotoSlot === index;
+                                const label = slot?.url
+                                  ? `Replace photo ${index + 1}, ${slot.fileName || "uploaded image"}`
+                                  : `Select photo ${index + 1}`;
+
+                                return (
+                                  <button
+                                    key={`${framePhotoLayout.id}-${index}`}
+                                    type="button"
+                                    data-frame-photo-slot={index + 1}
+                                    onClick={() => openPhotoSlot(index)}
+                                    onPointerDown={(event) =>
+                                      event.stopPropagation()
+                                    }
+                                    disabled={isPreparingPhotos}
+                                    className={`group absolute overflow-hidden border-2 border-white/90 bg-transparent shadow-[0_1px_4px_rgba(15,23,42,0.18)] transition hover:ring-2 hover:ring-rosegold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ikonnic-red focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70 ${
+                                      selected ? "ring-2 ring-rosegold-400" : ""
+                                    }`}
+                                    style={{
+                                      left: `${geometry.left}%`,
+                                      top: `${geometry.top}%`,
+                                      width: `${geometry.width}%`,
+                                      height: `${geometry.height}%`,
+                                      borderRadius: geometry.borderRadius ?? "1px",
+                                      containerType: "inline-size",
+                                    }}
+                                    aria-label={label}
+                                  >
+                                    {slot?.url ? (
+                                      <>
+                                        <img
+                                          src={slot.url}
+                                          alt=""
+                                          draggable={false}
+                                          className="h-full w-full select-none object-cover"
+                                          style={{
+                                            objectPosition: `${50 + slot.position.x}% ${50 + slot.position.y}%`,
+                                            transform: `scale(${slot.scale})`,
+                                            transformOrigin: `${50 + slot.position.x}% ${50 + slot.position.y}%`,
+                                          }}
+                                        />
+                                        <span className="absolute inset-x-0 bottom-0 translate-y-full bg-slate-950/75 px-1 py-1 text-center text-[clamp(8px,10cqw,13px)] font-black uppercase tracking-wide text-white transition group-hover:translate-y-0 group-focus-visible:translate-y-0">
+                                          Replace
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <span className="absolute inset-0 grid place-items-center bg-white/55 p-[4%]">
+                                        <span
+                                          className="grid h-[58%] w-[72%] place-items-center rounded-[12%] bg-ikonnic-red px-[5%] text-center font-black uppercase leading-[1.04] text-white shadow-sm"
+                                          style={{
+                                            fontSize: "clamp(9px, 13cqw, 19px)",
+                                          }}
+                                        >
+                                          <span>
+                                            Select
+                                            <br />
+                                            Photo
+                                          </span>
+                                        </span>
+                                      </span>
+                                    )}
+                                    <span
+                                      className="absolute left-[5%] top-[5%] grid aspect-square w-[18%] min-w-4 place-items-center rounded-full bg-white/95 font-black text-[#07142f] shadow-sm"
+                                      style={{
+                                        fontSize: "clamp(9px, 11cqw, 14px)",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
                       ) : (
                         <>
                           {productPreviewImageSrc ? (

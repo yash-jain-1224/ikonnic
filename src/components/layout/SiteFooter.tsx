@@ -8,8 +8,6 @@ const shopLinks = [
   ["Track Your Order", "/orders-tracking"],
   ["Contact Us", "/contact-us"],
   ["FAQ", "/faq"],
-  ["Blog", "/blog"],
-  ["Photo Poses", "/photo-poses"],
 ];
 
 const policyLinks = [
@@ -72,9 +70,9 @@ export function SiteFooter() {
           </p>
 
           <div className="mt-6 space-y-2.5">
-            <a className="flex items-center gap-3 text-sm text-slate-300 transition hover:text-white" href="mailto:support@ikonnic.com">
+            <a className="flex items-center gap-3 text-sm text-slate-300 transition hover:text-white" href="mailto:ikonnicdecor@gmail.com">
               <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-slate-800 text-ikonnic-red"><Mail size={14} /></span>
-              support@ikonnic.com
+              ikonnicdecor@gmail.com
             </a>
             <a className="flex items-center gap-3 text-sm text-slate-300 transition hover:text-white" href="tel:+917300096277">
               <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-slate-800 text-ikonnic-red"><Phone size={14} /></span>

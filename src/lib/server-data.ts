@@ -14,7 +14,16 @@ import { isWhitelistedCategory, WHITELISTED_CATEGORY_SLUGS } from "@/config/whit
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 const FETCH_TIMEOUT_MS = 5000;
 
+// Product routes are statically generated during `next build`. Calling the
+// deployed API once for every generated route creates a large burst of
+// serverless invocations (and database connections) before the storefront is
+// even live. Use the bundled catalogue for that build step; ISR requests after
+// deployment continue to use the configured API and refresh normally.
+const isProductionBuild = process.env.NEXT_PHASE === "phase-production-build";
+
 async function fetchJson<T>(path: string, revalidate = 300): Promise<T | null> {
+  if (isProductionBuild) return null;
+
   try {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       next: { revalidate },

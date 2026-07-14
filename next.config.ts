@@ -3,6 +3,13 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // The catalogue deliberately has many statically generated product pages.
+    // Keep the prerender worker fan-out bounded so a production build stays
+    // within Vercel's memory limits and does not stampede the API/database.
+    staticGenerationMaxConcurrency: 4,
+    staticGenerationMinPagesPerWorker: 50,
+  },
   images: {
     remotePatterns: [
       // Azure Blob Storage (configured via env)

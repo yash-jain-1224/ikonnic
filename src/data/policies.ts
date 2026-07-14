@@ -16,16 +16,11 @@ export const policies = {
   },
   "refund-return-policy": {
     title: "Refund & Return Policy",
-    intro: "This refund, return and cancellation policy outlines how you can cancel or seek a refund for a product/service that you have purchased through the Platform. We offer refund/exchange within the first 5 days from the date of your purchase. If 5 days have passed since your purchase, you will not be offered a return, exchange or refund of any kind.",
+    intro: "We offer a 7-day return window, which means you can request a return within 7 days of receiving your item.",
     sections: [
-      ["Cancellations", "Cancellations will only be considered if the request is made within 5 days of placing the order. However, cancellation requests may not be entertained if the orders have been communicated to such sellers/merchant(s) listed on the Platform and they have initiated the process of shipping them, or the product is out for delivery. In such an event, you may choose to reject the product at the doorstep."],
-      ["Perishable Items", "Akechi Webcraft Private Limited does not accept cancellation requests for perishable items like flowers, eatables, etc. However, the refund/replacement can be made if the user establishes that the quality of the product delivered is not good."],
-      ["Damaged or Defective Items", "In case of receipt of damaged or defective items, please report to our customer service team. The request would be entertained once the seller/merchant listed on the Platform has checked and determined the same at its own end. This should be reported within 5 days of receipt of products. In case you feel that the product received is not as shown on the site or as per your expectations, you must bring it to the notice of our customer service within 5 days of receiving the product. The customer service team after looking into your complaint will take an appropriate decision."],
-      ["Eligibility for Return/Exchange", "In order to become eligible for a return or an exchange: (1) The purchased item should be unused and in the same condition as you received it; (2) The item must have original packaging; (3) If the item was purchased on a sale, then the item may not be eligible for a return/exchange. Further, only such items are replaced by us (based on an exchange request) if such items are found defective or damaged."],
-      ["Exempted Categories", "You agree that there may be a certain category of products/items that are exempted from returns or refunds. Such categories of the products would be identified to you at the time of purchase."],
-      ["Warranty Products", "In case of complaints regarding products that come with a warranty from the manufacturers, please refer the issue to them directly."],
-      ["Return/Exchange Process", "For exchange/return accepted request(s) (as applicable), once your returned product/item is received and inspected by us, we will send you an email to notify you about receipt of the returned/exchanged product. If the same has been approved after the quality check at our end, your request (i.e. return/exchange) will be processed in accordance with our policies."],
-      ["Refund Timeline", "In case of any refunds approved by Akechi Webcraft Private Limited, it will take 10 days for the refund to be processed to you."],
+      ["Return Policy", "To be eligible for a return: The item must be unused and in its original packaging. You must provide the receipt or proof of purchase.\n\nTo initiate a return, send us an email. Once your return request is approved, we will provide you with instructions on how and where to send the item.\n\nPlease note: Items returned without prior authorization will not be accepted."],
+      ["Replacement Policy", "If you receive a damaged or defective item, please report it to us within 48 hours of delivery along with photos/videos as proof.\n\nOnce we receive and inspect the returned item: We will confirm the eligibility for a replacement. If approved, a replacement will be delivered within 7-10 business days.\n\nReplacements are subject to stock availability. If a replacement is not available, we may offer a refund or an alternative item."],
+      ["Refund Policy", "After we receive and inspect your return, we'll notify you via email or message regarding the status of your refund.\n\nIf approved: Your refund will be credited automatically to your original method of payment within 10 business days. You will receive a confirmation once the refund is issued.\n\nPlease note: Your bank or credit card provider may take additional time to reflect the refund in your account. Shipping charges (if any) are non-refundable unless the return is due to our error (e.g., defective or wrong item)."],
     ],
   },
   "shipping-policy": {
@@ -34,7 +29,7 @@ export const policies = {
     sections: [
       ["Shipping Method", "The orders for the user are shipped through registered domestic courier companies and/or speed post only."],
       ["Dispatch Timeline", "Orders are shipped within 3 days from the date of the order and/or payment or as per the delivery date agreed at the time of order confirmation and delivering of the shipment, subject to courier company/post office norms."],
-      ["Delivery", "Delivery of all orders will be made to the address provided by the buyer at the time of purchase. Delivery of our services will be confirmed on your email ID as specified at the time of registration."],
+      ["Delivery", "Once the order is placed, the products will be delivered within 7 business days."],
       ["Liability for Delays", "The Platform Owner shall not be liable for any delay in delivery by the courier company/postal authority."],
       ["Shipping Costs", "If there are any shipping cost(s) levied by the seller or the Platform Owner (as the case may be), the same is not refundable."],
     ],

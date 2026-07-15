@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: "India's favourite personalised gifting brand. Custom acrylic photos, wall décor, clocks, frames, albums, keychains & gifts — delivered across India.",
   metadataBase: new URL(siteUrl),
   icons: {
-    icon: "/images/ikonnic-wbg.png",
-    apple: "/images/ikonnic-wbg.png",
+    icon: "/images/ikonnic-favicon.png",
+    apple: "/images/ikonnic-favicon.png",
   },
   openGraph: {
     type: "website",

@@ -138,15 +138,6 @@ export function SiteFooter() {
                 <p className="text-xs leading-5 text-slate-400">Creative Fulfilment Hub, Sitapura, Jaipur, Rajasthan</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-slate-800 text-ikonnic-red">
-                <MapPin size={14} />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-white">Bengaluru</p>
-                <p className="text-xs leading-5 text-slate-400">Print & Dispatch Studio, Yelahanka, Bengaluru, Karnataka</p>
-              </div>
-            </div>
           </div>
           <div className="mt-5 rounded-xl border border-slate-800 bg-slate-800/40 p-4">
             <p className="text-xs font-semibold text-slate-300">🚀 Pan-India Delivery</p>

@@ -15595,7 +15595,7 @@ const generateRawProducts = (): Product[] => [
     "reviewsCount": 586,
     "reviews": [],
     "schemaData": [],
-    "customizerTemplateId": "tpl_product_1_portrait_acrylic_wall_photo"
+    "customizerTemplateId": "tpl_product_wall_photo"
   },
   {
     "id": "prod_1-photo-acrylic-wall-photo_201",
@@ -15665,7 +15665,7 @@ const generateRawProducts = (): Product[] => [
     "reviewsCount": 586,
     "reviews": [],
     "schemaData": [],
-    "customizerTemplateId": "tpl_product_1_photo_acrylic_wall_photo"
+    "customizerTemplateId": "tpl_product_wall_photo"
   },
   {
     "id": "prod_acrylic-wall-photo-frame_202",
@@ -15735,7 +15735,7 @@ const generateRawProducts = (): Product[] => [
     "reviewsCount": 586,
     "reviews": [],
     "schemaData": [],
-    "customizerTemplateId": "tpl_product_acrylic_wall_photo_frame"
+    "customizerTemplateId": "tpl_product_wall_photo"
   },
 {
     "id": "prod_1-portrait-acrylic-wall-photo-2_206",

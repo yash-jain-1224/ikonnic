@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = ['/account', '/checkout', '/wishlist'];
 const adminRoutes = ['/admin'];
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check for auth token in cookies (set by frontend after login)

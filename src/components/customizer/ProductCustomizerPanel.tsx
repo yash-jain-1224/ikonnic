@@ -12,13 +12,20 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import type { CSSProperties, PointerEvent, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent, ReactNode, ComponentType } from "react";
+import { useEffect, useMemo, useRef, useState, Component } from "react";
 import type {
   CustomizerTemplate,
   Product,
   ProductCustomisation,
 } from "@/types";
+
+// Error Boundary for ThreeDPreview to prevent WebGL/GPU crashes from breaking the whole page
+class ThreeDErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() { return this.state.hasError ? null : this.props.children; }
+}
 import { useCartStore } from "@/store/cart";
 import { uploadAPI } from "@/lib/api";
 import {
@@ -2913,7 +2920,8 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
             <div
               className={`${!isClockProduct && editorMode === "edit" ? "block lg:hidden" : "block"} w-full border border-[#edf0f4] bg-[#10131b] p-2 sm:p-3`}
             >
-              <ThreeDPreview
+              <ThreeDErrorBoundary>
+                <ThreeDPreview
                 photoUrl={
                   usesSlotPreview ? productPreviewImageSrc : previewImageSrc
                 }
@@ -2938,6 +2946,7 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
                 shape={previewShape}
                 mode="inline"
               />
+            </ThreeDErrorBoundary>
             </div>
           ) : null}
 

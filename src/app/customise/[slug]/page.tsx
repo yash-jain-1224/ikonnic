@@ -37,9 +37,10 @@ export default async function CustomisePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ size?: string; thickness?: string }>;
+  searchParams?: Promise<{ size?: string; thickness?: string }>;
 }) {
-  const [{ slug }, initialAlbumOptions] = await Promise.all([params, searchParams]);
+  const { slug } = await params;
+  const initialAlbumOptions = searchParams ? await searchParams : undefined;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 

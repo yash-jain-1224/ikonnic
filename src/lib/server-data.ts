@@ -12,7 +12,7 @@ import { categories as staticCategories, categoryMap } from "@/data/categories";
 import { isWhitelistedCategory, WHITELISTED_CATEGORY_SLUGS } from "@/config/whitelist";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
-const FETCH_TIMEOUT_MS = 5000;
+const FETCH_TIMEOUT_MS = 2000;
 
 // Product routes are statically generated during `next build`. Calling the
 // deployed API once for every generated route creates a large burst of
@@ -20,9 +20,12 @@ const FETCH_TIMEOUT_MS = 5000;
 // even live. Use the bundled catalogue for that build step; ISR requests after
 // deployment continue to use the configured API and refresh normally.
 const isProductionBuild = process.env.NEXT_PHASE === "phase-production-build";
+const isUnreachableLocalhost =
+  process.env.NODE_ENV === "production" &&
+  (API_BASE_URL.includes("localhost") || API_BASE_URL.includes("127.0.0.1"));
 
 async function fetchJson<T>(path: string, revalidate = 300): Promise<T | null> {
-  if (isProductionBuild) return null;
+  if (isProductionBuild || isUnreachableLocalhost) return null;
 
   try {
     const res = await fetch(`${API_BASE_URL}${path}`, {

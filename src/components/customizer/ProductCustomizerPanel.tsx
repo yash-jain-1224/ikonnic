@@ -45,10 +45,22 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ConfirmAddToCartOverlay } from "@/components/product/ConfirmAddToCartOverlay";
 import { CrossSellPopup } from "@/components/product/CrossSellPopup";
+import dynamic from "next/dynamic";
 import { ProductDescriptionContent } from "@/components/product/ProductDescriptionContent";
-import { ThreeDPreview } from "@/components/customizer/ThreeDPreview";
 import { AlbumCustomizerPanel } from "@/components/customizer/AlbumCustomizerPanel";
 import { isAlbumProduct } from "@/data/albumTemplates";
+
+const ThreeDPreview = dynamic(
+  () => import("@/components/customizer/ThreeDPreview").then((mod) => mod.ThreeDPreview),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid h-full w-full place-items-center bg-slate-100 text-xs font-bold text-slate-400">
+        Loading 3D Preview...
+      </div>
+    ),
+  }
+);
 
 type SizeOption = {
   label: string;

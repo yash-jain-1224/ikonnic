@@ -9,7 +9,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-rosegold-200/60 bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-soft">
       {product.sale ? <span className="absolute left-2 top-2 z-10 rounded-md bg-ikonnic-red px-2 py-1 text-[10px] font-black text-white">SALE</span> : null}
-      <Link href={`/customise/${product.slug}`} className="block overflow-hidden bg-rosegold-50">
+      <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-rosegold-50">
         <SmartImage
           src={imageSrc}
           alt={product.alt || product.title || product.categoryName}
@@ -19,7 +19,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         />
       </Link>
       <div className="p-3">
-        <Link href={`/customise/${product.slug}`} className="line-clamp-2 min-h-9 text-xs font-bold leading-4 text-slate-800 hover:text-ikonnic-red">
+        <Link href={`/product/${product.slug}`} className="line-clamp-2 min-h-9 text-xs font-bold leading-4 text-slate-800 hover:text-ikonnic-red">
           {product.title}
         </Link>
         <div className="mt-2 flex flex-wrap items-baseline gap-1.5 text-xs">

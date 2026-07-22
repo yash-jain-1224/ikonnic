@@ -6,6 +6,8 @@ import { ProductSchema } from "@/components/seo/ProductSchema";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { ReviewsSection } from "@/components/product/ReviewsSection";
 
+import { products } from "@/data/products";
+
 // Render on demand with ISR instead of prerendering every product at build
 // time — prerendering here duplicated the full product fetch fan-out of
 // /product/[slug] and helped exhaust the backend's DB connections during
@@ -13,7 +15,7 @@ import { ReviewsSection } from "@/components/product/ReviewsSection";
 export const revalidate = 300;
 
 export function generateStaticParams() {
-  return [];
+  return products.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

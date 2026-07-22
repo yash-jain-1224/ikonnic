@@ -30370,7 +30370,7 @@ const generateRawProducts = (): Product[] => [
   }
 ];
 
-const routeSlug = (slug: string) => slug.split("/").filter(Boolean).pop() ?? slug;
+const routeSlug = (slug: string) => (typeof slug === "string" ? slug.split("/").filter(Boolean).pop() ?? slug : "");
 
 type CuratedProductSeed = {
   slug: string;

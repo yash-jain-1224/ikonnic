@@ -1836,7 +1836,7 @@ const rawCategories: Category[] = [
   }
 ];
 
-const routeSlug = (slug: string) => slug.split("/").filter(Boolean).pop() ?? slug;
+const routeSlug = (slug: string) => (typeof slug === "string" ? slug.split("/").filter(Boolean).pop() ?? slug : "");
 
 const finalCategoryOverrides: Record<string, Partial<Category>> = {
   "acrylic-name-plate": {

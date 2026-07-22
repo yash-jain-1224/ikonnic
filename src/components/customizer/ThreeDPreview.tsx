@@ -50,16 +50,115 @@ function buildPreviewShape(shape: string, width: number, height: number) {
   const previewShape = new THREE.Shape();
 
   if (shape === "heart") {
-    previewShape.moveTo(0, -h * 0.55);
-    previewShape.bezierCurveTo(-w, -h * 0.05, -w * 0.86, h * 0.88, 0, h * 0.42);
-    previewShape.bezierCurveTo(w * 0.86, h * 0.88, w, -h * 0.05, 0, -h * 0.55);
+    const sX = (x: number) => (x / 100 - 0.5) * width;
+    const sY = (y: number) => (0.5 - y / 100) * height;
+
+    previewShape.moveTo(sX(50), sY(18));
+    previewShape.bezierCurveTo(sX(38), sY(6), sX(20), sY(4), sX(10), sY(16));
+    previewShape.bezierCurveTo(sX(0), sY(28), sX(2), sY(44), sX(18), sY(64));
+    previewShape.bezierCurveTo(sX(30), sY(78), sX(44), sY(88), sX(50), sY(96));
+    previewShape.bezierCurveTo(sX(56), sY(88), sX(70), sY(78), sX(82), sY(64));
+    previewShape.bezierCurveTo(sX(98), sY(44), sX(100), sY(28), sX(90), sY(16));
+    previewShape.bezierCurveTo(sX(80), sY(6), sX(62), sY(6), sX(50), sY(18));
+    previewShape.closePath();
     return previewShape;
   }
 
   if (shape === "leaf") {
-    previewShape.moveTo(0, -h);
-    previewShape.bezierCurveTo(-w * 0.95, -h * 0.42, -w * 0.72, h * 0.64, 0, h);
-    previewShape.bezierCurveTo(w * 0.72, h * 0.64, w * 0.95, -h * 0.42, 0, -h);
+    // Match the physical leaf clock: square corners at top-right/bottom-left
+    // and broad opposing quarter-rounds at top-left/bottom-right.
+    previewShape.moveTo(-w * 0.26, h);
+    previewShape.lineTo(w, h);
+    previewShape.lineTo(w, -h * 0.26);
+    previewShape.bezierCurveTo(w, -h * 0.64, w * 0.64, -h, w * 0.26, -h);
+    previewShape.lineTo(-w, -h);
+    previewShape.lineTo(-w, h * 0.26);
+    previewShape.bezierCurveTo(-w, h * 0.64, -w * 0.64, h, -w * 0.26, h);
+    previewShape.closePath();
+    return previewShape;
+  }
+
+  if (shape === "floral") {
+    const sX = (x: number) => (x / 100 - 0.5) * width;
+    const sY = (y: number) => (0.5 - y / 100) * height;
+
+    previewShape.moveTo(sX(50), sY(13));
+    previewShape.bezierCurveTo(sX(32), sY(13), sX(22), sY(5), sX(12), sY(5));
+    previewShape.bezierCurveTo(sX(6), sY(5), sX(5), sY(6), sX(5), sY(12));
+    previewShape.bezierCurveTo(sX(5), sY(22), sX(13), sY(32), sX(13), sY(50));
+    previewShape.bezierCurveTo(sX(13), sY(68), sX(5), sY(78), sX(5), sY(88));
+    previewShape.bezierCurveTo(sX(5), sY(94), sX(6), sY(95), sX(12), sY(95));
+    previewShape.bezierCurveTo(sX(22), sY(95), sX(32), sY(87), sX(50), sY(87));
+    previewShape.bezierCurveTo(sX(68), sY(87), sX(78), sY(95), sX(88), sY(95));
+    previewShape.bezierCurveTo(sX(94), sY(95), sX(95), sY(94), sX(95), sY(88));
+    previewShape.bezierCurveTo(sX(95), sY(78), sX(87), sY(68), sX(87), sY(50));
+    previewShape.bezierCurveTo(sX(87), sY(32), sX(95), sY(22), sX(95), sY(12));
+    previewShape.bezierCurveTo(sX(95), sY(6), sX(94), sY(5), sX(88), sY(5));
+    previewShape.bezierCurveTo(sX(78), sY(5), sX(68), sY(13), sX(50), sY(13));
+    previewShape.closePath();
+    return previewShape;
+  }
+
+  if (shape === "symmetrical") {
+    const sX = (x: number) => (x / 100 - 0.5) * width;
+    const sY = (y: number) => (0.5 - y / 100) * height;
+
+    previewShape.moveTo(sX(30), sY(3));
+    previewShape.bezierCurveTo(sX(27), sY(3), sX(26), sY(4), sX(26), sY(7));
+    previewShape.lineTo(sX(26), sY(13));
+    previewShape.bezierCurveTo(sX(26), sY(15), sX(25), sY(16), sX(23), sY(16));
+    previewShape.lineTo(sX(16), sY(16));
+    previewShape.bezierCurveTo(sX(14), sY(16), sX(13), sY(17), sX(13), sY(19));
+    previewShape.lineTo(sX(13), sY(26));
+    previewShape.bezierCurveTo(sX(13), sY(28), sX(12), sY(29), sX(10), sY(29));
+    previewShape.lineTo(sX(6), sY(29));
+    previewShape.bezierCurveTo(sX(4), sY(29), sX(3), sY(30), sX(3), sY(33));
+    previewShape.lineTo(sX(3), sY(67));
+    previewShape.bezierCurveTo(sX(3), sY(70), sX(4), sY(71), sX(6), sY(71));
+    previewShape.lineTo(sX(10), sY(71));
+    previewShape.bezierCurveTo(sX(12), sY(71), sX(13), sY(72), sX(13), sY(74));
+    previewShape.lineTo(sX(13), sY(81));
+    previewShape.bezierCurveTo(sX(13), sY(83), sX(14), sY(84), sX(16), sY(84));
+    previewShape.lineTo(sX(23), sY(84));
+    previewShape.bezierCurveTo(sX(25), sY(84), sX(26), sY(85), sX(26), sY(87));
+    previewShape.lineTo(sX(26), sY(93));
+    previewShape.bezierCurveTo(sX(26), sY(96), sX(27), sY(97), sX(30), sY(97));
+    previewShape.lineTo(sX(70), sY(97));
+    previewShape.bezierCurveTo(sX(73), sY(97), sX(74), sY(96), sX(74), sY(93));
+    previewShape.lineTo(sX(74), sY(87));
+    previewShape.bezierCurveTo(sX(74), sY(85), sX(75), sY(84), sX(77), sY(84));
+    previewShape.lineTo(sX(84), sY(84));
+    previewShape.bezierCurveTo(sX(86), sY(84), sX(87), sY(83), sX(87), sY(81));
+    previewShape.lineTo(sX(87), sY(74));
+    previewShape.bezierCurveTo(sX(87), sY(72), sX(88), sY(71), sX(90), sY(71));
+    previewShape.lineTo(sX(94), sY(71));
+    previewShape.bezierCurveTo(sX(96), sY(71), sX(97), sY(70), sX(97), sY(67));
+    previewShape.lineTo(sX(97), sY(33));
+    previewShape.bezierCurveTo(sX(97), sY(30), sX(96), sY(29), sX(94), sY(29));
+    previewShape.lineTo(sX(90), sY(29));
+    previewShape.bezierCurveTo(sX(88), sY(29), sX(87), sY(28), sX(87), sY(26));
+    previewShape.lineTo(sX(87), sY(19));
+    previewShape.bezierCurveTo(sX(87), sY(17), sX(86), sY(16), sX(84), sY(16));
+    previewShape.lineTo(sX(77), sY(16));
+    previewShape.bezierCurveTo(sX(75), sY(16), sX(74), sY(15), sX(74), sY(13));
+    previewShape.lineTo(sX(74), sY(7));
+    previewShape.bezierCurveTo(sX(74), sY(4), sX(73), sY(3), sX(70), sY(3));
+    previewShape.closePath();
+    return previewShape;
+  }
+
+  if (shape === "rounded-rectangle") {
+    const radius = Math.min(w, h) * 0.18;
+    previewShape.moveTo(-w + radius, h);
+    previewShape.lineTo(w - radius, h);
+    previewShape.quadraticCurveTo(w, h, w, h - radius);
+    previewShape.lineTo(w, -h + radius);
+    previewShape.quadraticCurveTo(w, -h, w - radius, -h);
+    previewShape.lineTo(-w + radius, -h);
+    previewShape.quadraticCurveTo(-w, -h, -w, -h + radius);
+    previewShape.lineTo(-w, h - radius);
+    previewShape.quadraticCurveTo(-w, h, -w + radius, h);
+    previewShape.closePath();
     return previewShape;
   }
 
@@ -349,6 +448,7 @@ function createCollagePhotoTexture(
   height: number,
   backgroundUrl?: string,
   collageLayout: "four-photo-clock" | "grid" = "grid",
+  shape?: string,
 ) {
   const loadOptionalImage = (url?: string) =>
     url
@@ -470,20 +570,66 @@ function createCollagePhotoTexture(
     });
 
     if (isFourPhotoClock) {
-      const numeralPositions = [
-        ["12", 0.5, 0.05],
-        ["1", 0.75, 0.05],
-        ["2", 0.95, 0.25],
-        ["3", 0.95, 0.5],
-        ["4", 0.95, 0.75],
-        ["5", 0.75, 0.95],
-        ["6", 0.5, 0.95],
-        ["7", 0.25, 0.95],
-        ["8", 0.05, 0.75],
-        ["9", 0.05, 0.5],
-        ["10", 0.05, 0.25],
-        ["11", 0.25, 0.05],
-      ] as const;
+      const numeralPositions: Array<readonly [string, number, number]> =
+        shape === "symmetrical"
+          ? [
+              ["12", 0.5, 0.15],
+              ["1", 0.71, 0.19],
+              ["2", 0.8, 0.31],
+              ["3", 0.84, 0.5],
+              ["4", 0.8, 0.69],
+              ["5", 0.71, 0.81],
+              ["6", 0.5, 0.85],
+              ["7", 0.29, 0.81],
+              ["8", 0.2, 0.69],
+              ["9", 0.16, 0.5],
+              ["10", 0.2, 0.31],
+              ["11", 0.29, 0.19],
+            ]
+          : shape === "floral"
+          ? [
+              ["12", 0.5, 0.18],
+              ["1", 0.74, 0.15],
+              ["2", 0.85, 0.29],
+              ["3", 0.82, 0.5],
+              ["4", 0.85, 0.71],
+              ["5", 0.74, 0.85],
+              ["6", 0.5, 0.82],
+              ["7", 0.26, 0.85],
+              ["8", 0.15, 0.71],
+              ["9", 0.18, 0.5],
+              ["10", 0.15, 0.29],
+              ["11", 0.26, 0.15],
+            ]
+          : shape === "heart"
+          ? [
+              ["12", 0.5, 0.26],
+              ["1", 0.66, 0.2],
+              ["2", 0.81, 0.32],
+              ["3", 0.85, 0.48],
+              ["4", 0.76, 0.63],
+              ["5", 0.64, 0.74],
+              ["6", 0.5, 0.82],
+              ["7", 0.36, 0.74],
+              ["8", 0.24, 0.63],
+              ["9", 0.15, 0.48],
+              ["10", 0.19, 0.32],
+              ["11", 0.34, 0.2],
+            ]
+          : [
+              ["12", 0.5, 0.13],
+              ["1", 0.69, 0.18],
+              ["2", 0.82, 0.31],
+              ["3", 0.87, 0.5],
+              ["4", 0.82, 0.69],
+              ["5", 0.69, 0.82],
+              ["6", 0.5, 0.87],
+              ["7", 0.31, 0.82],
+              ["8", 0.18, 0.69],
+              ["9", 0.13, 0.5],
+              ["10", 0.18, 0.31],
+              ["11", 0.31, 0.18],
+            ];
       context.font = `900 ${Math.round(canvas.width * 0.045)}px Arial, sans-serif`;
       context.textAlign = "center";
       context.textBaseline = "middle";
@@ -594,6 +740,7 @@ function AcrylicSlab({
             height,
             photoUrl,
             collageLayout,
+            shape,
           )
         : createFittedPhotoTexture(photoUrl, width, height);
 
@@ -614,7 +761,7 @@ function AcrylicSlab({
       cancelled = true;
       createdTexture?.dispose();
     };
-  }, [collageLayout, height, photoTransforms, photoUrl, photoUrls, width]);
+  }, [collageLayout, height, photoTransforms, photoUrl, photoUrls, shape, width]);
 
   // Gentle idle float
   useFrame((state) => {
@@ -741,6 +888,7 @@ function AcrylicSlab({
     "custom",
     "heart",
     "leaf",
+    "floral",
     "rounded-rectangle",
     "diamond",
     "triangle",
@@ -856,6 +1004,8 @@ function CameraSetup({
       "custom",
       "heart",
       "leaf",
+      "floral",
+      "symmetrical",
       "rounded-rectangle",
       "diamond",
       "triangle",

@@ -234,6 +234,127 @@ function drawAlbumTextFields(
   });
 }
 
+/**
+ * Each album family supplies a base colour.  The artwork below turns that
+ * colour into a print-safe page treatment so the area around a photo never
+ * falls back to an unrelated flat grey/white canvas.
+ */
+function albumPageBackdropStyle(color?: string, product?: Product): CSSProperties {
+  const text = `${product?.categorySlug ?? ""} ${product?.categoryName ?? ""} ${product?.slug ?? ""} ${product?.title ?? ""} ${product?.filterTags?.join(" ") ?? ""} ${color ?? ""}`.toLowerCase();
+
+  // 1. House Warming Albums (e.g., "Knocked once Entered forever", "New House Same Love")
+  if (text.includes("house-warming") || text.includes("house warming") || text.includes("home") || text.includes("house")) {
+    return {
+      backgroundColor: "#f97316",
+      backgroundImage: `
+        radial-gradient(ellipse 90% 60% at 50% 100%, #ea580c 0%, transparent 80%),
+        radial-gradient(ellipse 100% 60% at 50% -20%, #ffedd5 0%, transparent 70%),
+        linear-gradient(135deg, #fb923c 0%, #f97316 50%, #c2410c 100%)
+      `,
+    };
+  }
+
+  // 2. Birthday, Kids & Baby Albums
+  if (text.includes("birthday") || text.includes("baby") || text.includes("kids") || text.includes("pink") || text.includes("party")) {
+    return {
+      backgroundColor: "#ec4899",
+      backgroundImage: `
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,0.4), transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(168,85,247,0.35), transparent 50%),
+        linear-gradient(135deg, #f472b6 0%, #db2777 50%, #9d174d 100%)
+      `,
+    };
+  }
+
+  // 3. Travel & Adventure Albums
+  if (text.includes("travel") || text.includes("wildlife") || text.includes("mountain") || text.includes("snow") || text.includes("beach") || text.includes("explore")) {
+    return {
+      backgroundColor: "#0d9488",
+      backgroundImage: `
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,0.4), transparent 45%),
+        radial-gradient(circle at 80% 90%, rgba(14,165,233,0.35), transparent 50%),
+        linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #115e59 100%)
+      `,
+    };
+  }
+
+  // 4. Family & Heritage Albums
+  if (text.includes("family") || text.includes("father") || text.includes("mother") || text.includes("parent")) {
+    return {
+      backgroundColor: "#78350f",
+      backgroundImage: `
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.4), transparent 60%),
+        linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%)
+      `,
+    };
+  }
+
+  // 5. Wedding, Couples, BTS & Anniversary Albums
+  if (text.includes("wedding") || text.includes("couple") || text.includes("anniversary") || text.includes("love") || text.includes("bts")) {
+    return {
+      backgroundColor: "#be123c",
+      backgroundImage: `
+        radial-gradient(circle at 50% -20%, rgba(255,255,255,0.45), transparent 70%),
+        linear-gradient(135deg, #f43f5e 0%, #be123c 50%, #881337 100%)
+      `,
+    };
+  }
+
+  // 6. Default / Signature Rose Gold Theme
+  return {
+    backgroundColor: "#b76e79",
+    backgroundImage: `
+      radial-gradient(circle at 50% -20%, rgba(255,255,255,0.45), transparent 70%),
+      linear-gradient(135deg, #f97316 0%, #b76e79 50%, #881337 100%)
+    `,
+  };
+}
+
+function drawAlbumPageBackdrop(
+  context: CanvasRenderingContext2D,
+  page: AlbumPageTemplate,
+  width: number,
+  height: number,
+) {
+  const backdropStyle = albumPageBackdropStyle(page.backgroundColor);
+  const base = (backdropStyle.backgroundColor as string) || "#f97316";
+
+  const gradient = context.createLinearGradient(0, 0, width, height);
+  if (base === "#ec4899") {
+    gradient.addColorStop(0, "#f472b6");
+    gradient.addColorStop(0.5, "#db2777");
+    gradient.addColorStop(1, "#9d174d");
+  } else if (base === "#0d9488") {
+    gradient.addColorStop(0, "#14b8a6");
+    gradient.addColorStop(0.5, "#0d9488");
+    gradient.addColorStop(1, "#115e59");
+  } else if (base === "#78350f") {
+    gradient.addColorStop(0, "#d97706");
+    gradient.addColorStop(0.5, "#b45309");
+    gradient.addColorStop(1, "#78350f");
+  } else {
+    gradient.addColorStop(0, "#fb923c");
+    gradient.addColorStop(0.5, "#f97316");
+    gradient.addColorStop(1, "#c2410c");
+  }
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, width, height);
+
+  const glow = context.createRadialGradient(
+    width * 0.5,
+    height * 0.1,
+    0,
+    width * 0.5,
+    height * 0.1,
+    Math.max(width, height) * 0.8,
+  );
+  glow.addColorStop(0, "rgba(255,255,255,0.35)");
+  glow.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = glow;
+  context.fillRect(0, 0, width, height);
+}
+
 async function canvasToFile(canvas: HTMLCanvasElement, name: string) {
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
@@ -273,14 +394,13 @@ async function createAlbumPreview(
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Album preview canvas is unavailable");
 
-  context.fillStyle = page.backgroundColor || "#fffaf8";
-  context.fillRect(0, 0, width, height);
+  drawAlbumPageBackdrop(context, page, width, height);
 
   if (page.backgroundImage) {
     try {
       const background = await loadCanvasImage(page.backgroundImage);
       context.save();
-      context.globalAlpha = page.type === "front-cover" ? 1 : 0.18;
+        context.globalAlpha = page.type === "front-cover" ? 1 : 0.24;
       drawCanvasImageCover(context, background, 0, 0, width, height);
       context.restore();
     } catch {
@@ -410,6 +530,7 @@ async function uploadAlbumPhotos(
 
 function AlbumPageCanvas({
   page,
+  product,
   assignments,
   photos,
   textValues,
@@ -418,6 +539,7 @@ function AlbumPageCanvas({
   compact = false,
 }: {
   page: AlbumPageTemplate;
+  product?: Product;
   assignments: Record<string, AlbumSlotAssignment>;
   photos: Map<string, LocalAlbumPhoto>;
   textValues: Record<string, string>;
@@ -427,27 +549,35 @@ function AlbumPageCanvas({
 }) {
   const isSpread = page.type === "inside-spread";
   const aspectRatio = isSpread ? "1.62 / 1" : "1 / 1";
-  const backgroundOpacity = page.type === "front-cover" || page.type === "back-cover" ? "opacity-100" : "opacity-20";
+  const backdropStyle = albumPageBackdropStyle(page.backgroundColor, product);
 
   return (
     <div
       className={`relative overflow-hidden bg-white shadow-[0_8px_24px_rgba(15,23,42,0.2)] ${compact ? "" : "ring-1 ring-slate-900/5"}`}
       style={{
         aspectRatio,
-        backgroundColor: page.backgroundColor || "#fffaf8",
+        ...backdropStyle,
         containerType: "inline-size",
       }}
     >
-      {page.backgroundImage ? (
+      {page.type === "inside-spread" ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 select-none overflow-hidden"
+          style={backdropStyle}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,255,255,0.65),transparent)]" />
+          <div className="absolute bottom-0 left-1/2 top-0 w-6 -translate-x-1/2 bg-gradient-to-r from-transparent via-slate-950/10 to-transparent" />
+          <div className="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-slate-950/20" />
+        </div>
+      ) : page.backgroundImage ? (
         <img
           src={page.backgroundImage}
           alt=""
           draggable={false}
-          className={`pointer-events-none absolute inset-0 h-full w-full select-none object-cover ${backgroundOpacity}`}
+          className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover opacity-100"
+          style={{ imageRendering: "-webkit-optimize-contrast" }}
         />
-      ) : null}
-      {page.type === "inside-spread" ? (
-        <span className="pointer-events-none absolute bottom-0 left-1/2 top-0 z-[1] w-px -translate-x-1/2 bg-slate-950/15" />
       ) : null}
       <span className="pointer-events-none absolute left-3 top-3 z-[2] rounded-full bg-white/80 px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#07142f] shadow-sm backdrop-blur">
         {page.label}
@@ -468,13 +598,12 @@ function AlbumPageCanvas({
             }}
           />
         ) : (
-          <span className="flex h-full w-full flex-col items-center justify-center gap-1 bg-white/90 px-1 text-center text-[#07142f]">
-            <ImagePlus size={compact ? 12 : 22} className="text-ikonnic-red" />
-            {!compact ? (
-              <span className="text-[10px] font-black uppercase tracking-[0.08em]">
-                {slot.required ? "Select photo" : "Optional photo"}
+          <span className="flex h-full w-full items-center justify-center bg-white p-[6%] text-center shadow-inner">
+            <span className="grid h-full w-full place-items-center rounded-[18%] bg-ikonnic-red px-[6%] py-[4%] font-sans font-black uppercase leading-[1.05] tracking-tight text-white shadow-[0_4px_14px_rgba(183,110,121,0.38)] transition-transform hover:scale-[1.02]">
+              <span className="text-[clamp(8px,7.5cqw,28px)]">
+                SELECT<br />PHOTO
               </span>
-            ) : null}
+            </span>
           </span>
         );
 
@@ -1146,6 +1275,7 @@ export function AlbumCustomizerPanel({
             <div className="mx-auto max-w-[720px]">
               <AlbumPageCanvas
                 page={activePage}
+                product={product}
                 assignments={editor.slotAssignments}
                 photos={photoById}
                 textValues={editor.textValues}
@@ -1311,7 +1441,7 @@ export function AlbumCustomizerPanel({
                 {template.pages.map((page, index) => {
                   const incomplete = page.slots.filter((slot) => slot.required && !editor.slotAssignments[slot.id]).length;
                   const duplicates = page.slots.filter((slot) => duplicateRequiredSlotIds.includes(slot.id)).length;
-                  return <button key={page.id} type="button" onClick={() => { setReviewOpen(false); goToPage(index); }} className={`overflow-hidden rounded-xl border-2 bg-[#f7f8fa] p-1 text-left transition hover:border-rosegold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ikonnic-red ${index === editor.activePageIndex ? "border-ikonnic-red" : "border-transparent"}`}><AlbumPageCanvas page={page} assignments={editor.slotAssignments} photos={photoById} textValues={editor.textValues} compact /><span className="flex items-center justify-between gap-2 px-2 py-2 text-[11px] font-black text-[#07142f]"><span className="truncate">{index + 1}. {page.label}</span>{incomplete || duplicates ? <span className="shrink-0 text-amber-700">{incomplete ? `${incomplete} empty` : `${duplicates} repeat`}</span> : <CheckCircle2 className="shrink-0 text-emerald-600" size={14} />}</span></button>;
+                  return <button key={page.id} type="button" onClick={() => { setReviewOpen(false); goToPage(index); }} className={`overflow-hidden rounded-xl border-2 bg-[#f7f8fa] p-1 text-left transition hover:border-rosegold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ikonnic-red ${index === editor.activePageIndex ? "border-ikonnic-red" : "border-transparent"}`}><AlbumPageCanvas page={page} product={product} assignments={editor.slotAssignments} photos={photoById} textValues={editor.textValues} compact /><span className="flex items-center justify-between gap-2 px-2 py-2 text-[11px] font-black text-[#07142f]"><span className="truncate">{index + 1}. {page.label}</span>{incomplete || duplicates ? <span className="shrink-0 text-amber-700">{incomplete ? `${incomplete} empty` : `${duplicates} repeat`}</span> : <CheckCircle2 className="shrink-0 text-emerald-600" size={14} />}</span></button>;
                 })}
               </div>
             </div>

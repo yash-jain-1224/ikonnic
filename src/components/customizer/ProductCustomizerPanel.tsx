@@ -105,6 +105,8 @@ type PreviewShape =
   | "circle"
   | "heart"
   | "leaf"
+  | "floral"
+  | "symmetrical"
   | "diamond"
   | "triangle"
   | "hexagon"
@@ -173,9 +175,6 @@ const categorySizeFallbacks: Record<string, SizeOption[]> = {
 };
 
 const shapeClipPaths: Partial<Record<PreviewShape, string>> = {
-  heart:
-    "polygon(50% 94%, 43% 87%, 28% 75%, 15% 62%, 8% 48%, 7% 34%, 11% 21%, 21% 11%, 34% 8%, 44% 12%, 50% 25%, 56% 12%, 66% 8%, 79% 11%, 89% 21%, 93% 34%, 92% 48%, 85% 62%, 72% 75%, 57% 87%)",
-  leaf: "ellipse(44% 50% at 52% 50%)",
   circle: "circle(49% at 50% 50%)",
   oval: "ellipse(45% 50% at 50% 50%)",
   diamond: "polygon(50% 2%, 98% 50%, 50% 98%, 2% 50%)",
@@ -195,9 +194,15 @@ const shapeClipPaths: Partial<Record<PreviewShape, string>> = {
 };
 
 const shapeSvgPaths: Partial<Record<PreviewShape, string>> = {
+  "rounded-rectangle":
+    "M 18 0 L 82 0 C 92 0, 100 8, 100 18 L 100 82 C 100 92, 92 100, 82 100 L 18 100 C 8 100, 0 92, 0 82 L 0 18 C 0 8, 8 0, 18 0 Z",
   heart:
-    "M50 94 C43 87 28 76 16 63 C6 52 4 37 8 25 C12 14 22 8 34 8 C43 8 48 14 50 25 C52 14 57 8 66 8 C78 8 88 14 92 25 C96 37 94 52 84 63 C72 76 57 87 50 94 Z",
-  leaf: "M50 96 C18 73 13 33 50 4 C87 33 82 73 50 96 Z",
+    "M 50 18 C 38 6, 20 4, 10 16 C 0 28, 2 44, 18 64 C 30 78, 44 88, 50 96 C 56 88, 70 78, 82 64 C 98 44, 100 28, 90 16 C 80 4, 62 6, 50 18 Z",
+  leaf: "M37 2 H98 V63 C98 82 82 98 63 98 H2 V37 C2 18 18 2 37 2 Z",
+  floral:
+    "M 50 13 C 68 13, 78 5, 88 5 C 94 5, 95 6, 95 12 C 95 22, 87 32, 87 50 C 87 68, 95 78, 95 88 C 95 94, 94 95, 88 95 C 78 95, 68 87, 50 87 C 32 87, 22 95, 12 95 C 6 95, 5 94, 5 88 C 5 78, 13 68, 13 50 C 13 32, 5 22, 5 12 C 5 6, 6 5, 12 5 C 22 5, 32 13, 50 13 Z",
+  symmetrical:
+    "M 30 3 L 70 3 C 73 3, 74 4, 74 7 L 74 13 C 74 15, 75 16, 77 16 L 84 16 C 86 16, 87 17, 87 19 L 87 26 C 87 28, 88 29, 90 29 L 94 29 C 96 29, 97 30, 97 33 L 97 67 C 97 70, 96 71, 94 71 L 90 71 C 88 71, 87 72, 87 74 L 87 81 C 87 83, 86 84, 84 84 L 77 84 C 75 84, 74 85, 74 87 L 74 93 C 74 96, 73 97, 70 97 L 30 97 C 27 97, 26 96, 26 93 L 26 87 C 26 85, 25 84, 23 84 L 16 84 C 14 84, 13 83, 13 81 L 13 74 C 13 72, 12 71, 10 71 L 6 71 C 4 71, 3 70, 3 67 L 3 33 C 3 30, 4 29, 6 29 L 10 29 C 12 29, 13 28, 13 26 L 13 19 C 13 17, 14 16, 16 16 L 23 16 C 25 16, 26 15, 26 13 L 26 7 C 26 4, 27 3, 30 3 Z",
   circle: "M50 1 A49 49 0 1 1 49.9 1 Z",
   oval: "M50 1 C76 1 92 20 92 50 C92 80 76 99 50 99 C24 99 8 80 8 50 C8 20 24 1 50 1 Z",
   diamond: "M50 2 L98 50 L50 98 L2 50 Z",
@@ -212,8 +217,6 @@ const shapeSvgPaths: Partial<Record<PreviewShape, string>> = {
   house: "M50 4 L96 38 L84 38 L84 96 L16 96 L16 38 L4 38 Z",
   cloud:
     "M21 73 C10 72 4 63 7 52 C9 43 16 38 26 38 C30 23 43 14 58 20 C66 15 80 22 83 35 C94 39 98 52 92 63 C86 74 76 76 64 73 Z",
-  "rounded-rectangle":
-    "M18 1 L82 1 C92 1 99 8 99 18 L99 82 C99 92 92 99 82 99 L18 99 C8 99 1 92 1 82 L1 18 C1 8 8 1 18 1 Z",
 };
 
 const colorSwatches = [
@@ -482,6 +485,8 @@ function inferPreviewShape(
   const text =
     `${templateShape ?? ""} ${product.slug} ${product.title}`.toLowerCase();
   if (text.includes("heart")) return "heart";
+  if (text.includes("floral") || text.includes("flower")) return "floral";
+  if (text.includes("symmetrical")) return "symmetrical";
   if (text.includes("leaf")) return "leaf";
   if (text.includes("diamond")) return "diamond";
   if (text.includes("triangle")) return "triangle";
@@ -497,10 +502,12 @@ function inferPreviewShape(
   if (
     text.includes("rounded") ||
     text.includes("round-corners") ||
-    text.includes("square-round")
+    text.includes("square-round") ||
+    text.includes("square round") ||
+    text.includes("square")
   )
     return "rounded-rectangle";
-  if (text.includes("circle") || /\bround\b/.test(text)) return "circle";
+  if (text.includes("circle") || (/\bround\b/.test(text) && !text.includes("square"))) return "circle";
   return templateShape === "custom" ? "custom" : "rectangle";
 }
 
@@ -513,7 +520,7 @@ function previewShapeStyle(shape: PreviewShape): CSSProperties {
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='black' d='${svgPath}'/></svg>`;
     const maskImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     return {
-      borderRadius: ["heart", "leaf", "bean", "balloon", "cloud"].includes(
+      borderRadius: ["heart", "leaf", "floral", "symmetrical", "bean", "balloon", "cloud"].includes(
         shape,
       )
         ? "0"
@@ -530,7 +537,7 @@ function previewShapeStyle(shape: PreviewShape): CSSProperties {
     };
   }
   return {
-    borderRadius: ["heart", "leaf", "bean", "balloon", "cloud"].includes(shape)
+    borderRadius: ["heart", "leaf", "floral", "symmetrical", "bean", "balloon", "cloud"].includes(shape)
       ? "0"
       : "16px",
     clipPath,
@@ -615,20 +622,97 @@ const fourPhotoClockSlotStyles: CSSProperties[] = fourPhotoClockSlots.map(
   }),
 );
 
-const clockNumeralPositions = [
-  { hour: 12, left: 50, top: 5 },
-  { hour: 1, left: 75, top: 5 },
-  { hour: 2, left: 95, top: 25 },
-  { hour: 3, left: 95, top: 50 },
-  { hour: 4, left: 95, top: 75 },
-  { hour: 5, left: 75, top: 95 },
-  { hour: 6, left: 50, top: 95 },
-  { hour: 7, left: 25, top: 95 },
-  { hour: 8, left: 5, top: 75 },
-  { hour: 9, left: 5, top: 50 },
-  { hour: 10, left: 5, top: 25 },
-  { hour: 11, left: 25, top: 5 },
-];
+function clockPhotoSlotLayouts(count: number) {
+  if (count <= 1) {
+    return [{ left: 0, top: 0, width: 100, height: 100 }];
+  }
+  if (count === 4) return fourPhotoClockSlots.map((slot) => ({
+    left: slot.left * 100,
+    top: slot.top * 100,
+    width: slot.width * 100,
+    height: slot.height * 100,
+  }));
+
+  const columns = count === 2 ? 2 : Math.ceil(Math.sqrt(count));
+  const rows = Math.ceil(count / columns);
+  const gap = count <= 3 ? 5 : 3;
+  const margin = count <= 3 ? 7 : 5;
+  const width = (100 - margin * 2 - gap * (columns - 1)) / columns;
+  const height = (100 - margin * 2 - gap * (rows - 1)) / rows;
+  return Array.from({ length: count }, (_, index) => ({
+    left: margin + (index % columns) * (width + gap),
+    top: margin + Math.floor(index / columns) * (height + gap),
+    width,
+    height,
+  }));
+}
+
+function getClockNumeralPositions(shape?: PreviewShape) {
+  if (shape === "symmetrical") {
+    return [
+      { hour: 12, left: 50, top: 15 },
+      { hour: 1, left: 71, top: 19 },
+      { hour: 2, left: 80, top: 31 },
+      { hour: 3, left: 84, top: 50 },
+      { hour: 4, left: 80, top: 69 },
+      { hour: 5, left: 71, top: 81 },
+      { hour: 6, left: 50, top: 85 },
+      { hour: 7, left: 29, top: 81 },
+      { hour: 8, left: 20, top: 69 },
+      { hour: 9, left: 16, top: 50 },
+      { hour: 10, left: 20, top: 31 },
+      { hour: 11, left: 29, top: 19 },
+    ];
+  }
+  if (shape === "floral") {
+    return [
+      { hour: 12, left: 50, top: 18 },
+      { hour: 1, left: 74, top: 15 },
+      { hour: 2, left: 85, top: 29 },
+      { hour: 3, left: 82, top: 50 },
+      { hour: 4, left: 85, top: 71 },
+      { hour: 5, left: 74, top: 85 },
+      { hour: 6, left: 50, top: 82 },
+      { hour: 7, left: 26, top: 85 },
+      { hour: 8, left: 15, top: 71 },
+      { hour: 9, left: 18, top: 50 },
+      { hour: 10, left: 15, top: 29 },
+      { hour: 11, left: 26, top: 15 },
+    ];
+  }
+  if (shape === "heart") {
+    return [
+      { hour: 12, left: 50, top: 26 },
+      { hour: 1, left: 66, top: 20 },
+      { hour: 2, left: 81, top: 32 },
+      { hour: 3, left: 85, top: 48 },
+      { hour: 4, left: 76, top: 63 },
+      { hour: 5, left: 64, top: 74 },
+      { hour: 6, left: 50, top: 82 },
+      { hour: 7, left: 36, top: 74 },
+      { hour: 8, left: 24, top: 63 },
+      { hour: 9, left: 15, top: 48 },
+      { hour: 10, left: 19, top: 32 },
+      { hour: 11, left: 34, top: 20 },
+    ];
+  }
+  return [
+    { hour: 12, left: 50, top: 14 },
+    { hour: 1, left: 68, top: 19 },
+    { hour: 2, left: 81, top: 32 },
+    { hour: 3, left: 86, top: 50 },
+    { hour: 4, left: 81, top: 68 },
+    { hour: 5, left: 68, top: 81 },
+    { hour: 6, left: 50, top: 86 },
+    { hour: 7, left: 31, top: 81 },
+    { hour: 8, left: 19, top: 68 },
+    { hour: 9, left: 14, top: 50 },
+    { hour: 10, left: 19, top: 32 },
+    { hour: 11, left: 31, top: 19 },
+  ];
+}
+
+const clockNumeralPositions = getClockNumeralPositions();
 
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -676,9 +760,99 @@ function drawCanvasImageCover(
   context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 }
 
-async function createFourPhotoClockPreview(
+function clipClockCanvasFace(
+  context: CanvasRenderingContext2D,
+  size: number,
+  shape: PreviewShape,
+) {
+  const center = size / 2;
+  const scale = size / 100;
+  context.beginPath();
+  if (shape === "circle") {
+    context.arc(center, center, center - 2, 0, Math.PI * 2);
+  } else if (shape === "rounded-rectangle") {
+    context.roundRect(2, 2, size - 4, size - 4, size * 0.16);
+  } else if (shape === "leaf") {
+    context.moveTo(size * 0.37, 2);
+    context.lineTo(size - 2, 2);
+    context.lineTo(size - 2, size * 0.63);
+    context.bezierCurveTo(size - 2, size * 0.82, size * 0.82, size - 2, size * 0.63, size - 2);
+    context.lineTo(2, size - 2);
+    context.lineTo(2, size * 0.37);
+    context.bezierCurveTo(2, size * 0.18, size * 0.18, 2, size * 0.37, 2);
+  } else if (shape === "symmetrical") {
+    context.moveTo(30 * scale, 3 * scale);
+    context.lineTo(70 * scale, 3 * scale);
+    context.bezierCurveTo(73 * scale, 3 * scale, 74 * scale, 4 * scale, 74 * scale, 7 * scale);
+    context.lineTo(74 * scale, 13 * scale);
+    context.bezierCurveTo(74 * scale, 15 * scale, 75 * scale, 16 * scale, 77 * scale, 16 * scale);
+    context.lineTo(84 * scale, 16 * scale);
+    context.bezierCurveTo(86 * scale, 16 * scale, 87 * scale, 17 * scale, 87 * scale, 19 * scale);
+    context.lineTo(87 * scale, 26 * scale);
+    context.bezierCurveTo(87 * scale, 28 * scale, 88 * scale, 29 * scale, 90 * scale, 29 * scale);
+    context.lineTo(94 * scale, 29 * scale);
+    context.bezierCurveTo(96 * scale, 29 * scale, 97 * scale, 30 * scale, 97 * scale, 33 * scale);
+    context.lineTo(97 * scale, 67 * scale);
+    context.bezierCurveTo(97 * scale, 70 * scale, 96 * scale, 71 * scale, 94 * scale, 71 * scale);
+    context.lineTo(90 * scale, 71 * scale);
+    context.bezierCurveTo(88 * scale, 71 * scale, 87 * scale, 72 * scale, 87 * scale, 74 * scale);
+    context.lineTo(87 * scale, 81 * scale);
+    context.bezierCurveTo(87 * scale, 83 * scale, 86 * scale, 84 * scale, 84 * scale, 84 * scale);
+    context.lineTo(77 * scale, 84 * scale);
+    context.bezierCurveTo(75 * scale, 84 * scale, 74 * scale, 85 * scale, 74 * scale, 87 * scale);
+    context.lineTo(74 * scale, 93 * scale);
+    context.bezierCurveTo(74 * scale, 96 * scale, 73 * scale, 97 * scale, 70 * scale, 97 * scale);
+    context.lineTo(30 * scale, 97 * scale);
+    context.bezierCurveTo(27 * scale, 97 * scale, 26 * scale, 96 * scale, 26 * scale, 93 * scale);
+    context.lineTo(26 * scale, 87 * scale);
+    context.bezierCurveTo(26 * scale, 85 * scale, 25 * scale, 84 * scale, 23 * scale, 84 * scale);
+    context.lineTo(16 * scale, 84 * scale);
+    context.bezierCurveTo(14 * scale, 84 * scale, 13 * scale, 83 * scale, 13 * scale, 81 * scale);
+    context.lineTo(13 * scale, 74 * scale);
+    context.bezierCurveTo(13 * scale, 72 * scale, 12 * scale, 71 * scale, 10 * scale, 71 * scale);
+    context.lineTo(6 * scale, 71 * scale);
+    context.bezierCurveTo(4 * scale, 71 * scale, 3 * scale, 70 * scale, 3 * scale, 67 * scale);
+    context.lineTo(3 * scale, 33 * scale);
+    context.bezierCurveTo(3 * scale, 30 * scale, 4 * scale, 29 * scale, 6 * scale, 29 * scale);
+    context.lineTo(10 * scale, 29 * scale);
+    context.bezierCurveTo(12 * scale, 29 * scale, 13 * scale, 28 * scale, 13 * scale, 26 * scale);
+    context.lineTo(13 * scale, 19 * scale);
+    context.bezierCurveTo(13 * scale, 17 * scale, 14 * scale, 16 * scale, 16 * scale, 16 * scale);
+    context.lineTo(23 * scale, 16 * scale);
+    context.bezierCurveTo(25 * scale, 16 * scale, 26 * scale, 15 * scale, 26 * scale, 13 * scale);
+    context.lineTo(26 * scale, 7 * scale);
+    context.bezierCurveTo(26 * scale, 4 * scale, 27 * scale, 3 * scale, 30 * scale, 3 * scale);
+  } else if (shape === "floral") {
+    context.moveTo(50 * scale, 13 * scale);
+    context.bezierCurveTo(68 * scale, 13 * scale, 78 * scale, 5 * scale, 88 * scale, 5 * scale);
+    context.bezierCurveTo(94 * scale, 5 * scale, 95 * scale, 6 * scale, 95 * scale, 12 * scale);
+    context.bezierCurveTo(95 * scale, 22 * scale, 87 * scale, 32 * scale, 87 * scale, 50 * scale);
+    context.bezierCurveTo(87 * scale, 68 * scale, 95 * scale, 78 * scale, 95 * scale, 88 * scale);
+    context.bezierCurveTo(95 * scale, 94 * scale, 94 * scale, 95 * scale, 88 * scale, 95 * scale);
+    context.bezierCurveTo(78 * scale, 95 * scale, 68 * scale, 87 * scale, 50 * scale, 87 * scale);
+    context.bezierCurveTo(32 * scale, 87 * scale, 22 * scale, 95 * scale, 12 * scale, 95 * scale);
+    context.bezierCurveTo(6 * scale, 95 * scale, 5 * scale, 94 * scale, 5 * scale, 88 * scale);
+    context.bezierCurveTo(5 * scale, 78 * scale, 13 * scale, 68 * scale, 13 * scale, 50 * scale);
+    context.bezierCurveTo(13 * scale, 32 * scale, 5 * scale, 22 * scale, 5 * scale, 12 * scale);
+    context.bezierCurveTo(5 * scale, 6 * scale, 6 * scale, 5 * scale, 12 * scale, 5 * scale);
+  } else if (shape === "heart") {
+    context.moveTo(50 * scale, 18 * scale);
+    context.bezierCurveTo(38 * scale, 6 * scale, 20 * scale, 4 * scale, 10 * scale, 16 * scale);
+    context.bezierCurveTo(0 * scale, 28 * scale, 2 * scale, 44 * scale, 18 * scale, 64 * scale);
+    context.bezierCurveTo(30 * scale, 78 * scale, 44 * scale, 88 * scale, 50 * scale, 96 * scale);
+    context.bezierCurveTo(56 * scale, 88 * scale, 70 * scale, 78 * scale, 82 * scale, 64 * scale);
+    context.bezierCurveTo(98 * scale, 44 * scale, 100 * scale, 28 * scale, 90 * scale, 16 * scale);
+    context.bezierCurveTo(80 * scale, 4 * scale, 62 * scale, 6 * scale, 50 * scale, 18 * scale);
+  } else {
+    context.rect(0, 0, size, size);
+  }
+  context.closePath();
+  context.clip();
+}
+
+async function createClockPreview(
   slots: UploadedPhotoSlot[],
-  rounded: boolean,
+  shape: PreviewShape,
 ) {
   const size = 900;
   const canvas = document.createElement("canvas");
@@ -689,31 +863,29 @@ async function createFourPhotoClockPreview(
 
   context.clearRect(0, 0, size, size);
   context.save();
-  if (rounded) {
-    context.beginPath();
-    context.roundRect(2, 2, size - 4, size - 4, size * 0.16);
-    context.clip();
+  clipClockCanvasFace(context, size, shape);
+  if (slots.length === 4) {
+    ["#eeeeef", "#ffffff", "#fffaf8", "#f4f1f1"].forEach((color, index) => {
+      context.fillStyle = color;
+      context.fillRect((index % 2) * (size / 2), Math.floor(index / 2) * (size / 2), size / 2, size / 2);
+    });
+  } else {
+    context.fillStyle = "#efe6e0";
+    context.fillRect(0, 0, size, size);
   }
-  context.fillStyle = "#eeeeef";
-  context.fillRect(0, 0, size / 2, size / 2);
-  context.fillStyle = "#ffffff";
-  context.fillRect(size / 2, 0, size / 2, size / 2);
-  context.fillStyle = "#fffaf8";
-  context.fillRect(0, size / 2, size / 2, size / 2);
-  context.fillStyle = "#f4f1f1";
-  context.fillRect(size / 2, size / 2, size / 2, size / 2);
+  const layouts = clockPhotoSlotLayouts(slots.length);
 
   const images = await Promise.all(
-    slots.slice(0, 4).map((slot) => loadCanvasImage(slot.url)),
+    slots.map((slot) => loadCanvasImage(slot.url)),
   );
   images.forEach((image, index) => {
-    const layout = fourPhotoClockSlots[index];
+    const layout = layouts[index];
     const slot = slots[index];
-    const x = layout.left * size;
-    const y = layout.top * size;
-    const width = layout.width * size;
-    const height = layout.height * size;
-    const radius = Math.min(width, height) * 0.18;
+    const x = (layout.left / 100) * size;
+    const y = (layout.top / 100) * size;
+    const width = (layout.width / 100) * size;
+    const height = (layout.height / 100) * size;
+    const radius = slots.length === 1 ? 0 : Math.min(width, height) * 0.18;
     context.save();
     context.beginPath();
     context.roundRect(x, y, width, height, radius);
@@ -743,7 +915,8 @@ async function createFourPhotoClockPreview(
   context.lineWidth = 3;
   context.strokeStyle = "#07142f";
   context.fillStyle = "#ffffff";
-  clockNumeralPositions.forEach(({ hour, left, top }) => {
+  const numeralPositions = getClockNumeralPositions(shape);
+  numeralPositions.forEach(({ hour, left, top }) => {
     const x = size * (left / 100);
     const y = size * (top / 100);
     context.strokeText(String(hour), x, y);
@@ -1157,16 +1330,18 @@ function ClockHandsOverlay() {
   );
 }
 
-function ClockNumeralsOverlay() {
+function ClockNumeralsOverlay({ shape, hasUploadedPhoto }: { shape?: PreviewShape; hasUploadedPhoto?: boolean }) {
+  if (!hasUploadedPhoto) return null;
+  const positions = getClockNumeralPositions(shape);
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 z-20"
     >
-      {clockNumeralPositions.map(({ hour, left, top }) => (
+      {positions.map(({ hour, left, top }) => (
         <span
           key={hour}
-          className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(12px,4.6cqw,22px)] font-black leading-none text-white [-webkit-text-stroke:1px_#07142f]"
+          className="absolute -translate-x-1/2 -translate-y-1/2 text-[clamp(12px,4.8cqw,24px)] font-black leading-none text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.95)]"
           style={{ left: `${left}%`, top: `${top}%` }}
         >
           {hour}
@@ -1176,14 +1351,110 @@ function ClockNumeralsOverlay() {
   );
 }
 
+function ClockPhotoFace({
+  disabled,
+  fallbackImage,
+  onSelectSlot,
+  uploadedPhotoSlots,
+  slotCount,
+  shape,
+}: {
+  disabled: boolean;
+  fallbackImage: string;
+  onSelectSlot: (index: number) => void;
+  uploadedPhotoSlots: UploadedPhotoSlot[];
+  slotCount: number;
+  shape?: PreviewShape;
+}) {
+  const layouts = clockPhotoSlotLayouts(slotCount);
+  const hasMultiplePhotos = slotCount > 1;
+  const hasUploadedPhoto = uploadedPhotoSlots.some((slot) => Boolean(slot?.url));
+
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden bg-[#efe6e0]"
+      data-testid="clock-photo-face"
+      style={{ containerType: "inline-size" }}
+    >
+      {layouts.map((layout, index) => {
+        const slot = uploadedPhotoSlots[index];
+        const source = slot?.url || (!hasMultiplePhotos ? fallbackImage : "");
+        const image = source ? (
+          <img
+            src={source}
+            alt=""
+            draggable={false}
+            className="h-full w-full select-none object-cover"
+            style={{
+              objectPosition: `${50 + (slot?.position.x ?? 0)}% ${50 + (slot?.position.y ?? 0)}%`,
+              transform: `scale(${slot?.scale ?? 1})`,
+              transformOrigin: `${50 + (slot?.position.x ?? 0)}% ${50 + (slot?.position.y ?? 0)}%`,
+            }}
+          />
+        ) : null;
+
+        if (!hasMultiplePhotos) {
+          return (
+            <div key={index} className="absolute inset-0 overflow-hidden">
+              {image}
+              {!slot?.url ? (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => onSelectSlot(0)}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  className="absolute left-1/2 top-1/2 grid h-[26%] w-[31%] min-h-16 min-w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[16%] bg-ikonnic-red px-2 text-center text-[clamp(13px,5cqw,27px)] font-black uppercase leading-[1.03] text-white shadow-[0_8px_20px_rgba(128,0,0,.28)] transition hover:bg-rosegold-600 disabled:cursor-wait disabled:opacity-70"
+                >
+                  Select<br />Photo
+                </button>
+              ) : null}
+            </div>
+          );
+        }
+
+        return (
+          <button
+            key={index}
+            type="button"
+            disabled={disabled}
+            onClick={() => onSelectSlot(index)}
+            onPointerDown={(event) => event.stopPropagation()}
+            aria-label={slot?.url ? `Replace clock photo ${index + 1}` : `Add clock photo ${index + 1}`}
+            className={`group absolute overflow-hidden rounded-[18%] border-2 border-white/90 shadow-[0_4px_12px_rgba(15,23,42,.2)] transition hover:ring-2 hover:ring-rosegold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ikonnic-red disabled:cursor-wait disabled:opacity-70 ${slot?.url ? "bg-white" : "bg-ikonnic-red"}`}
+            style={{
+              left: `${layout.left}%`,
+              top: `${layout.top}%`,
+              width: `${layout.width}%`,
+              height: `${layout.height}%`,
+            }}
+          >
+            {image ?? (
+              <span className="grid h-full w-full place-items-center px-1 text-center text-[clamp(11px,5.5cqw,25px)] font-black uppercase leading-[1.02] text-white">
+                Select<br />Photo
+              </span>
+            )}
+            {slot?.url ? (
+              <span className="absolute inset-x-0 bottom-0 translate-y-full bg-slate-950/75 px-1 py-1 text-center text-[10px] font-black uppercase tracking-wide text-white transition group-hover:translate-y-0 group-focus-visible:translate-y-0">Replace</span>
+            ) : null}
+          </button>
+        );
+      })}
+      <ClockNumeralsOverlay shape={shape} hasUploadedPhoto={hasUploadedPhoto} />
+      <ClockHandsOverlay />
+    </div>
+  );
+}
+
 function FourPhotoClockFace({
   disabled,
   onSelectSlot,
   uploadedPhotoSlots,
+  shape,
 }: {
   disabled: boolean;
   onSelectSlot: (index: number) => void;
   uploadedPhotoSlots: UploadedPhotoSlot[];
+  shape?: PreviewShape;
 }) {
   return (
     <div
@@ -1251,7 +1522,7 @@ function FourPhotoClockFace({
           );
         })}
       </div>
-      <ClockNumeralsOverlay />
+      <ClockNumeralsOverlay shape={shape} />
       <ClockHandsOverlay />
     </div>
   );
@@ -1504,11 +1775,10 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
   );
   const isFourPhotoClock =
     isClockProduct &&
-    coverSlotCount === 4 &&
-    (previewShape === "rectangle" || previewShape === "rounded-rectangle");
+    coverSlotCount === 4;
   const hasFramePhotoLayout = Boolean(framePhotoLayout);
   const usesDirectImageUpload =
-    isFourPhotoClock || isAlbumProduct || hasFramePhotoLayout;
+    isClockProduct || isAlbumProduct || hasFramePhotoLayout;
   const clockPreviewPhotoUrls = useMemo(
     () =>
       Array.from(
@@ -1920,7 +2190,7 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
   };
 
   const adjustClockPhotoPosition = (xDelta: number, yDelta: number) => {
-    if (!isFourPhotoClock || !uploadedImage) return;
+    if (!isClockProduct || !uploadedImage) return;
     setActiveSlotPosition((position) => ({
       x: clamp(position.x + xDelta, -50, 50),
       y: clamp(position.y + yDelta, -50, 50),
@@ -1928,12 +2198,12 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
   };
 
   const adjustClockPhotoScale = (delta: number) => {
-    if (!isFourPhotoClock || !uploadedImage) return;
+    if (!isClockProduct || !uploadedImage) return;
     setActiveSlotScale(clamp(imageScale + delta, 1, 2));
   };
 
   const resetClockPhotoCrop = () => {
-    if (!isFourPhotoClock || !uploadedImage) return;
+    if (!isClockProduct || !uploadedImage) return;
     updateActivePhotoSlot({ position: { x: 0, y: 0 }, scale: 1 });
   };
 
@@ -2037,16 +2307,16 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
         .filter(Boolean);
       let cartPreviewImage = firstUploadedImage || product.image;
 
-      if (isFourPhotoClock) {
-        const clockSlots = uploadedPhotoSlots.slice(0, 4);
+      if (isClockProduct) {
+        const clockSlots = uploadedPhotoSlots.slice(0, coverSlotCount);
         const originalFiles = clockSlots
           .map((slot) => slot.file)
           .filter((file): file is File => Boolean(file));
-        if (originalFiles.length !== 4)
-          throw new Error("Four original clock photos are required");
-        const previewFile = await createFourPhotoClockPreview(
+        if (originalFiles.length !== coverSlotCount)
+          throw new Error("Every clock photo is required");
+        const previewFile = await createClockPreview(
           clockSlots,
-          previewShape === "rounded-rectangle",
+          previewShape,
         );
         const { originalResults, previewResult } = await uploadCustomiserFiles(
           product.id,
@@ -2560,6 +2830,16 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
                       disabled={isPreparingPhotos}
                       onSelectSlot={openPhotoSlot}
                       uploadedPhotoSlots={uploadedPhotoSlots}
+                      shape={previewShape}
+                    />
+                  ) : isClockProduct ? (
+                    <ClockPhotoFace
+                      disabled={isPreparingPhotos}
+                      fallbackImage={productPreviewImageSrc}
+                      onSelectSlot={openPhotoSlot}
+                      slotCount={coverSlotCount}
+                      uploadedPhotoSlots={uploadedPhotoSlots}
+                      shape={previewShape}
                     />
                   ) : usesSlotPreview ? (
                     <div className="absolute inset-0 bg-white">
@@ -2877,7 +3157,8 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
                   )}
                   {showPreviewSelectCta &&
                   previewImageSrc &&
-                  !usesSlotPreview ? (
+                  !usesSlotPreview &&
+                  !isClockProduct ? (
                     <button
                       type="button"
                       onClick={openActivePhotoUpload}
@@ -2950,7 +3231,7 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
             </div>
           ) : null}
 
-          {isFourPhotoClock && uploadedPhotoCount > 0 ? (
+          {isClockProduct && uploadedPhotoCount > 0 ? (
             <div className="rounded-[14px] border border-rosegold-200/70 bg-white p-3 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -2970,7 +3251,7 @@ function StandardProductCustomizerPanel({ product }: { product: Product }) {
                 role="group"
                 aria-label="Choose photo to adjust"
               >
-                {Array.from({ length: 4 }, (_, index) => (
+                {Array.from({ length: coverSlotCount }, (_, index) => (
                   <button
                     key={index}
                     type="button"

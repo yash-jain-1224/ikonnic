@@ -19,6 +19,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 localhost*.log
+*.log
+template_product.json
 
 # env files
 .env
